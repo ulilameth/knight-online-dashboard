@@ -1,0 +1,234 @@
+[
+ {
+  "Identifier": 28,
+  "Name": "Armor - Kurian",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 6,
+  "Name": "Armor - Mage",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 7,
+  "Name": "Armor - Priest",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 2,
+  "Name": "Armor - Rogue",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 8,
+  "Name": "Armor - Warrior",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 11,
+  "Name": "Axe - 1H",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 12,
+  "Name": "Axe - 2H",
+  "CanEquipRight": true,
+  "CanEquipLeft": false,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 16,
+  "Name": "Belt",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 3,
+  "Name": "Bow",
+  "CanEquipRight": false,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 13,
+  "Name": "Club - 1H",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 27,
+  "Name": "Club - 2H",
+  "CanEquipRight": true,
+  "CanEquipLeft": false,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 25,
+  "Name": "Cospre - Armors",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": true
+ },
+ {
+  "Identifier": 24,
+  "Name": "Cospre - Pathos Gloves",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": true
+ },
+ {
+  "Identifier": 4,
+  "Name": "Crossbow",
+  "CanEquipRight": true,
+  "CanEquipLeft": false,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 1,
+  "Name": "Dagger",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 14,
+  "Name": "Earring",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 31,
+  "Name": "Emblems",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": true
+ },
+ {
+  "Identifier": 30,
+  "Name": "Jamadar",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 15,
+  "Name": "Necklace",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 23,
+  "Name": "Priest Weapon / Mace",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 17,
+  "Name": "Ring",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 21,
+  "Name": "Shield",
+  "CanEquipRight": false,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 10,
+  "Name": "Spear - 1H",
+  "CanEquipRight": true,
+  "CanEquipLeft": false,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 22,
+  "Name": "Spear - 2H",
+  "CanEquipRight": true,
+  "CanEquipLeft": false,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 20,
+  "Name": "Staff",
+  "CanEquipRight": true,
+  "CanEquipLeft": false,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 18,
+  "Name": "Sword - 1H",
+  "CanEquipRight": true,
+  "CanEquipLeft": true,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 19,
+  "Name": "Sword - 2H",
+  "CanEquipRight": true,
+  "CanEquipLeft": false,
+  "CanEquipNormal": false,
+  "IsCospre": false
+ },
+ {
+  "Identifier": 29,
+  "Name": "Tattoo",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": true
+ },
+ {
+  "Identifier": 26,
+  "Name": "Wings",
+  "CanEquipRight": false,
+  "CanEquipLeft": false,
+  "CanEquipNormal": true,
+  "IsCospre": true
+ }
+]
