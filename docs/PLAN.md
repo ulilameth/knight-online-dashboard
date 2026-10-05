@@ -1,8 +1,9 @@
-# Klan Paneli: Plan
+# L4BEL Klan Paneli: Plan
 
-Knight Online yeni sunucuları (12 Kasım 2026, 16:00 TSİ) için klan içi, Discord girişli web paneli.
+**L4BEL** klanı için Knight Online yeni sunucularına (12 Kasım 2026, 16:00 TSİ) yönelik, klan içi ve Discord girişli web paneli.
 
 - Tasarım prototipi: [`design/prototype.html`](../design/prototype.html) (tarayıcıda açılır, örnek verilerle çalışır)
+- Claude Design tuvali (ekranlar ve tasarım dili): https://claude.ai/artifact/DgqTbC48vWNhVAwpyawKkZ
 - Bu doküman paralel çalışan cloud oturumlarının ortak referansıdır. Kapsam, dosya sahipliği ve kabul kriterleri burada.
 
 ---
@@ -41,6 +42,21 @@ Kaynak: [NTTGame yeni sunucu sayfası](https://www.nttgame.com/knight/tr/newserv
 Diğer bilgiler: Yeni sunuculara girişte **OTP zorunlu**. Yeni sunucularda **Ardream ve Ronark Land Base yok**, savaş yalnızca Ronark Land'de. Sunucu isimleri ve level sınırı henüz açıklanmadı.
 
 Tarihler tutarsız olduğu için kodda sabit yazılmaz: `milestones` tablosunda tutulur, yöneticiler Ayarlar sayfasından düzeltir. Aşama saatleri duyurulmadığı için `saat_belli=false` olan aşamalarda yalnızca gün gösterilir.
+
+### L4BEL'in açılış planı
+
+Yeni sunucuda klan adları boş; **L4BEL** adını ilk kuran alır. Panel bu adımları hazırlık listesinde ve ana sayfada takip eder.
+
+| Ne zaman | Ne yapılır | Kim |
+|---|---|---|
+| Şimdi – 15 Ekim | Herkes telefon doğrulaması ve OTP'yi açar, panelde işaretler | Tüm üyeler |
+| 15 – 29 Ekim | Ödüllü 1. ön kayıt | Tüm üyeler |
+| 29 Ekim – 9 Kasım | Sunucu oylaması; herkes aynı sunucuyu seçer | Yönetim oylar, üyeler seçer |
+| 10 – 11 Kasım | Karakter adları alınır (lider ve asistanlar öncelikli) | Tüm üyeler |
+| 12 Kasım 16:00 | Lider klan kurma şartlarını en hızlı şekilde tamamlayıp **L4BEL**'i kurar; tutmazsa yedek ad kullanılır | Lider, asistanlar destek |
+| Açılış sonrası | Üyeler klana davet edilir, panelde "L4BEL'e katıldım" işaretlenir | Asistanlar davet eder |
+
+Klan kurma şartları (level, para vb.) yeni sunucu için açıklanınca bu tabloya eklenecek.
 
 ---
 
@@ -92,15 +108,17 @@ Tek migration (`supabase/migrations/0001_init.sql`) Faz 0'da yazılır; Faz 1 ot
 ```
 profiles            id (auth.users), discord_id, discord_ad, avatar_url, yetki, created_at
 characters          id, profile_id?, ad (unique), sinif, level?, rutbe, durum, ana_karakter, notlar, katilma_tarihi
-hazirlik            profile_id (pk), otp, on_kayit, sunucu_secimi, karakter_adi, updated_at
+hazirlik            profile_id (pk), otp, on_kayit, sunucu_secimi, karakter_adi, klana_katildi, updated_at
 milestones          id, sira, baslik, baslangic, bitis?, saat_belli, aciklama, kaynak_url
 event_types         kod (pk), ad, kisa_ad, yoklama_var        -- csw, bdw, juraid, chaos, ft, boss, toplanti
 events              id, tur → event_types, baslik, baslangic, bitis?, aciklama, schedule_id?, olusturan, created_at
 recurring_schedules id, tur, baslik, gun (0-6), saat, sure_dk, aktif     -- haftalık düzen
 attendance          event_id + character_id (pk), durum, isaretleyen, updated_at
 announcements       id, baslik, govde, sabit, discord_gonderildi_at?, yazar, created_at
-clan_settings       tek satır: klan_adi, irk (karus | el_morad), sunucu_adi?, discord_guild_id?
+clan_settings       tek satır: klan_adi, yedek_ad?, monogram, irk (karus | el_morad), sunucu_adi?, discord_guild_id?
 ```
+
+Seed: `clan_settings` → `klan_adi = 'L4BEL'`, `monogram = 'L4'`. Klan adı kodda sabit yazılmaz; başlık, arma ve sayfa başlıkları bu satırdan okunur.
 
 Enum'lar:
 - `sinif`: warrior, rogue, mage, priest, kurian (El Morad'da Porutu; görüntülemede ırka göre ad değişir)
@@ -135,7 +153,7 @@ Katılım oranı = (katildi + gec) / işaretlenmiş yoklama sayısı. Mazeretli 
 | `/duyurular` | Duyuru listesi ve yazma formu | Takvim ve duyurular |
 | `/ayarlar` | Açılış tarihleri, klan bilgisi, yetkiler, üyelik onayı | yok |
 
-Tasarım kuralları prototipten gelir: koyu tema öncelikli (açık tema da var), tek altın vurgu rengi, sınıf renkleri sabit sırada (Warrior mavi, Rogue turuncu, Mage su yeşili, Priest sarı, Kurian pembe) ve her zaman yazıyla birlikte, durumlar renk + etiketle.
+Tasarım kuralları prototipten gelir: üst barda kalkan içinde "L4" monogramı ve "L4BEL" yazısı, koyu tema öncelikli (açık tema da var), tek altın vurgu rengi, sınıf renkleri sabit sırada (Warrior mavi, Rogue turuncu, Mage su yeşili, Priest sarı, Kurian pembe) ve her zaman yazıyla birlikte, durumlar renk + etiketle.
 
 ---
 
@@ -160,7 +178,7 @@ Teslim edilecekler:
 3. Ortak arayüz parçaları `components/ui/`: Panel, Button, Tag, Pill (durum), ClassChip, Segmented, DateBlock, Meter, Tooltip, Toast.
 4. Uygulama kabuğu `app/(panel)/layout.tsx`: arma + klan adı, sekmeler, kullanıcı rozeti; her sayfa için boş yer tutucu.
 5. `supabase/migrations/0001_init.sql` (tüm şema + RLS + seed: event_types, milestones) ve `lib/database.types.ts`.
-6. Veri katmanı arayüzleri `lib/data/*.ts` (fonksiyon imzaları + demo adaptörü) ve `lib/demo/fixtures.ts`.
+6. Veri katmanı arayüzleri `lib/data/*.ts` (fonksiyon imzaları + demo adaptörü) ve `lib/demo/fixtures.ts` (klan adı L4BEL, prototipteki örnek üyeler).
 7. `lib/auth.ts`: `getCurrentUser()`, `requireYetki(min)`; demo modunda prototipteki "Yetkili / Üye" anahtarı gibi çerezle değişen sahte kullanıcı.
 8. `lib/time.ts`: TSİ biçimlendirme, "3 gün sonra" gibi göreli tarih, açılış öncesi/sonrası tespiti (birim testli).
 9. GitHub Actions: lint, typecheck, test, build.
@@ -175,7 +193,7 @@ Her oturum Faz 0'ın birleştiği `main` dalından başlar, kendi dalında çal�
 | **A: Üyeler** | `feat/uyeler` | `app/(panel)/uyeler/**`, `components/uyeler/**`, `lib/data/members.ts` (supabase adaptörü) | Filtre + arama, sınıf dağılımı, rütbe özeti, hazırlık sütunu (açılış öncesi) / level sütunu (sonrası), karakter ekle-düzenle formu (Server Action + doğrulama), karakter detayında katılım geçmişi |
 | **B: Etkinlik + yoklama** | `feat/etkinlikler` | `app/(panel)/etkinlikler/**`, `components/etkinlikler/**`, `lib/data/events.ts`, `lib/data/attendance.ts` | Yaklaşan/geçmiş listesi, etkinlik oluştur-düzenle, yoklama ekranı (tek tıkla işaretleme, iyimser güncelleme, toplu işlemler), tür bazında katılım grafiği, en istikrarlı 5 üye, üyeler için salt okunur görünüm |
 | **C: Takvim + duyurular** | `feat/takvim-duyurular` | `app/(panel)/takvim/**`, `app/(panel)/duyurular/**`, `components/takvim/**`, `components/duyurular/**`, `lib/data/announcements.ts`, `lib/data/schedule.ts`, `lib/discord/**` | Aylık takvim + telefonda ajanda, haftalık düzen düzenleme ve "bu haftanın etkinliklerini oluştur", duyuru yaz/sabitle/sil, Discord webhook gönderimi (hata durumunda yeniden dene + kullanıcıya açık mesaj), webhook birim testi (fetch mock) |
-| **D: Genel bakış + ayarlar** | `feat/genel-ayarlar` | `app/(panel)/page.tsx`, `app/(panel)/ayarlar/**`, `app/beklemede/**`, `components/genel/**`, `lib/data/milestones.ts`, `lib/data/prep.ts`, `lib/data/settings.ts` | Geri sayım (istemci bileşeni, saniyelik), aşama zaman çizelgesi, klan hazırlığı + "benim hazırlığım", açılış sonrası özet kutuları, Ayarlar: açılış tarihleri, klan adı/ırk, yetki verme, bekleyen üyeleri onaylama |
+| **D: Genel bakış + ayarlar** | `feat/genel-ayarlar` | `app/(panel)/page.tsx`, `app/(panel)/ayarlar/**`, `app/beklemede/**`, `components/genel/**`, `lib/data/milestones.ts`, `lib/data/prep.ts`, `lib/data/settings.ts` | Geri sayım (istemci bileşeni, saniyelik), aşama zaman çizelgesi, klan hazırlığı + "benim hazırlığım" (açılıştan sonra "L4BEL'e katıldım" adımı eklenir), açılış sonrası özet kutuları, Ayarlar: açılış tarihleri, klan adı/ırk, yetki verme, bekleyen üyeleri onaylama |
 
 Ortak kurallar:
 - Her oturum bitmeden önce `lint`, `typecheck`, `test`, `build` temiz geçmeli.
@@ -202,8 +220,11 @@ Kod tarafı oturumlarla ilerler; aşağıdakiler hesap sahibinin işi:
 
 ## 8. Açık sorular
 
-1. Klan adı ve arması? (Prototipte örnek: "Demir Sancak")
-2. Irk: Karus mu El Morad mı? (Sınıf adları ve renk vurgusu buna göre)
-3. Rütbe adları prototipteki gibi mi kalsın (Lider, Asistan, Subay, Üye, Aday)?
-4. Discord sunucusunda olanlar otomatik onaylansın mı, yoksa her üyeyi yönetici mi onaylasın?
-5. Haftalık etkinlik saatleri sunucu açılınca belli olacak; prototipteki saatler örnek.
+Klan adı netleşti: **L4BEL**.
+
+1. Arma: şimdilik kalkan içinde "L4" monogramı. Klanın bir logosu var mı?
+2. Yedek klan adı ne olsun? (Açılışta L4BEL başkası tarafından alınırsa)
+3. Irk: Karus mu El Morad mı? (Sınıf adları ve renk vurgusu buna göre)
+4. Rütbe adları prototipteki gibi mi kalsın (Lider, Asistan, Subay, Üye, Aday)?
+5. Discord sunucusunda olanlar otomatik onaylansın mı, yoksa her üyeyi yönetici mi onaylasın?
+6. Haftalık etkinlik saatleri sunucu açılınca belli olacak; prototipteki saatler örnek.
