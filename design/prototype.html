@@ -1,63 +1,50 @@
 <title>Knight Online Klan Paneli</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Grenze:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Cinzel:wght@600;700&display=swap">
 <style>
-/* Layout: çelik tonlu komuta panosu. Üstte klan arması + sekme rayı, içerik 12 kolonluk ızgarada; tek cesur an geri sayım. */
+/* Layout: kömür ve dövme demir zeminli komuta panosu. Üstte arma + sekme rayı, içerik 12 kolonluk ızgarada; tek cesur an geri sayım.
+   Palet: design/tokens.css ve design/palet.md. Tek (koyu) tema; marka rengi ırka göre data-irk ile değişir. */
 :root{
   color-scheme: dark;
-  --bg:#0e1116;
-  --surface:#161a21;
-  --surface-2:#1e232c;
-  --line:#2a303a;
-  --hatch:rgba(212,168,79,.05);
-  --fg:#ece8e0;
-  --fg-2:#bcc2cb;
-  --muted:#8c949f;
-  --gold:#d4a84f;
-  --gold-soft:rgba(212,168,79,.14);
-  --on-gold:#1a1408;
-  --good:#3fb35f; --good-soft:rgba(63,179,95,.18);
-  --warn:#e2a72e; --warn-soft:rgba(226,167,46,.18);
-  --crit:#e0605a; --crit-soft:rgba(224,96,90,.18);
-  --idle-soft:rgba(140,148,159,.18);
-  --c-war:#3987e5; --c-rog:#d95926; --c-mag:#199e70; --c-pri:#c98500; --c-kur:#d55181;
-  --on-series:#10141a;
-  --shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 8px 24px rgba(0,0,0,.25);
-  --font-display:"Grenze", Georgia, "Times New Roman", serif;
+  --bg:#0f0e0d;            /* Kömür Karası */
+  --surface:#191715;       /* Dövme Demir */
+  --surface-2:#232019;     /* Örs Gölgesi */
+  --line:#3a352e;          /* Zırh Kenarı */
+  --line-subtle:#2c2823;   /* Pas Çizgisi */
+  --input-line:#766d60;    /* Örs Kenarı */
+  --hatch:rgba(201,161,74,.05);
+  --fg:#f1e8d4;            /* Parşömen Beyazı */
+  --fg-2:#d3c8b2;          /* Eski Parşömen */
+  --muted:#9c9282;         /* Solgun Mürekkep */
+  --gold:#c9a14a;          /* Eski Altın */
+  --gold-hover:#e2bf6b;    /* Ganimet Altını */
+  --gold-soft:rgba(201,161,74,.14);
+  --on-gold:#1a1408;       /* Mürekkep Karası */
+  --good:#6cba6e; --good-soft:rgba(108,186,110,.16);   /* Şifa Otu */
+  --warn:#ee9a3c; --warn-soft:rgba(238,154,60,.16);    /* Meşale */
+  --crit:#e5584f; --crit-soft:rgba(229,88,79,.16);     /* Ejder Kanı */
+  --info:#56b6d0;                                      /* Mana Işığı */
+  --idle-soft:rgba(156,146,130,.18);
+  --rank-leader:#e7c46e; --rank-assistant:#c9ced6; --rank-officer:#cf9258; --rank-member:#a69d8f; --rank-candidate:#958b7d;
+  --c-war:#3f88dc; --c-rog:#d9622d; --c-mag:#1fa077; --c-pri:#c48410; --c-kur:#d35a84;
+  --on-series:#0f0e0d;
+  --shadow:0 1px 0 rgba(241,232,212,.03) inset, 0 8px 24px rgba(0,0,0,.35);
+  --font-display:"Cinzel", "Times New Roman", serif;
   --font-body:"Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-data:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
 }
-@media (prefers-color-scheme: light){
-  :root:not([data-theme="dark"]){
-    color-scheme: light;
-    --bg:#eceff3; --surface:#ffffff; --surface-2:#f3f5f8; --line:#d6dbe2; --hatch:rgba(138,97,16,.05);
-    --fg:#141820; --fg-2:#3b4350; --muted:#5f6874;
-    --gold:#8a6110; --gold-soft:rgba(138,97,16,.10); --on-gold:#ffffff;
-    --good:#1f8a3c; --good-soft:rgba(31,138,60,.13);
-    --warn:#a66f00; --warn-soft:rgba(214,150,10,.16);
-    --crit:#c43c37; --crit-soft:rgba(196,60,55,.12);
-    --idle-soft:rgba(95,104,116,.13);
-    --c-war:#2a78d6; --c-rog:#eb6834; --c-mag:#1baf7a; --c-pri:#eda100; --c-kur:#e87ba4;
-    --shadow:0 1px 2px rgba(20,24,32,.06), 0 6px 20px rgba(20,24,32,.05);
-  }
+:root, :root[data-irk="karus"]{
+  --brand:#7a1b28; --brand-hover:#94263a; --brand-text:#e0707a; --brand-soft:rgba(122,27,40,.32);   /* Kan Bordosu */
 }
-:root[data-theme="light"]{
-  color-scheme: light;
-  --bg:#eceff3; --surface:#ffffff; --surface-2:#f3f5f8; --line:#d6dbe2; --hatch:rgba(138,97,16,.05);
-  --fg:#141820; --fg-2:#3b4350; --muted:#5f6874;
-  --gold:#8a6110; --gold-soft:rgba(138,97,16,.10); --on-gold:#ffffff;
-  --good:#1f8a3c; --good-soft:rgba(31,138,60,.13);
-  --warn:#a66f00; --warn-soft:rgba(214,150,10,.16);
-  --crit:#c43c37; --crit-soft:rgba(196,60,55,.12);
-  --idle-soft:rgba(95,104,116,.13);
-  --c-war:#2a78d6; --c-rog:#eb6834; --c-mag:#1baf7a; --c-pri:#eda100; --c-kur:#e87ba4;
-  --shadow:0 1px 2px rgba(20,24,32,.06), 0 6px 20px rgba(20,24,32,.05);
+:root[data-irk="el-morad"]{
+  --brand:#1d3a74; --brand-hover:#274c93; --brand-text:#82a8ea; --brand-soft:rgba(29,58,116,.38);   /* Kraliyet Laciverti */
 }
 
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
-body{color:var(--fg);font:400 15px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+body{color:var(--fg-2);font:400 15px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3,b,strong,.brand-name{color:var(--fg)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 a{color:var(--gold)}
@@ -69,7 +56,7 @@ a{color:var(--gold)}
 .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding-block:18px 14px}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
 .brand svg{flex:none}
-.brand-name{font:700 26px/1 var(--font-display);letter-spacing:.03em}
+.brand-name{font:700 25px/1 var(--font-display);letter-spacing:.06em}
 .brand-sub{font:600 12.5px/1.2 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:5px}
 .controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .ctl-label{font:600 11.5px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -77,22 +64,22 @@ a{color:var(--gold)}
 .seg{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
 .seg button{border:0;background:transparent;padding:6px 11px;border-radius:6px;font:600 14px/1 var(--font-data);letter-spacing:.02em;color:var(--fg-2)}
 .seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
-.me{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.me{display:flex;align-items:center;gap:8px;color:var(--fg-2);text-align:left;padding:4px 10px 4px 4px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
 .avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold);font:700 13px/1 var(--font-data)}
 .me b{font:600 14px/1 var(--font-data)}
 .me span{font:500 12.5px/1 var(--font-data);color:var(--muted)}
 
-.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line-subtle);overflow-x:auto;scrollbar-width:none}
 .tabs-in{display:flex;gap:2px;min-width:max-content}
 .tab{border:0;background:transparent;padding:12px 14px 11px;border-bottom:2px solid transparent;font:600 15px/1 var(--font-body);color:var(--fg-2)}
 .tab:hover{color:var(--fg)}
-.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--gold)}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--brand-text)}
 .proto-note{display:flex;gap:8px;align-items:flex-start;margin-block:14px 6px;font-size:13px;color:var(--muted);max-width:90ch}
 .proto-note i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-top:6px}
 
 /* ---------- Sayfa başlıkları ---------- */
 .page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-block:22px 16px}
-.page-head h1{margin:0;font:700 34px/1.05 var(--font-display);text-wrap:balance}
+.page-head h1{margin:0;font:700 32px/1.1 var(--font-display);letter-spacing:.02em;text-wrap:balance}
 .page-head p{margin:6px 0 0;color:var(--fg-2);max-width:65ch}
 .eyebrow{font:600 12px/1 var(--font-data);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 
@@ -107,9 +94,10 @@ a{color:var(--gold)}
 .panel-h .sub{font-size:13px;color:var(--muted)}
 
 /* ---------- Butonlar, etiketler ---------- */
-.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface-2);padding:8px 12px;border-radius:8px;font:600 14px/1 var(--font-data);letter-spacing:.02em}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--input-line);background:var(--surface-2);padding:8px 12px;border-radius:8px;font:600 14px/1 var(--font-data);letter-spacing:.02em}
 .btn:hover{border-color:var(--muted)}
-.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--fg)}
+.btn.primary:hover{background:var(--brand-hover);border-color:var(--brand-hover)}
 .btn svg{width:14px;height:14px}
 .tag{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font:600 12px/1.5 var(--font-data);letter-spacing:.04em;background:var(--surface-2);color:var(--fg-2);border:1px solid var(--line);white-space:nowrap}
 .tag.official{background:var(--gold-soft);border-color:transparent;color:var(--gold)}
@@ -134,7 +122,7 @@ a{color:var(--gold)}
 .hero h2{margin:8px 0 0;font:700 clamp(22px,3vw,30px)/1.1 var(--font-display);text-wrap:balance}
 .count{display:flex;flex-wrap:wrap;gap:clamp(10px,3vw,34px);margin-top:18px}
 .unit{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
-.unit b{font:700 clamp(48px,9vw,104px)/.85 var(--font-display);color:var(--gold);font-variant-numeric:tabular-nums;min-width:1.15em}
+.unit b{font:700 clamp(40px,8vw,96px)/.9 var(--font-display);color:var(--gold);font-variant-numeric:tabular-nums;min-width:1.15em}
 .unit span{font:600 12.5px/1 var(--font-data);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .when{margin-top:18px;font:600 16px/1.3 var(--font-data);letter-spacing:.02em;color:var(--fg-2)}
 .next{align-self:stretch;display:flex;flex-direction:column;justify-content:space-between;gap:14px;border-left:1px solid var(--line);padding-left:24px}
@@ -157,7 +145,7 @@ a{color:var(--gold)}
 .phase .x{font-size:13px;color:var(--muted)}
 
 /* ---------- Hazırlık ---------- */
-.prep-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,170px) 56px;gap:14px;align-items:center;padding-block:11px;border-bottom:1px solid var(--line)}
+.prep-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,170px) 56px;gap:14px;align-items:center;padding-block:11px;border-bottom:1px solid var(--line-subtle)}
 .prep-row:last-of-type{border-bottom:0}
 .prep-row h3{margin:0;font:600 15px/1.3 var(--font-body)}
 .prep-row p{margin:2px 0 0;font-size:13px;color:var(--muted)}
@@ -176,14 +164,14 @@ a{color:var(--gold)}
 
 /* ---------- Listeler ---------- */
 .list{list-style:none;margin:0;padding:0}
-.item{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
+.item{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line-subtle)}
 .item:last-child{border-bottom:0}
 .date{display:flex;flex-direction:column;align-items:center;justify-content:center;width:48px;height:50px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
-.date b{font:700 21px/1 var(--font-display)}
+.date b{font:700 19px/1 var(--font-display)}
 .date span{font:600 11px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
 .item h3{margin:0;font:600 15px/1.3 var(--font-body)}
 .item p{margin:2px 0 0;font-size:13px;color:var(--muted)}
-.ann{padding-block:14px;border-bottom:1px solid var(--line)}
+.ann{padding-block:14px;border-bottom:1px solid var(--line-subtle)}
 .ann:last-child{border-bottom:0}
 .ann h3{margin:0;font:600 16px/1.3 var(--font-body);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ann h3 svg{width:14px;height:14px;color:var(--gold)}
@@ -218,7 +206,6 @@ a{color:var(--gold)}
 .ranks div{padding:8px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
 .ranks b{display:block;font:600 22px/1 var(--font-data)}
 .ranks span{font:600 12px/1 var(--font-data);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.ranks .lead span{color:var(--gold)}
 @media (max-width:520px){.ranks{gap:6px}.ranks div{padding:8px 6px}.ranks span{font-size:11px;letter-spacing:.02em}}
 .legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font:600 14px/1.2 var(--font-data)}
 .legend .cls b{font-weight:600}
@@ -227,22 +214,22 @@ a{color:var(--gold)}
 
 /* ---------- Üyeler ---------- */
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
-.search{display:flex;align-items:center;gap:8px;padding:0 10px;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);flex:1 1 220px;min-width:0;max-width:320px}
+.search{display:flex;align-items:center;gap:8px;padding:0 10px;height:38px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface-2);flex:1 1 220px;min-width:0;max-width:320px}
 .search svg{width:15px;height:15px;color:var(--muted);flex:none}
 .search input{border:0;background:transparent;outline:0;width:100%;min-width:0;height:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 11px;font:600 13.5px/1 var(--font-data);color:var(--fg-2);display:inline-flex;gap:6px;align-items:center}
 .chip[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);border-color:var(--muted)}
 .chip i{width:9px;height:9px;border-radius:2px}
-select.sel{height:38px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);padding:0 10px;font:600 14px/1 var(--font-data)}
+select.sel{height:38px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface-2);padding:0 10px;font:600 14px/1 var(--font-data)}
 .table-wrap{overflow-x:auto;margin-inline:-20px;padding-inline:20px}
 table{width:100%;border-collapse:collapse;min-width:720px}
-th{text-align:left;font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{text-align:left;font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 10px;border-bottom:1px solid var(--line-subtle);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--line-subtle);vertical-align:middle}
 tbody tr:hover{background:var(--surface-2)}
 td.name b{display:block;font-weight:600}
 td.name span{font-size:12.5px;color:var(--muted)}
-.rank-lead{color:var(--gold);font-weight:600}
+.rk{font-weight:600}
 .pips{display:flex;gap:5px}
 .pip{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;border:1px solid var(--line);color:var(--muted)}
 .pip svg{width:12px;height:12px}
@@ -266,13 +253,13 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .ev-item h3{margin:0;font:600 14.5px/1.3 var(--font-body)}
 .ev-item p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
 .ev-item .cnt{font:600 14px/1 var(--font-data)}
-.detail h2{margin:6px 0 4px;font:700 28px/1.1 var(--font-display);text-wrap:balance}
+.detail h2{margin:6px 0 4px;font:700 26px/1.15 var(--font-display);text-wrap:balance}
 .detail .when2{font:600 15px/1.3 var(--font-data);color:var(--fg-2)}
 .detail .desc{color:var(--fg-2);margin:10px 0 0;max-width:65ch}
 .summary{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
 .bulk{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
 .roster{list-style:none;margin:0;padding:0}
-.roster li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;padding-block:9px;border-bottom:1px solid var(--line)}
+.roster li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;padding-block:9px;border-bottom:1px solid var(--line-subtle)}
 .roster li:last-child{border-bottom:0}
 .roster .who{display:flex;align-items:center;gap:10px;min-width:0}
 .roster .who b{font-weight:600}
@@ -283,7 +270,7 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .mark button[aria-pressed="true"][data-s="excused"]{background:var(--idle-soft);color:var(--fg)}
 .mark button[aria-pressed="true"][data-s="absent"]{background:var(--crit-soft);color:var(--fg)}
 .callout{padding:14px 16px;border-radius:10px;background:var(--surface-2);border:1px dashed var(--line);color:var(--fg-2);font-size:14px}
-.top5 li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding-block:8px;border-bottom:1px solid var(--line)}
+.top5 li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding-block:8px;border-bottom:1px solid var(--line-subtle)}
 .top5 li:last-child{border-bottom:0}
 .top5 .rk{font:700 16px/1 var(--font-display);color:var(--muted)}
 
@@ -291,8 +278,8 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .cal-nav{display:flex;align-items:center;gap:8px}
 .cal-nav h2{margin:0;min-width:9ch;text-align:center;font:700 22px/1 var(--font-display)}
 .month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
-.dow{padding:8px;font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface-2)}
-.day{min-height:92px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:4px;min-width:0}
+.dow{padding:8px;font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-right:1px solid var(--line);border-bottom:1px solid var(--line-subtle);background:var(--surface-2)}
+.day{min-height:92px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line-subtle);display:flex;flex-direction:column;gap:4px;min-width:0}
 .day.out{background:var(--surface-2)}
 .day.out .dn{color:var(--muted);opacity:.6}
 .dn{font:600 13px/22px var(--font-data);width:22px;text-align:center}
@@ -305,7 +292,7 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .ev:hover{filter:brightness(1.1)}
 .agenda{display:none}
 @media (max-width:640px){.month-wrap{display:none}.agenda{display:block}}
-.ag-day{padding-block:10px;border-bottom:1px solid var(--line)}
+.ag-day{padding-block:10px;border-bottom:1px solid var(--line-subtle)}
 .ag-day:last-child{border-bottom:0}
 .ag-day h3{margin:0 0 6px;font:600 14px/1 var(--font-data);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .ag-day.today h3{color:var(--gold)}
@@ -313,11 +300,24 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .sched td,.sched th{padding-inline:6px}
 .form{display:grid;gap:10px;margin-bottom:10px;padding:14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
 .form label{font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.form input[type="text"],.form textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:9px 10px;margin-top:6px}
+.form input[type="text"],.form textarea{width:100%;border:1px solid var(--input-line);border-radius:8px;background:var(--surface);padding:9px 10px;margin-top:6px}
 .form textarea{min-height:76px;resize:vertical}
 .form .row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}
 .form .opts{display:flex;flex-wrap:wrap;gap:8px 18px}
 
+.pf-label{display:block;font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+.pf-label:first-child{margin-top:0}
+.pf-classes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.pf-classes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pf-cls{display:flex;align-items:center;gap:9px;min-height:46px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:transparent;font:600 15px/1.2 var(--font-body);color:var(--fg);text-align:left}
+.pf-cls[aria-checked="true"]{border-color:var(--gold);background:var(--surface-2)}
+.pf-cls i{width:12px;height:12px;border-radius:3px;flex:none}
+.stepper{display:flex;align-items:center;gap:8px;max-width:280px}
+.stepper button{width:48px;height:48px;border-radius:9px;border:1px solid var(--input-line);background:var(--surface-2);font:700 22px/1 var(--font-data);color:var(--fg)}
+.stepper input{flex:1;min-width:0;height:48px;border:1px solid var(--input-line);border-radius:9px;background:var(--surface-2);text-align:center;font:600 24px/1 var(--font-data);color:var(--fg)}
+.stepper input:disabled,.stepper button:disabled{opacity:.5;cursor:not-allowed}
+.who-edits li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding-block:10px;border-bottom:1px solid var(--line-subtle)}
+.who-edits li:last-child{border-bottom:0}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:9px;font:600 14px/1.3 var(--font-data);box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:calc(100% - 32px)}
 
 /* ---------- Görünüm anahtarları ---------- */
@@ -346,13 +346,13 @@ section[data-tab].on{display:block}
   <header class="top">
     <div class="brand">
       <svg width="42" height="46" viewBox="0 0 42 46" aria-hidden="true">
-        <path d="M21 2l17 6.5V22c0 11-7.6 18.6-17 22C11.6 40.6 4 33 4 22V8.5z" fill="var(--surface-2)" stroke="var(--gold)" stroke-width="2"/>
+        <path d="M21 2l17 6.5V22c0 11-7.6 18.6-17 22C11.6 40.6 4 33 4 22V8.5z" fill="var(--brand)" stroke="var(--gold)" stroke-width="2"/>
         <path d="M21 9v28M13 17h16" stroke="var(--gold)" stroke-width="2" opacity=".55"/>
-        <text x="21" y="28" text-anchor="middle" font-family="Grenze, Georgia, serif" font-weight="700" font-size="14" fill="var(--fg)">L4</text>
+        <text x="21" y="28" text-anchor="middle" font-family="Cinzel, Times New Roman, serif" font-weight="700" font-size="13" fill="var(--fg)">L4</text>
       </svg>
       <div>
         <div class="brand-name">L4BEL</div>
-        <div class="brand-sub">El Morad · Yeni sunucu 2026</div>
+        <div class="brand-sub" id="brand-sub">Karus · Yeni sunucu 2026</div>
       </div>
     </div>
     <div class="controls">
@@ -364,13 +364,20 @@ section[data-tab].on{display:block}
         </div>
       </div>
       <div class="ctl">
+        <span class="ctl-label" id="lbl-irk">Irk</span>
+        <div class="seg" role="group" aria-labelledby="lbl-irk">
+          <button type="button" id="irk-k" data-irk="karus">Karus</button>
+          <button type="button" id="irk-e" data-irk="el-morad">El Morad</button>
+        </div>
+      </div>
+      <div class="ctl">
         <span class="ctl-label" id="lbl-role">Yetki</span>
         <div class="seg" role="group" aria-labelledby="lbl-role">
           <button type="button" id="rl-off" data-role="officer">Yetkili</button>
           <button type="button" id="rl-mem" data-role="member">Üye</button>
         </div>
       </div>
-      <div class="me" id="me"></div>
+      <button type="button" class="me" id="me" data-go="profil" aria-label="Profilim"></button>
     </div>
   </header>
 
@@ -380,6 +387,7 @@ section[data-tab].on{display:block}
       <button class="tab" role="tab" id="t-uyeler" data-go="uyeler">Üyeler</button>
       <button class="tab" role="tab" id="t-etkinlikler" data-go="etkinlikler">Etkinlikler ve katılım</button>
       <button class="tab" role="tab" id="t-takvim" data-go="takvim">Takvim ve duyurular</button>
+      <button class="tab" role="tab" id="t-profil" data-go="profil">Profilim</button>
     </div>
   </nav>
 
@@ -571,6 +579,45 @@ section[data-tab].on{display:block}
         </div>
       </div>
     </section>
+    <!-- ================= PROFİLİM ================= -->
+    <section data-tab="profil" aria-labelledby="t-profil">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Hesabım</div>
+          <h1>Profilim</h1>
+          <p>Sınıfını ve levelini kendin güncelle; değişiklik üye listesine hemen yansır. Karakter adını ve rütbeni yetkililer değiştirir.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="s7 panel">
+          <div class="panel-h"><h2 id="pf-name"></h2><span class="sub" id="pf-sub"></span></div>
+          <form id="pf-form" novalidate>
+            <div class="pf-label" id="pf-cls-label">Sınıf</div>
+            <div class="pf-classes" id="pf-classes" role="radiogroup" aria-labelledby="pf-cls-label"></div>
+            <label class="pf-label" for="pf-level">Level</label>
+            <div class="stepper">
+              <button type="button" data-lv="-1" aria-label="Level azalt">−</button>
+              <input id="pf-level" type="number" inputmode="numeric" min="1" max="99">
+              <button type="button" data-lv="1" aria-label="Level artır">+</button>
+            </div>
+            <p class="muted" id="pf-level-hint" style="font-size:13px;margin:8px 0 0"></p>
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:20px">
+              <button class="btn primary" type="submit" style="min-height:44px;padding-inline:20px">Kaydet</button>
+              <span class="muted" id="pf-updated" style="font-size:13px"></span>
+            </div>
+          </form>
+        </div>
+        <div class="s5 panel">
+          <div class="panel-h"><h2>Kim neyi değiştirir</h2></div>
+          <ul class="list who-edits">
+            <li><span>Sınıf, level</span><span class="tag official">Sen</span></li>
+            <li><span>Hazırlık adımları</span><span class="tag official">Sen</span></li>
+            <li><span>Karakter adı, rütbe, durum</span><span class="tag">Yetkililer</span></li>
+            <li><span>Discord adı ve resmi</span><span class="tag">Discord’dan otomatik</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 <div id="tip" hidden></div>
@@ -591,6 +638,8 @@ section[data-tab].on{display:block}
     war: 'Warrior', rog: 'Rogue', mag: 'Mage', pri: 'Priest', kur: 'Kurian'
   };
   const RANKS = ['Lider', 'Asistan', 'Subay', 'Üye', 'Aday'];
+  const RANKVAR = { 'Lider': '--rank-leader', 'Asistan': '--rank-assistant', 'Subay': '--rank-officer', 'Üye': '--rank-member', 'Aday': '--rank-candidate' };
+  const rankAttr = r => `class="rk" style="color:var(${RANKVAR[r]})"`;
   const STATUS = { aktif: ['Aktif', 'good'], izinli: ['İzinli', 'warn'], pasif: ['Pasif', 'idle'] };
   const MARK = { present: ['Katıldı', 'good'], late: ['Geç', 'warn'], excused: ['Mazeretli', 'idle'], absent: ['Yok', 'crit'] };
   const TYPES = {
@@ -602,7 +651,7 @@ section[data-tab].on{display:block}
     { n: 1, title: '1. Ön kayıt', start: tr('2026-10-15'), end: tr('2026-10-29'), d: '15 – 29 Ekim', x: 'Ödüllü dönem. Telefon doğrulaması gerekli.' },
     { n: 2, title: '2. Ön kayıt ve sunucu seçimi', start: tr('2026-10-29'), end: tr('2026-11-10'), d: '29 Ekim – 9 Kasım', x: 'Bitiş bazı kaynaklarda 12 Kasım.' },
     { n: 3, title: 'Karakter oluşturma', start: tr('2026-11-10'), end: OPEN, d: '10 – 11 Kasım', x: 'Karakter adları ilk saatlerde alınmalı.' },
-    { n: 4, title: 'Sunucu açılışı', start: OPEN, end: OPEN + DAY, d: '12 Kasım, 16:00', x: 'Lider L4BEL klanını ilk gün kurar. Savaş yalnızca Ronark Land’de.' }
+    { n: 4, title: 'Sunucu açılışı', start: OPEN, end: OPEN + DAY, d: '12 Kasım, 16:00', x: 'Lider L4BEL klanını ilk gün kurar. Savaş yalnızca Ronark Land (CZ)’de.' }
   ];
   const PREP = [
     { k: 0, label: 'Telefon doğrulama ve OTP', opens: null, hint: 'Yeni sunuculara OTP olmadan girilemiyor' },
@@ -668,10 +717,10 @@ section[data-tab].on{display:block}
     pre: [
       { title: 'Açılış planı', by: 'KaraBey', at: tr('2026-10-03T19:10'), pin: true, dc: true, body: 'Bu hafta herkes telefon doğrulamasını ve OTP’yi açsın; yeni sunuculara OTP olmadan girilemiyor. Ön kayıt 15 Ekim’de başlıyor ve ilk dönem ödüllü.' },
       { title: 'Sınıf dağılımı', by: 'Asena', at: tr('2026-10-02T23:05'), pin: false, dc: true, body: 'Şu an 5 Warrior, 4 Rogue, 3 Mage, 4 Priest, 2 Kurian var. Mage ve Kurian açığımız var; kararsız kalanlar kanala yazsın.' },
-      { title: 'Yeni sunucularda Ardream yok', by: 'SessizOk', at: tr('2026-10-01T18:40'), pin: false, dc: false, body: 'Ardream ve Ronark Land Base haritaları olmayacak, tüm savaş Ronark Land’de. Level planınızı buna göre yapın.' }
+      { title: 'Yeni sunucularda Ardream yok', by: 'SessizOk', at: tr('2026-10-01T18:40'), pin: false, dc: false, body: 'Ardream ve Ronark Land Base haritaları olmayacak, tüm savaş Ronark Land (CZ)’de. Level planınızı buna göre yapın.' }
     ],
     post: [
-      { title: 'Pazar CSW kadrosu', by: 'KaraBey', at: tr('2026-11-20T22:15'), pin: true, dc: true, body: 'İlk iki parti belli, liste Discord’da. Herkes 20:15’te Ronark Land girişinde. Mazereti olan cumartesi akşamına kadar panelden bildirsin.' },
+      { title: 'Pazar CSW kadrosu', by: 'KaraBey', at: tr('2026-11-20T22:15'), pin: true, dc: true, body: 'İlk iki parti belli, liste Discord’da. Herkes 20:15’te Ronark Land (CZ) girişinde. Mazereti olan cumartesi akşamına kadar panelden bildirsin.' },
       { title: 'Boss avı saati', by: 'DemirYumruk', at: tr('2026-11-18T12:30'), pin: false, dc: true, body: 'Perşembe boss avı 21:00’de kalıyor. Drop dağılımı avdan sonra duyurulacak.' },
       { title: 'Juraid partileri', by: 'Asena', at: tr('2026-11-16T20:00'), pin: false, dc: false, body: 'Juraid için 8 kişilik iki parti kuruyoruz; Priest sayısı az, Bilge ve Nur ikinci partide.' }
     ]
@@ -707,10 +756,12 @@ section[data-tab].on{display:block}
   const state = {
     phase: realNow < OPEN ? 'pre' : 'post',
     role: 'officer',
+    irk: 'karus',
     tab: 'genel',
     q: '', cls: '', rank: '', status: '',
     sel: { pre: null, post: null },
-    month: null
+    month: null,
+    pf: null
   };
   function now() { return state.phase === 'pre' ? Date.now() : SIM_POST + (Date.now() - LOADED); }
   const events = () => state.phase === 'pre' ? PRE_EVENTS : POST_EVENTS;
@@ -908,7 +959,7 @@ section[data-tab].on{display:block}
     const byCls = Object.keys(CLASSES).map(k => [k, MEMBERS.filter(m => m.cls === k).length]);
     classDist('cls-bar', 'cls-legend', 'cls-sub');
     document.getElementById('ranks').innerHTML = RANKS.map(r =>
-      `<div class="${r === 'Lider' || r === 'Asistan' ? 'lead' : ''}"><b class="num">${MEMBERS.filter(m => m.rank === r).length}</b><span>${r}</span></div>`).join('');
+      `<div><b class="num">${MEMBERS.filter(m => m.rank === r).length}</b><span style="color:var(${RANKVAR[r]})">${r}</span></div>`).join('');
 
     const cf = document.getElementById('cls-filter');
     cf.innerHTML = [['', 'Tümü'], ...Object.entries(CLASSES)].map(([k, l]) =>
@@ -932,7 +983,7 @@ section[data-tab].on{display:block}
       return `<tr>
         <td class="name"><b>${esc(m.name)}</b><span>@${esc(m.dc)}</span></td>
         <td><span class="cls"><i class="c-${m.cls}"></i>${CLASSES[m.cls]}</span></td>
-        <td class="${m.rank === 'Lider' || m.rank === 'Asistan' ? 'rank-lead' : ''}">${m.rank}</td>
+        <td ${rankAttr(m.rank)}>${m.rank}</td>
         <td data-when="post" class="num">${m.lv}</td>
         <td data-when="pre"><div class="pips">${pips}</div></td>
         <td>${r ? `<div class="att" data-tip="${r.ok} / ${r.n} etkinlik" tabindex="0"><div class="meter"><i style="width:${r.pct}%"></i></div><span class="num">%${r.pct}</span></div>` : '<span class="muted">—</span>'}</td>
@@ -1045,12 +1096,36 @@ section[data-tab].on{display:block}
     document.body.classList.toggle('role-member', state.role === 'member');
     document.querySelectorAll('[data-phase]').forEach(b => b.setAttribute('aria-pressed', b.dataset.phase === state.phase));
     document.querySelectorAll('[data-role]').forEach(b => b.setAttribute('aria-pressed', b.dataset.role === state.role));
+    document.querySelectorAll('button[data-irk]').forEach(b => b.setAttribute('aria-pressed', b.dataset.irk === state.irk));
+    document.documentElement.dataset.irk = state.irk;
+    CLASSES.kur = state.irk === 'karus' ? 'Kurian' : 'Porutu';
+    document.getElementById('brand-sub').textContent = `${state.irk === 'karus' ? 'Karus' : 'El Morad'} · Yeni sunucu 2026`;
     document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.go === state.tab));
     document.querySelectorAll('section[data-tab]').forEach(s => s.classList.toggle('on', s.dataset.tab === state.tab));
     const m = me();
-    document.getElementById('me').innerHTML = `<span class="avatar">${m.name.slice(0, 2).toLocaleUpperCase('tr')}</span><span><b>${esc(m.name)}</b> <span>${m.rank}</span></span>`;
+    document.getElementById('me').innerHTML = `<span class="avatar">${m.name.slice(0, 2).toLocaleUpperCase('tr')}</span><span><b>${esc(m.name)}</b> <span style="color:var(${RANKVAR[m.rank]})">${m.rank}</span></span>`;
   }
-  function render() { renderShell(); renderHome(); renderMembers(); renderEvents(); renderCalendar(); tick(); }
+  /* ---------- Profilim ---------- */
+  function renderProfile() {
+    const m = me();
+    if (!state.pf || state.pf.name !== m.name) state.pf = { name: m.name, cls: m.cls, lv: m.lv, saved: m.saved || null };
+    const pre = state.phase === 'pre';
+    document.getElementById('pf-name').textContent = m.name;
+    document.getElementById('pf-sub').innerHTML = `@${esc(m.dc)} · <span style="color:var(${RANKVAR[m.rank]});font-weight:600">${m.rank}</span>`;
+    document.getElementById('pf-classes').innerHTML = Object.entries(CLASSES).map(([k, l]) =>
+      `<button type="button" class="pf-cls" role="radio" data-pfcls="${k}" aria-checked="${state.pf.cls === k}"><i class="c-${k}"></i>${l}</button>`).join('');
+    const inp = document.getElementById('pf-level');
+    inp.value = pre ? '' : state.pf.lv;
+    inp.placeholder = pre ? 'Açılışta' : '';
+    inp.disabled = pre;
+    document.querySelectorAll('[data-lv]').forEach(b => { b.disabled = pre; });
+    document.getElementById('pf-level-hint').textContent = pre
+      ? 'Level sunucu açılınca (12 Kasım 16:00) girilir. Şimdilik planladığın sınıfı seç.'
+      : 'Oyundaki levelini yaz. Üst sınır, yöneticinin girdiği sunucu level sınırıdır.';
+    document.getElementById('pf-updated').textContent = state.pf.saved ? `Son güncelleme: ${F(state.pf.saved, { day: 'numeric', month: 'long' })} ${hm(state.pf.saved)}` : 'Henüz güncellenmedi';
+  }
+
+  function render() { renderShell(); renderHome(); renderMembers(); renderEvents(); renderCalendar(); renderProfile(); tick(); }
 
   function tick() {
     const h = heroTarget();
@@ -1078,7 +1153,10 @@ section[data-tab].on{display:block}
     const goEl = t.closest('[data-go]'); if (goEl) { go(goEl.dataset.go); return; }
     const ph = t.closest('[data-phase]'); if (ph) { state.phase = ph.dataset.phase; state.month = null; render(); return; }
     const rl = t.closest('[data-role]'); if (rl) { state.role = rl.dataset.role; render(); return; }
+    const ik = t.closest('button[data-irk]'); if (ik) { state.irk = ik.dataset.irk; render(); return; }
     const cf = t.closest('[data-cls]'); if (cf) { state.cls = cf.dataset.cls; renderMembers(); return; }
+    const pc = t.closest('[data-pfcls]'); if (pc) { state.pf.cls = pc.dataset.pfcls; renderProfile(); return; }
+    const lv = t.closest('[data-lv]'); if (lv) { state.pf.lv = Math.max(1, Math.min(99, (+state.pf.lv || 1) + (+lv.dataset.lv))); renderProfile(); return; }
     const ev = t.closest('[data-ev]'); if (ev) { state.sel[state.phase] = ev.dataset.ev; renderEvents(); return; }
     const op = t.closest('[data-open]');
     if (op) {
@@ -1120,6 +1198,16 @@ section[data-tab].on{display:block}
     if (t.id === 'status-filter') { state.status = t.value; renderMembers(); }
   });
   document.getElementById('q').addEventListener('input', e => { state.q = e.target.value; renderMembers(); });
+  document.getElementById('pf-level').addEventListener('input', e => { const v = parseInt(e.target.value, 10); if (v) state.pf.lv = Math.max(1, Math.min(99, v)); });
+  document.getElementById('pf-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const m = me();
+    m.cls = state.pf.cls;
+    if (state.phase === 'post') m.lv = state.pf.lv;
+    m.saved = state.pf.saved = now();
+    renderProfile(); renderMembers(); renderHome(); renderEvents();
+    toast('Profilin kaydedildi. Üye listesinde görünüyor.');
+  });
   document.getElementById('ann-form').addEventListener('submit', e => {
     e.preventDefault();
     const ti = document.getElementById('ann-title'), bo = document.getElementById('ann-body');
@@ -1134,7 +1222,7 @@ section[data-tab].on{display:block}
   });
 
   const h0 = (location.hash || '').slice(1);
-  if (['genel', 'uyeler', 'etkinlikler', 'takvim'].includes(h0)) state.tab = h0;
+  if (['genel', 'uyeler', 'etkinlikler', 'takvim', 'profil'].includes(h0)) state.tab = h0;
   render();
 })();
 </script>
