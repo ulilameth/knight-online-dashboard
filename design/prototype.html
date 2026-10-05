@@ -347,6 +347,11 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .b-ctl button{width:36px;height:36px;border-radius:8px;border:1px solid var(--input-line);background:var(--surface-2);font:700 16px/1 var(--font-data);color:var(--fg)}
 .b-ctl button:disabled{opacity:.4;cursor:not-allowed}
 .b-ctl output{min-width:3ch;text-align:center;font:600 18px/1 var(--font-data);color:var(--fg)}
+.b-ctl input{width:58px;height:36px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface-2);text-align:center;font:600 17px/1 var(--font-data);color:var(--fg);padding:0 4px}
+.b-ctl input:focus{border-color:var(--gold);outline:2px solid var(--gold-soft);outline-offset:0}
+.b-ctl input:disabled{opacity:.5}
+.b-ctl input.over{color:var(--crit);border-color:var(--crit)}
+.b-row .nm .eq{color:var(--good);font-weight:600}
 .b-row.locked{opacity:.55}
 .gear{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
 @media (max-width:640px){.gear{grid-template-columns:minmax(0,1fr)}}
@@ -436,6 +441,8 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .crit-note{margin:12px 0 0;padding:9px 12px;border-radius:8px;background:var(--crit-soft);color:var(--fg);font-size:14px}
 .rules li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding-block:8px;border-bottom:1px solid var(--line-subtle);font-size:14px}
 .rules li:last-child{border-bottom:0}
+.rules li{grid-template-columns:minmax(0,1fr) minmax(0,auto)}
+.rules .tag{white-space:normal;justify-self:end;text-align:right;border-radius:10px;max-width:100%}
 .stepper{display:flex;align-items:center;gap:8px;max-width:280px}
 .stepper button{width:48px;height:48px;border-radius:9px;border:1px solid var(--input-line);background:var(--surface-2);font:700 22px/1 var(--font-data);color:var(--fg)}
 .stepper input{flex:1;min-width:0;height:48px;border:1px solid var(--input-line);border-radius:9px;background:var(--surface-2);text-align:center;font:600 24px/1 var(--font-data);color:var(--fg)}
@@ -754,7 +761,7 @@ section[data-tab].on{display:block}
         <div class="s6 panel">
           <div class="panel-h"><h2>Statlar</h2><span class="sub" id="b-st-sub"></span></div>
           <div id="b-stats"></div>
-          <p class="muted" style="font-size:13px;margin:12px 0 0">Gri kısım ırkın başlangıç statı, altın kısım senin dağıttığın puan, yeşil kısım takılı eşyaların bonusu. Karakter oluştururken 10 bonus puan, level 60’a kadar her level 3, sonra 5 puan gelir. Tek stat en fazla 255; reb puanları bu sınırın üstüne çıkabilir.</p>
+          <p class="muted" style="font-size:13px;margin:12px 0 0">Gri kısım ırkın başlangıç statı, altın kısım senin dağıttığın puan, yeşil kısım takılı eşyaların bonusu. Karakter oluştururken 10 bonus puan, level 60’a kadar her level 3, sonra 5 puan gelir. Bir stat dağıtımda en fazla 255 olur; eşya bonusları bunun üstüne eklenir.</p>
         </div>
         <div class="s6 panel">
           <div class="panel-h"><h2>Skill ağaçları</h2><span class="sub" id="b-sk-sub"></span></div>
@@ -1079,6 +1086,7 @@ section[data-tab].on{display:block}
     ap: { wes: false, wolf: false, xst: 0, xpc: 0 }  /* AP panelindeki buff seçimleri ve elle eklenenler */
   };
   const REB_MAX = 10;
+  let building = false;  /* renderBuild sırasında kutulardan gelen focusout olaylarını yok saymak için */
   const lvText = m => `${m.lv}${m.reb ? `<span class="reb">+${m.reb}</span>` : ''}`;
   function now() { return state.phase === 'pre' ? Date.now() : SIM_POST + (Date.now() - LOADED); }
   const events = () => state.phase === 'pre' ? PRE_EVENTS : POST_EVENTS;
@@ -1464,7 +1472,7 @@ section[data-tab].on{display:block}
   const RULES = [
     { k: 'Level başına stat puanı', v: '3 · 60’tan sonra 5', ok: true },
     { k: 'Reb başına bonus stat', v: '+2', ok: true },
-    { k: 'Tek stat sınırı', v: '255', ok: true },
+    { k: 'Tek stat sınırı', v: '255 · reb dahil', ok: true },
     { k: 'Skill puanı başlangıcı', v: 'Level 10', ok: true },
     { k: 'Level başına skill puanı', v: '2 · reb vermez', ok: true },
     { k: 'Ağaç başına en fazla', v: 'Level kadar · üst skill 80 (Warrior 3. ağaç 83)', ok: true },
@@ -1764,6 +1772,13 @@ section[data-tab].on{display:block}
     mn.textContent = `Bonus verisi olmayan eşya: ${miss.map(it => it.n).join(', ')}. Bu eşyaların katkısı hesaba girmedi.`;
   }
   function renderBuild() {
+    /* Stat/skill kutusuna yazarken satırlar yeniden çizilir; odağı ve imleci geri ver */
+    const ae = document.activeElement, keep = ae && /^(st|sk)-/.test(ae.id) ? { id: ae.id, pos: ae.selectionStart } : null;
+    building = true;
+    try { renderBuildInner(); } finally { building = false; }
+    if (keep) { const el = document.getElementById(keep.id); if (el && !el.disabled) { el.focus(); try { el.setSelectionRange(keep.pos, keep.pos); } catch (e) { /* imleç konumu desteklenmiyorsa geç */ } } }
+  }
+  function renderBuildInner() {
     const m = me();
     if (!state.build || state.build.owner !== m.name) state.build = { owner: m.name, ...newBuild(m) };
     const b = state.build;
@@ -1785,15 +1800,15 @@ section[data-tab].on{display:block}
     const race = RACES.find(r => r.id === b.race);
     document.getElementById('b-race').innerHTML = raceOptions(b.cls).map(r => `<option value="${r.id}" ${r.id === b.race ? 'selected' : ''}>${r.n}</option>`).join('');
     document.getElementById('b-st-sub').textContent = `${race.n} · Level ${lvLabel} · ${P.stUsed} puan dağıtıldı`;
-    const cap = STAT_CAP + REB_STAT * (b.lv === 83 ? b.reb : 0);
+    const cap = STAT_CAP;  /* dağıtımda kesin sınır; eşya bonusları üstüne eklenir */
     const GS = gearSum(b).s;
     document.getElementById('b-stats').innerHTML = STATS.map(([k, ab, nm], j) => {
       const base = race.st[k], add = b.st[k], own = base + add, item = GS[9 + j], total = own + item;
       const w = v => Math.max(0, Math.min(v, STAT_CAP)) / STAT_CAP * 100;
       return `<div class="b-row">
-        <div class="nm"><b>${ab}</b><span>${nm}</span></div>
+        <div class="nm"><b>${ab}</b><span>${nm} · ${base}+${add}${item ? ` <span class="eq">+${item} eşya = ${total}</span>` : ''}</span></div>
         <div class="b-meter" role="img" aria-label="${ab}: başlangıç ${base}, eklenen ${add}, eşyadan ${item}, toplam ${total}"><i class="base" style="width:${w(base)}%"></i><i class="add" style="width:${w(Math.min(add, STAT_CAP - base))}%"></i><i class="item" style="width:${w(Math.min(item, STAT_CAP - own))}%"></i></div>
-        <div class="b-ctl"><button type="button" data-st="${k}" data-d="-1" aria-label="${ab} azalt" ${add ? '' : 'disabled'}>−</button><output class="num" title="${base} + ${add}${item ? ` + ${item} eşya` : ''}">${total}<small>${base}+${add}${item ? `<b>+${item}</b>` : ''}</small></output><button type="button" data-st="${k}" data-d="1" aria-label="${ab} artır" ${P.stLeft > 0 && own < cap ? '' : 'disabled'}>+</button></div>
+        <div class="b-ctl"><button type="button" data-st="${k}" data-d="-1" aria-label="${ab} azalt" ${add ? '' : 'disabled'}>−</button><input id="st-${k}" data-stin="${k}" type="text" inputmode="numeric" maxlength="3" autocomplete="off" value="${own}" class="num ${P.stLeft < 0 ? 'over' : ''}" aria-label="${ab}, başlangıç ${base} ile ${STAT_CAP} arası yaz" title="Başlangıç ${base} + dağıtılan ${add}"><button type="button" data-st="${k}" data-d="1" aria-label="${ab} artır" ${P.stLeft > 0 && own < cap ? '' : 'disabled'}>+</button></div>
       </div>`;
     }).join('');
     const names = [...TREES[b.cls], 'Master'];
@@ -1806,7 +1821,7 @@ section[data-tab].on{display:block}
       return `<div class="b-row ${lock ? 'locked' : ''}">
         <div class="nm"><b>${n}</b><span>${i === 3 ? (lock ? 'Level 60’ta açılır' : `Master · en fazla ${cap}`) : `${i + 1}. ağaç · en fazla ${cap}`}</span></div>
         <div class="meter" aria-hidden="true"><i style="width:${b.sk[i] / maxSk * 100}%"></i></div>
-        <div class="b-ctl"><button type="button" data-sk="${i}" data-d="-1" aria-label="${n} azalt" ${b.sk[i] ? '' : 'disabled'}>−</button><output class="num" ${over ? 'style="color:var(--crit)"' : ''}>${b.sk[i]}</output><button type="button" data-sk="${i}" data-d="1" aria-label="${n} artır" ${P.skLeft > 0 && b.sk[i] < cap ? '' : 'disabled'}>+</button></div>
+        <div class="b-ctl"><button type="button" data-sk="${i}" data-d="-1" aria-label="${n} azalt" ${b.sk[i] ? '' : 'disabled'}>−</button><input id="sk-${i}" data-skin="${i}" type="text" inputmode="numeric" maxlength="2" autocomplete="off" value="${b.sk[i]}" class="num ${over ? 'over' : ''}" aria-label="${n} puanı, 0 ile ${cap} arası yaz" ${lock && !b.sk[i] ? 'disabled' : ''}><button type="button" data-sk="${i}" data-d="1" aria-label="${n} artır" ${P.skLeft > 0 && b.sk[i] < cap ? '' : 'disabled'}>+</button></div>
       </div>`;
     }).join('');
     document.getElementById('b-sk-note').textContent = 'Skill puanı level 10’da başlar, her level 2 puan (reb puan vermez). Bir ağaca levelinden fazla puan konamaz; master ağacına level 60’tan sonra her level 1 puan, en fazla 23.';
@@ -1951,6 +1966,59 @@ section[data-tab].on{display:block}
   };
   document.getElementById('b-lv').addEventListener('input', setBuildNum('lv', 83, 1));
   document.getElementById('b-reb').addEventListener('input', setBuildNum('reb', REB_MAX, 0));
+  /* Elle stat/skill girişi. Yazarken geçerli aralıktaysa hemen uygulanır; kutudan çıkınca (ya da Enter)
+     aralığa ve kalan puana göre düzeltilir. Ok tuşları 1, Shift ile 10 artırır/azaltır. */
+  const typed = el => /^\d+$/.test(el.value.trim()) ? parseInt(el.value, 10) : null;
+  function setStat(k, v, final, el) {
+    const b = state.build, race = RACES.find(r => r.id === b.race), base = race.st[k], ab = STATS.find(x => x[0] === k)[1];
+    const cap = STAT_CAP;  /* dağıtımda kesin sınır; eşya bonusları üstüne eklenir */
+    if (v === null) { if (final && el && el.value !== String(base + b.st[k])) renderBuild(); return; }
+    if (!final && (v < base || v > cap)) return;
+    let add = Math.min(Math.max(v, base), cap) - base;
+    if (final) {
+      const room = Math.max(0, b.st[k] + pools(b).stLeft);
+      if (add > room) { add = room; toast(`${ab} en fazla ${base + room} olabilir: kalan stat puanı bu kadar`); }
+      else if (v > cap) toast(`${ab} en fazla ${cap}`);
+      else if (v < base) toast(`${ab} başlangıç statı ${base}, daha aşağı inemez`);
+    }
+    if (add !== b.st[k] || (el && el.value !== String(base + add))) { b.st[k] = add; renderBuild(); }
+  }
+  function setSkill(i, v, final, el) {
+    const b = state.build, cap = skCap(b, i), name = [...TREES[b.cls], 'Master'][i];
+    if (v === null) { if (final && el && el.value !== String(b.sk[i])) renderBuild(); return; }
+    if (!final && v > cap) return;
+    let n = Math.min(v, cap);
+    if (final) {
+      const room = Math.max(0, b.sk[i] + pools(b).skLeft);
+      if (n > room) { n = room; toast(`${name} en fazla ${room} olabilir: kalan skill puanı bu kadar`); }
+      else if (v > cap) toast(`${name} bu levelde en fazla ${cap}`);
+    }
+    if (n !== b.sk[i] || (el && el.value !== String(n))) { b.sk[i] = n; renderBuild(); }
+  }
+  ['b-stats', 'b-skills'].forEach(id => {
+    const host = document.getElementById(id);
+    const apply = (el, final) => el.dataset.stin ? setStat(el.dataset.stin, typed(el), final, final && el) : setSkill(+el.dataset.skin, typed(el), final, final && el);
+    host.addEventListener('input', e => { if (e.target.matches('[data-stin],[data-skin]')) apply(e.target, false); });
+    /* Kutudan çıkınca son düzeltme; satırlar yeniden çizilirse odak gidilen kutuya taşınır */
+    host.addEventListener('focusout', e => {
+      if (building || !e.target.matches('[data-stin],[data-skin]')) return;
+      const next = e.relatedTarget && e.relatedTarget.id;
+      apply(e.target, true);
+      const el = next && document.getElementById(next);
+      if (el && document.activeElement !== el) el.focus();
+    });
+    host.addEventListener('focusin', e => { if (e.target.matches('[data-stin],[data-skin]')) e.target.select(); });
+    host.addEventListener('keydown', e => {
+      const el = e.target;
+      if (!el.matches('[data-stin],[data-skin]')) return;
+      if (e.key === 'Enter') { el.blur(); return; }
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      const step = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1), b = state.build;
+      if (el.dataset.stin) { const k = el.dataset.stin, base = RACES.find(r => r.id === b.race).st[k]; setStat(k, Math.max(base, base + b.st[k] + step), true, el); }
+      else { const i = +el.dataset.skin; setSkill(i, Math.max(0, b.sk[i] + step), true, el); }
+    });
+  });
   const onGrade = e => { const i = e.target.dataset.gup; if (i === undefined || !state.build.gear[i]) return; state.build.gear[i].up = +e.target.value; renderBuild(); };
   document.getElementById('b-gear').addEventListener('change', onGrade);
   document.getElementById('b-cospre').addEventListener('change', onGrade);
