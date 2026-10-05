@@ -354,6 +354,11 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .b-row .nm .eq{color:var(--good);font-weight:600}
 .b-row.locked{opacity:.55}
 .gear{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+.gear-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin:22px 0 10px}
+.gear-h:first-child{margin-top:0}
+.gear-h .calc-h{margin:0}
+.pk-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center}
+.pk-set{white-space:nowrap;min-height:40px}
 @media (max-width:640px){.gear{grid-template-columns:minmax(0,1fr)}}
 .gear-slot{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:8px;align-items:center}
 .ic{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -455,7 +460,7 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .crit-note{margin:12px 0 0;padding:9px 12px;border-radius:8px;background:var(--crit-soft);color:var(--fg);font-size:14px}
 .rules li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding-block:8px;border-bottom:1px solid var(--line-subtle);font-size:14px}
 .rules li:last-child{border-bottom:0}
-.rules li{grid-template-columns:minmax(0,1fr) minmax(0,auto)}
+.rules li{grid-template-columns:minmax(120px,1fr) minmax(0,auto)}
 .rules .tag{white-space:normal;justify-self:end;text-align:right;border-radius:10px;max-width:100%}
 .stepper{display:flex;align-items:center;gap:8px;max-width:280px}
 .stepper button{width:48px;height:48px;border-radius:9px;border:1px solid var(--input-line);background:var(--surface-2);font:700 22px/1 var(--font-data);color:var(--fg)}
@@ -826,10 +831,8 @@ section[data-tab].on{display:block}
         </div>
 
         <div class="s8 panel">
-          <div class="panel-h"><h2>Ekipman</h2><span class="sub">Yuvaya tıkla, eşyayı seç, artı seviyesini belirle</span><button type="button" class="btn" id="b-settak" style="margin-left:auto">Set tak</button></div>
-          <div class="gear" id="b-gear"></div>
-          <h3 class="calc-h" style="margin-top:20px">Cospre <small>Başlık, zırh, eldiven, kanat, dövme, amblem</small></h3>
-          <div class="gear" id="b-cospre"></div>
+          <div class="panel-h"><h2>Ekipman</h2><span class="sub">Yuvaya tıkla, eşyayı seç, artı seviyesini belirle</span></div>
+          <div id="b-gear"></div>
         </div>
         <div class="s4 stack">
           <div class="panel">
@@ -1625,18 +1628,21 @@ section[data-tab].on{display:block}
     const cur = b.gear[i] && b.gear[i].id;
     const list = ITEMS.filter(it => it.slots.includes(t) && usableBy(it, b.cls) && (!fit || reqLevel(it) <= b.lv) && (!q || lower(it.n).includes(q) || lower(it.k).includes(q)));
     document.getElementById('pk-count').textContent = `${list.length} eşya`;
-    box.innerHTML = list.slice(0, 250).map(it => `
-      <button type="button" class="pk-item" role="option" data-item="${it.id}" aria-selected="${it.id === cur}">
+    box.innerHTML = list.slice(0, 250).map(it => {
+      const st = SET_ORDER.includes(t) && setOf(it);
+      const row = `<button type="button" class="pk-item" role="option" data-item="${it.id}" aria-selected="${it.id === cur}">
         ${icoHTML(t, it)}
-        <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${esc(it.k)} · ${clsText(it)} · ${rangeText(it)}${gradesOf(it).length && featText(gradesOf(it)[0], 2) ? ` · <span style="color:var(--good)">${featText(gradesOf(it)[0], 2)}</span>` : ''}</span></span>
+        <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${st ? `Set: ${esc(st.n)}` : esc(it.k)} · ${clsText(it)} · ${rangeText(it)}${gradesOf(it).length && featText(gradesOf(it)[0], 2) ? ` · <span style="color:var(--good)">${featText(gradesOf(it)[0], 2)}</span>` : ''}</span></span>
         <span class="grade" style="color:var(${GRADES[it.g][1]})">${GRADES[it.g][0]}</span>
-      </button>`).join('') || '<div class="empty">Bu yuvaya uygun eşya yok. Filtreyi kapatmayı dene.</div>';
+      </button>`;
+      return st ? `<div class="pk-row">${row}<button type="button" class="btn pk-set" data-seteq="${st.k}" title="${esc(st.n)} setinin 5 parçasını birlikte tak">Tüm set</button></div>` : row;
+    }).join('') || '<div class="empty">Bu yuvaya uygun eşya yok. Filtreyi kapatmayı dene.</div>';
   }
   /* ---------- Eşyalar (sınıfa göre katalog) ---------- */
   const SLOT_GROUPS = [
     ['silah', 'Silah', ['silah']],
     ['ikinci', 'Kalkan', ['ikinci']],
-    ['zirh', 'Zırh parçaları', ['kask', 'zirh', 'pantolon', 'eldiven', 'bot']],
+    ['zirh', 'Zırh setleri', ['kask', 'zirh', 'pantolon', 'eldiven', 'bot']],
     ['taki', 'Takılar', ['kolye', 'kupe', 'yuzuk', 'kemer']],
     ['cospre', 'Cospre', ['cospre_kask', 'cospre_zirh', 'cospre_eldiven', 'kanat', 'dovme', 'amblem']]
   ];
@@ -1650,20 +1656,13 @@ section[data-tab].on{display:block}
     const ic = state.ic;
     document.getElementById('ic-cls').innerHTML = Object.entries(CLASSES).map(([k, l]) =>
       `<button type="button" class="cls-tab" role="tab" data-iccls="${k}" aria-selected="${ic.cls === k}"><i class="c-${k}"></i>${l}<span>${ITEMS.filter(it => usableBy(it, k)).length}</span></button>`).join('');
-    document.getElementById('ic-grp').innerHTML = [['', 'Tümü'], ['setler', 'Setler'], ...SLOT_GROUPS.map(([k, l]) => [k, l])].map(([k, l]) =>
+    document.getElementById('ic-grp').innerHTML = [['', 'Tümü'], ...SLOT_GROUPS.map(([k, l]) => [k, l])].map(([k, l]) =>
       `<button type="button" class="chip" data-icgrp="${k}" aria-pressed="${ic.grp === k}">${l}</button>`).join('');
     const gsel = document.getElementById('ic-grade');
     if (!gsel.options.length) gsel.innerHTML = '<option value="">Tüm dereceler</option>' + Object.entries(GRADES).map(([k, [l]]) => `<option value="${k}">${l}</option>`).join('');
     gsel.value = ic.grade;
     if (catalogState !== 'hazır') { host.innerHTML = `<div class="panel empty">${catalogState === 'hata' ? 'Eşya kataloğu yüklenemedi.' : 'Eşya kataloğu yükleniyor…'}</div>`; return; }
     const q = lower(ic.q.trim());
-    if (ic.grp === 'setler') {
-      const sets = SETS.filter(st => st.parts.every(x => usableBy(x, ic.cls)) && (!ic.grade || st.parts[0].g === ic.grade) && (!q || lower(st.n).includes(q) || st.parts.some(x => lower(x.n).includes(q))))
-        .sort((a, b) => (b.a ? 1 : 0) - (a.a ? 1 : 0) || Math.max(...b.parts.map(x => reqLevel(x))) - Math.max(...a.parts.map(x => reqLevel(x))) || a.n.localeCompare(b.n));
-      host.innerHTML = sets.length ? `<div class="ic-group"><h2><b>Setler</b> · ${sets.length}</h2><p class="muted" style="margin:0 0 12px;font-size:14px">“Seti tak” beş parçayı (kask, zırh, pantolon, eldiven, bot) build’ine birlikte takar. Krowaz, Mythril, Secret, Holy Knight ve Rosetta setlerinde takılı parça sayısına göre ek bonus gelir.</p><div class="set-grid">${sets.map(st => setCard(st, ic.cls)).join('')}</div></div>`
-        : '<div class="panel empty">Bu filtrelerle set yok.</div>';
-      return;
-    }
     const list = ITEMS.filter(it => usableBy(it, ic.cls) && (!ic.grade || it.g === ic.grade) && (!q || lower(it.n).includes(q) || lower(it.k).includes(q)) && (!ic.grp || groupOf(it) === ic.grp));
     const card = it => `
         <button type="button" class="it-card" data-icitem="${it.id}">
@@ -1673,6 +1672,13 @@ section[data-tab].on{display:block}
     const html = SLOT_GROUPS.map(([k, l, sl]) => {
       const items = list.filter(it => groupOf(it) === k).sort((a, b) => a.k.localeCompare(b.k) || reqLevel(b) - reqLevel(a) || a.n.localeCompare(b.n));
       if (!items.length) return '';
+      /* Zırhların hepsi 5 parçalık bir sete ait: zırhlar set kartı olarak gösterilir, parçaya tıklanınca detayı açılır */
+      if (k === 'zirh') {
+        const keys = new Set(items.map(it => it.set));
+        const sets = SETS.filter(st => keys.has(st.k))
+          .sort((a, c) => (c.a ? 1 : 0) - (a.a ? 1 : 0) || Math.max(...c.parts.map(x => reqLevel(x))) - Math.max(...a.parts.map(x => reqLevel(x))) || a.n.localeCompare(c.n));
+        return `<div class="ic-group"><h2><b>${l}</b> · ${sets.length} set</h2><p class="muted" style="margin:0 0 12px;font-size:14px">“Seti tak” beş parçayı (kask, zırh, pantolon, eldiven, bot) build’ine birlikte takar. Krowaz, Mythril, Secret, Holy Knight ve Rosetta setlerinde takılı parça sayısına göre ek bonus gelir. Tek parça için parçanın ikonuna tıkla.</p><div class="set-grid">${sets.map(st => setCard(st, ic.cls)).join('')}</div></div>`;
+      }
       /* Birden çok yuvalı gruplar (zırh, takı, cospre) yuva türüne göre alt bölümlere ayrılır */
       const body = sl.length === 1 ? `<div class="items-grid">${items.map(card).join('')}</div>`
         : `<div class="ic-subs">${sl.map(t => { const sub = items.filter(it => it.slots[0] === t); return sub.length ? `<div><h3 class="ic-sub">${SLOT_NAME[t]} · ${sub.length}</h3><div class="items-grid">${sub.map(card).join('')}</div></div>` : ''; }).join('')}</div>`;
@@ -1779,7 +1785,14 @@ section[data-tab].on{display:block}
     return Math.max(ap, 3);
   }
   const SLOTS = ['Silah', 'İkinci el', 'Kask', 'Zırh', 'Pantolon', 'Eldiven', 'Bot', 'Kolye', 'Küpe 1', 'Küpe 2', 'Yüzük 1', 'Yüzük 2', 'Kemer', 'Cospre başlık', 'Cospre zırh', 'Cospre eldiven', 'Kanat', 'Dövme', 'Amblem'];
-  const NF = 40, COSPRE_FROM = 13;  /* SLOTS içinde cospre yuvalarının başladığı sıra */
+  const NF = 40;
+  /* Ekipman panelinin bölümleri: [başlık, açıklama, SLOTS sıraları] */
+  const GEAR_SECTIONS = [
+    ['Silahlar', '', [0, 1]],
+    ['Zırh seti', 'kask, zırh, pantolon, eldiven, bot', [2, 3, 4, 5, 6]],
+    ['Takılar', 'kolye, küpe, yüzük, kemer', [7, 8, 9, 10, 11, 12]],
+    ['Cospre', 'başlık, zırh, eldiven, kanat, dövme, amblem', [13, 14, 15, 16, 17, 18]]
+  ];
   const newBuild = m => ({ race: '', cls: m.cls, lv: Math.max(1, m.lv || 1), reb: m.reb || 0, st: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, sk: [0, 0, 0, 0], gear: {} });
   const pools = b => {
     const stTot = CREATE_BONUS + STAT_PER_LV * (Math.min(b.lv, MASTER_LV) - 1) + STAT_PER_LV_60 * Math.max(0, b.lv - MASTER_LV) + REB_STAT * (b.lv === 83 ? b.reb : 0);
@@ -1947,8 +1960,13 @@ section[data-tab].on{display:block}
         <select data-gup="${i}" aria-label="${sl} derecesi" ${grades.length > 1 ? '' : 'disabled'}>${grades.length ? grades.map(r => `<option value="${r[0]}" ${r[0] === g.up ? 'selected' : ''}>+${r[0]}</option>`).join('') : '<option>—</option>'}</select>
       </div>`;
     };
-    document.getElementById('b-gear').innerHTML = SLOTS.slice(0, COSPRE_FROM).map(slotHTML).join('');
-    document.getElementById('b-cospre').innerHTML = SLOTS.slice(COSPRE_FROM).map((sl, j) => slotHTML(sl, COSPRE_FROM + j)).join('');
+    const worn = gearSum(b).sets;
+    const setNote = worn.length ? worn.map(x => `${esc(x.st ? x.st.n : 'Set')} ${x.n}/5${x.row ? ' · bonus aktif' : ''}`).join(' · ') : '';
+    document.getElementById('b-gear').innerHTML = GEAR_SECTIONS.map(([h, sub, idx]) => {
+      const armor = h === 'Zırh seti';
+      return `<div class="gear-h"><h3 class="calc-h">${h} <small>${armor && setNote ? setNote : sub}</small></h3>${armor ? '<button type="button" class="btn" id="b-settak">Set seç</button>' : ''}</div>
+        <div class="gear">${idx.map(i => slotHTML(SLOTS[i], i)).join('')}</div>`;
+    }).join('');
     const err = document.getElementById('b-err');
     err.hidden = P.stLeft >= 0 && P.skLeft >= 0 && !overTrees.length;
     err.textContent = P.stLeft < 0 || P.skLeft < 0
@@ -2131,7 +2149,6 @@ section[data-tab].on{display:block}
   });
   const onGrade = e => { const i = e.target.dataset.gup; if (i === undefined || !state.build.gear[i]) return; state.build.gear[i].up = +e.target.value; renderBuild(); };
   document.getElementById('b-gear').addEventListener('change', onGrade);
-  document.getElementById('b-cospre').addEventListener('change', onGrade);
   document.getElementById('pk-q').addEventListener('input', renderPicker);
   document.getElementById('ap-form').addEventListener('input', () => {
     const n = id => Math.max(0, parseInt(document.getElementById(id).value, 10) || 0);
