@@ -156,7 +156,9 @@ Hesap: dağıtılabilir stat = 10 + 3 × (level − 1) + 2 × reb; toplam stat =
 
 **Eşya kataloğu ve seçici.** Ekipman yuvaları serbest metin değil, katalogdan seçilir: yuvaya tıklanınca arama + "sınıfıma ve levelime uygun" filtresi olan bir liste açılır; derece renkle ve yazıyla gösterilir; sınıfa ya da levela uymayan takılı eşya uyarı verir. Katalog `items` tablosundadır ve yöneticiler Ayarlar › Eşya kataloğu'ndan doldurur:
 - Tek tek ekleme/düzenleme.
-- JSON ya da CSV içe aktarma. Alanlar KO Bugda API'sinin biçimiyle eşlenir (`name`, `category`, `slot`, `handType`, `isOneHanded`, `canUseWarrior` … `canUseKurian`, `requiredLevel`, `requiredStr` …, `stats[].grade`, `stats[].attackPower`, `setParts`); böylece izinli bir kaynaktan alınan dosya doğrudan yüklenebilir.
+- CSV içe aktarma, klan liderinin paylaştığı biçimle: `ID,Eşya Adı,Kategori,Slot,Görsel URL` (ilk dosya: [`data/esyalar/kobugda-wings.csv`](../data/esyalar/kobugda-wings.csv), 36 cospre eşyası). Slot eşlemesi: KO Bugda `11` → Cospre başlık, `12` → Cospre zırh; diğer slot numaraları yeni kategoriler geldikçe eşleme tablosuna eklenir, tanınmayan slot içe aktarmada hata olarak listelenir. Aynı ID tekrar yüklenirse güncellenir.
+- JSON içe aktarma. Alanlar KO Bugda API'sinin biçimiyle eşlenir (`name`, `category`, `slot`, `handType`, `isOneHanded`, `canUseWarrior` … `canUseKurian`, `requiredLevel`, `requiredStr` …, `stats[].grade`, `stats[].attackPower`, `setParts`); böylece izinli bir kaynaktan alınan dosya doğrudan yüklenebilir.
+- Ekipman yuvaları: Silah, İkinci el, Kask, Zırh, Pantolon, Eldiven, Bot, Pelerin, Kolye, Küpe ×2, Yüzük ×2, Kemer, **Cospre başlık**, **Cospre zırh**.
 - Görseller: varsayılan olarak panelin kendi yuva ikonları (yuva tipine göre, dereceye göre renkli çerçeve). Yönetici kendi hakkı olan görselleri Supabase Storage'a yükleyebilir.
 
 Telif ve izin: Oyun ikonları oyun şirketine ait; KO Bugda'nın eşya veritabanı ve API'si de onların emeği. Panel bu verileri izinsiz çekmez ve görselleri onların sunucusundan göstermez (hotlink yok). KO Bugda'dan izin alınırsa içe aktarma aracı bu biçimi zaten okuyor.
@@ -208,7 +210,7 @@ invite_codes        id, kod_hash (unique), son_dort, rutbe (uye | aday), max_kul
 invite_redemptions  id, code_id, profile_id, created_at
 password_resets     id, profile_id, kod_hash, bitis, kullanildi_at?, olusturan, created_at
 builds              id, character_id?, ad, sinif, irk_turu, level, reb, statlar jsonb {str,hp,dex,int,mp}, skiller int[4] (3 ağaç + master), ekipman jsonb {yuva: {item_id, arti}}, ap_girdileri jsonb, paylasim (klan | yetkili), sablon bool, olusturan, updated_at
-items               id, dis_id? (ör. legacyId), ad, kategori, yuva, el_tipi, tek_elli bool, siniflar text[] (warrior | rogue | mage | priest | kurian; boş = hepsi), gerekli_level, gerekli_str, gerekli_hp, gerekli_dex, gerekli_int, gerekli_mp, derece (normal | magic | rare | unique | set), set_id?, gorsel_yolu?, not, kaynak, ekleyen, updated_at
+items               id, dis_id? (ör. KO Bugda ID), ad, kategori, yuva, el_tipi, tek_elli bool, siniflar text[] (warrior | rogue | mage | priest | kurian; boş = hepsi), gerekli_level, gerekli_str, gerekli_hp, gerekli_dex, gerekli_int, gerekli_mp, derece (normal | magic | rare | unique | set), set_id?, gorsel_yolu? (kendi depomuzdaki görsel), kaynak_gorsel_url? (yalnızca kayıt, gösterilmez), not, kaynak, ekleyen, updated_at
 item_stats          item_id + arti (0-10) (pk), ap, diger jsonb       -- artı seviyesine göre değerler
 item_sets           id, ad, bonuslar jsonb
 game_rules          anahtar (pk), deger jsonb, dogrulandi bool, kaynak?   -- stat_per_level, reb_bonus_stat, stat_cap, skill_start_level, skill_per_level, master_level, sinif_baslangic_statlari
