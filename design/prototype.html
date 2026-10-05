@@ -315,6 +315,10 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .nick-field{position:relative;max-width:320px}
 .nick-field input{width:100%;height:48px;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:0 40px 0 12px;font:600 18px/1 var(--font-body);color:var(--fg)}
 .nick-field svg{position:absolute;right:14px;top:50%;width:14px;height:14px;margin-top:-7px;color:var(--muted)}
+.ts-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ts-addr{font:700 30px/1.1 var(--font-data);letter-spacing:.1em;color:var(--fg);user-select:all;margin-top:4px}
+.pf-input{width:100%;max-width:320px;height:48px;border:1px solid var(--input-line);border-radius:9px;background:var(--surface-2);padding:0 12px;font:500 16px/1 var(--font-body);color:var(--fg)}
+.reb{color:var(--gold);font-weight:700}
 .stepper{display:flex;align-items:center;gap:8px;max-width:280px}
 .stepper button{width:48px;height:48px;border-radius:9px;border:1px solid var(--input-line);background:var(--surface-2);font:700 22px/1 var(--font-data);color:var(--fg)}
 .stepper input{flex:1;min-width:0;height:48px;border:1px solid var(--input-line);border-radius:9px;background:var(--surface-2);text-align:center;font:600 24px/1 var(--font-data);color:var(--fg)}
@@ -451,6 +455,14 @@ section[data-tab].on{display:block}
 
         <div class="s5 stack">
           <div class="panel">
+            <div class="panel-h"><h2>TeamSpeak 3</h2><span class="sub">Toplantılar ve savaşlar burada</span></div>
+            <div class="ts-row">
+              <div><div class="eyebrow">Sunucu adresi</div><div class="ts-addr" id="ts-addr">L4B</div></div>
+              <button type="button" class="btn" id="ts-copy">Kopyala</button>
+            </div>
+            <p class="muted" style="font-size:13px;margin:10px 0 0">TeamSpeak 3’te Bağlan › Sunucu adresi alanına L4B yaz.</p>
+          </div>
+          <div class="panel">
             <div class="panel-h"><h2>Yaklaşanlar</h2><button type="button" class="btn" data-go="takvim">Takvim</button></div>
             <ul class="list" id="upcoming"></ul>
           </div>
@@ -487,7 +499,7 @@ section[data-tab].on{display:block}
         </div>
         <div class="s12 panel">
           <div class="toolbar">
-            <label class="search" for="q"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="Nick veya Discord adı ara" autocomplete="off"></label>
+            <label class="search" for="q"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="Nick veya TS adı ara" autocomplete="off"></label>
             <div class="chips" id="cls-filter" role="group" aria-label="Sınıf filtresi"></div>
             <select class="sel" id="rank-filter" aria-label="Rütbe filtresi"></select>
             <select class="sel" id="status-filter" aria-label="Durum filtresi">
@@ -544,7 +556,7 @@ section[data-tab].on{display:block}
         <div>
           <div class="eyebrow">Plan</div>
           <h1>Takvim ve duyurular</h1>
-          <p>Resmi tarihler altın renkte. Duyurular istenirse klanın Discord kanalına da gönderilir.</p>
+          <p>Resmi tarihler altın renkte. Duyurular istenirse TeamSpeak sunucusuna (L4B) mesaj olarak da gönderilir.</p>
         </div>
       </div>
       <div class="grid">
@@ -572,7 +584,7 @@ section[data-tab].on{display:block}
             <div class="row">
               <div class="opts">
                 <label class="check" for="ann-pin" style="text-transform:none;letter-spacing:0;font:400 14px var(--font-body);color:var(--fg)"><input type="checkbox" id="ann-pin">Sabitle</label>
-                <label class="check" for="ann-discord" style="text-transform:none;letter-spacing:0;font:400 14px var(--font-body);color:var(--fg)"><input type="checkbox" id="ann-discord" checked>Discord'a da gönder</label>
+                <label class="check" for="ann-ts" style="text-transform:none;letter-spacing:0;font:400 14px var(--font-body);color:var(--fg)"><input type="checkbox" id="ann-ts" checked>TeamSpeak’e de gönder</label>
               </div>
               <button class="btn primary" type="submit">Yayınla</button>
             </div>
@@ -601,17 +613,27 @@ section[data-tab].on{display:block}
               <svg aria-hidden="true"><use href="#i-lock"/></svg>
             </div>
             <p class="muted" id="pf-nick-hint" style="font-size:13px;margin:8px 0 0">Nick’ini yetkililer değiştirir. Oyunda farklı bir nick aldıysan bir yetkiliye yaz.</p>
+            <label class="pf-label" for="pf-ts">TeamSpeak nick</label>
+            <input id="pf-ts" class="pf-input" type="text" autocomplete="off" maxlength="30">
+            <p class="muted" style="font-size:13px;margin:8px 0 0">TeamSpeak’te (L4B) görünen adın; yetkililer seni TS’te bununla tanır.</p>
             <div class="pf-label" id="pf-cls-label">Sınıf</div>
             <div class="pf-classes" id="pf-classes" role="radiogroup" aria-labelledby="pf-cls-label"></div>
             <label class="pf-label" for="pf-level">Level</label>
             <div class="stepper">
               <button type="button" data-lv="-1" aria-label="Level azalt">−</button>
-              <input id="pf-level" type="number" inputmode="numeric" min="1" max="99">
+              <input id="pf-level" type="number" inputmode="numeric" min="1" max="80">
               <button type="button" data-lv="1" aria-label="Level artır">+</button>
+            </div>
+            <label class="pf-label" for="pf-reb">Reb (Rebirth)</label>
+            <div class="stepper">
+              <button type="button" data-reb="-1" aria-label="Reb azalt">−</button>
+              <input id="pf-reb" type="number" inputmode="numeric" min="0" max="10">
+              <button type="button" data-reb="1" aria-label="Reb artır">+</button>
             </div>
             <p class="muted" id="pf-level-hint" style="font-size:13px;margin:8px 0 0"></p>
             <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:20px">
               <button class="btn primary" type="submit" style="min-height:44px;padding-inline:20px">Kaydet</button>
+              <button class="btn" type="button" id="pf-pass" style="min-height:44px">Şifremi değiştir</button>
               <span class="muted" id="pf-updated" style="font-size:13px"></span>
             </div>
           </form>
@@ -619,11 +641,17 @@ section[data-tab].on{display:block}
         <div class="s5 panel">
           <div class="panel-h"><h2>Kim neyi değiştirir</h2></div>
           <ul class="list who-edits">
-            <li><span>Sınıf, level</span><span class="tag official">Sen</span></li>
+            <li><span>Sınıf, level, reb</span><span class="tag official">Sen</span></li>
+            <li><span>TeamSpeak nick, şifre</span><span class="tag official">Sen</span></li>
             <li><span>Hazırlık adımları</span><span class="tag official">Sen</span></li>
             <li><span>Nick, rütbe, durum</span><span class="tag">Yetkililer</span></li>
-            <li><span>Discord adı ve resmi</span><span class="tag">Discord’dan otomatik</span></li>
+            <li><span>Sunucu level sınırı</span><span class="tag">Yönetici</span></li>
           </ul>
+          <div class="officer-only" style="margin-top:14px">
+            <label class="pf-label" for="cap-sel" style="margin-top:0">Level sınırı (yönetici ayarı)</label>
+            <select class="sel" id="cap-sel"><option value="80">80</option><option value="83">83</option><option value="83+1">83+1</option><option value="83+2">83+2</option><option value="83+3">83+3</option><option value="83+4">83+4</option><option value="83+5">83+5</option><option value="83+6">83+6</option><option value="83+7">83+7</option><option value="83+8">83+8</option><option value="83+9">83+9</option><option value="83+10">83+10</option></select>
+            <p class="muted" style="font-size:13px;margin:8px 0 0">Üyeler bu sınırın üstünde level ya da reb giremez.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -671,28 +699,28 @@ section[data-tab].on{display:block}
 
   /* rel: katılım eğilimi (örnek veri üretmek için) */
   const MEMBERS = [
-    { name: 'KaraBey', dc: 'karabey', cls: 'war', rank: 'Lider', lv: 76, rel: .96, st: 'aktif', prep: [1, 1, 1, 1] },
-    { name: 'Asena', dc: 'asena.ko', cls: 'pri', rank: 'Asistan', lv: 74, rel: .92, st: 'aktif', prep: [1, 1, 1, 1] },
-    { name: 'SessizOk', dc: 'sessizok', cls: 'rog', rank: 'Asistan', lv: 75, rel: .88, st: 'aktif', prep: [1, 1, 1, 0] },
-    { name: 'DemirYumruk', dc: 'demiryumruk', cls: 'war', rank: 'Subay', lv: 73, rel: .9, st: 'aktif', prep: [1, 1, 0, 0] },
-    { name: 'AlevBüyü', dc: 'alevbuyu', cls: 'mag', rank: 'Subay', lv: 72, rel: .84, st: 'aktif', prep: [1, 1, 1, 0] },
-    { name: 'ŞifaEli', dc: 'sifaeli', cls: 'pri', rank: 'Subay', lv: 71, rel: .86, st: 'aktif', prep: [1, 0, 0, 0] },
-    { name: 'Bozkurt', dc: 'bozkurt44', cls: 'war', rank: 'Üye', lv: 70, rel: .79, st: 'aktif', prep: [1, 1, 0, 0] },
-    { name: 'GeceKuşu', dc: 'gecekusu', cls: 'rog', rank: 'Üye', lv: 71, rel: .75, st: 'aktif', prep: [1, 0, 0, 0] },
-    { name: 'BuzKraliçe', dc: 'buzkralice', cls: 'mag', rank: 'Üye', lv: 69, rel: .81, st: 'aktif', prep: [1, 1, 0, 0] },
-    { name: 'Tufan', dc: 'tufan', cls: 'kur', rank: 'Üye', lv: 68, rel: .7, st: 'aktif', prep: [1, 0, 0, 0] },
-    { name: 'Kartal', dc: 'kartal.ko', cls: 'rog', rank: 'Üye', lv: 70, rel: .66, st: 'aktif', prep: [1, 0, 0, 0] },
-    { name: 'Yıldırım', dc: 'yildirim', cls: 'mag', rank: 'Üye', lv: 67, rel: .62, st: 'aktif', prep: [0, 0, 0, 0] },
-    { name: 'Bilge', dc: 'bilge', cls: 'pri', rank: 'Üye', lv: 66, rel: .77, st: 'aktif', prep: [0, 0, 0, 0] },
-    { name: 'KılıçUstası', dc: 'kilicustasi', cls: 'war', rank: 'Üye', lv: 69, rel: .58, st: 'aktif', prep: [0, 0, 0, 0] },
-    { name: 'Gölge', dc: 'golge', cls: 'rog', rank: 'Üye', lv: 64, rel: .38, st: 'pasif', prep: [0, 0, 0, 0] },
-    { name: 'Sancaktar', dc: 'sancaktar', cls: 'war', rank: 'Üye', lv: 65, rel: .52, st: 'izinli', prep: [0, 0, 0, 0] },
-    { name: 'Ayaz', dc: 'ayaz', cls: 'kur', rank: 'Aday', lv: 58, rel: .45, st: 'aktif', prep: [0, 0, 0, 0] },
-    { name: 'Nur', dc: 'nur.priest', cls: 'pri', rank: 'Aday', lv: 55, rel: .5, st: 'aktif', prep: [0, 0, 0, 0] }
+    { name: 'KaraBey', ts: 'karabey', cls: 'war', rank: 'Lider', lv: 76, rel: .96, st: 'aktif', prep: [1, 1, 1, 1] },
+    { name: 'Asena', ts: 'asena.ko', cls: 'pri', rank: 'Asistan', lv: 74, rel: .92, st: 'aktif', prep: [1, 1, 1, 1] },
+    { name: 'SessizOk', ts: 'sessizok', cls: 'rog', rank: 'Asistan', lv: 75, rel: .88, st: 'aktif', prep: [1, 1, 1, 0] },
+    { name: 'DemirYumruk', ts: 'demiryumruk', cls: 'war', rank: 'Subay', lv: 73, rel: .9, st: 'aktif', prep: [1, 1, 0, 0] },
+    { name: 'AlevBüyü', ts: 'alevbuyu', cls: 'mag', rank: 'Subay', lv: 72, rel: .84, st: 'aktif', prep: [1, 1, 1, 0] },
+    { name: 'ŞifaEli', ts: 'sifaeli', cls: 'pri', rank: 'Subay', lv: 71, rel: .86, st: 'aktif', prep: [1, 0, 0, 0] },
+    { name: 'Bozkurt', ts: 'bozkurt44', cls: 'war', rank: 'Üye', lv: 70, rel: .79, st: 'aktif', prep: [1, 1, 0, 0] },
+    { name: 'GeceKuşu', ts: 'gecekusu', cls: 'rog', rank: 'Üye', lv: 71, rel: .75, st: 'aktif', prep: [1, 0, 0, 0] },
+    { name: 'BuzKraliçe', ts: 'buzkralice', cls: 'mag', rank: 'Üye', lv: 69, rel: .81, st: 'aktif', prep: [1, 1, 0, 0] },
+    { name: 'Tufan', ts: 'tufan', cls: 'kur', rank: 'Üye', lv: 68, rel: .7, st: 'aktif', prep: [1, 0, 0, 0] },
+    { name: 'Kartal', ts: 'kartal.ko', cls: 'rog', rank: 'Üye', lv: 70, rel: .66, st: 'aktif', prep: [1, 0, 0, 0] },
+    { name: 'Yıldırım', ts: 'yildirim', cls: 'mag', rank: 'Üye', lv: 67, rel: .62, st: 'aktif', prep: [0, 0, 0, 0] },
+    { name: 'Bilge', ts: 'bilge', cls: 'pri', rank: 'Üye', lv: 66, rel: .77, st: 'aktif', prep: [0, 0, 0, 0] },
+    { name: 'KılıçUstası', ts: 'kilicustasi', cls: 'war', rank: 'Üye', lv: 69, rel: .58, st: 'aktif', prep: [0, 0, 0, 0] },
+    { name: 'Gölge', ts: 'golge', cls: 'rog', rank: 'Üye', lv: 64, rel: .38, st: 'pasif', prep: [0, 0, 0, 0] },
+    { name: 'Sancaktar', ts: 'sancaktar', cls: 'war', rank: 'Üye', lv: 65, rel: .52, st: 'izinli', prep: [0, 0, 0, 0] },
+    { name: 'Ayaz', ts: 'ayaz', cls: 'kur', rank: 'Aday', lv: 58, rel: .45, st: 'aktif', prep: [0, 0, 0, 0] },
+    { name: 'Nur', ts: 'nur.priest', cls: 'pri', rank: 'Aday', lv: 55, rel: .5, st: 'aktif', prep: [0, 0, 0, 0] }
   ];
 
   const PRE_EVENTS = [
-    { id: 'p1', type: 'meet', title: 'Klan kuruluş toplantısı', at: tr('2026-09-28T21:00'), desc: 'Discord ses kanalı. Rütbeler ve açılış hedefleri konuşuldu.' },
+    { id: 'p1', type: 'meet', title: 'Klan kuruluş toplantısı', at: tr('2026-09-28T21:00'), desc: 'TeamSpeak (L4B). Rütbeler ve açılış hedefleri konuşuldu.' },
     { id: 'p2', type: 'meet', title: 'Sınıf dağılımı görüşmesi', at: tr('2026-10-02T21:30'), desc: 'Kim hangi sınıfı açacak, hangi roller açıkta.' },
     { id: 'p3', type: 'meet', title: 'OTP ve ön kayıt kontrolü', at: tr('2026-10-11T21:00'), desc: 'Herkes telefon doğrulaması ve OTP durumunu panelde işaretlesin.' },
     { id: 'o1', type: 'official', title: '1. ön kayıt başlıyor', at: tr('2026-10-15'), allDay: true, desc: 'İlk ön kayıt dönemi ödüllü. 29 Ekim’e kadar sürer.' },
@@ -700,7 +728,7 @@ section[data-tab].on{display:block}
     { id: 'o2', type: 'official', title: '2. ön kayıt ve sunucu seçimi', at: tr('2026-10-29'), allDay: true, desc: 'Sunucu seçimi bu dönemde yapılır.' },
     { id: 'p5', type: 'meet', title: 'Sunucu oylaması', at: tr('2026-11-01T21:00'), desc: 'Klanın gideceği sunucu oylanır; herkes aynı sunucuyu seçer.' },
     { id: 'o3', type: 'official', title: 'Karakter oluşturma', at: tr('2026-11-10'), allDay: true, desc: 'Karakter adları bu iki günde alınır.' },
-    { id: 'p6', type: 'meet', title: 'Açılış toplanması', at: tr('2026-11-12T15:30'), desc: 'Discord ses kanalı, açılıştan 30 dakika önce.' },
+    { id: 'p6', type: 'meet', title: 'Açılış toplanması', at: tr('2026-11-12T15:30'), desc: 'TeamSpeak’te (L4B), açılıştan 30 dakika önce.' },
     { id: 'o4', type: 'official', title: 'Sunucu açılışı', at: OPEN, desc: 'Sunucular 16:00’da (TSİ) açılıyor.' }
   ];
   const WEEK = { 1: ['bdw', '21:00'], 2: ['jr', '21:30'], 3: ['chaos', '22:00'], 4: ['boss', '21:00'], 5: ['ft', '21:00'], 6: ['bdw', '21:00'], 0: ['csw', '20:30'] };
@@ -714,7 +742,7 @@ section[data-tab].on{display:block}
   function descFor(t) {
     return {
       csw: 'Haftalık kale kuşatması. Kadro bir gün önce duyurulur; herkes 20:15’te toplanır.',
-      bdw: 'Sınır savunma savaşı. Parti listesi Discord’da.',
+      bdw: 'Sınır savunma savaşı. Parti listesi panelde, toplanma TeamSpeak’te.',
       jr: 'Juraid Mountain. 8 kişilik iki parti.',
       chaos: 'Chaos dungeon. Katılım serbest, puanlar klan için.',
       ft: 'Forgotten Temple. Priest’ler parti başına ikişer.',
@@ -724,14 +752,14 @@ section[data-tab].on{display:block}
 
   const ANN = {
     pre: [
-      { title: 'Açılış planı', by: 'KaraBey', at: tr('2026-10-03T19:10'), pin: true, dc: true, body: 'Bu hafta herkes telefon doğrulamasını ve OTP’yi açsın; yeni sunuculara OTP olmadan girilemiyor. Ön kayıt 15 Ekim’de başlıyor ve ilk dönem ödüllü.' },
-      { title: 'Sınıf dağılımı', by: 'Asena', at: tr('2026-10-02T23:05'), pin: false, dc: true, body: 'Şu an 5 Warrior, 4 Rogue, 3 Mage, 4 Priest, 2 Kurian var. Mage ve Kurian açığımız var; kararsız kalanlar kanala yazsın.' },
-      { title: 'Yeni sunucularda Ardream yok', by: 'SessizOk', at: tr('2026-10-01T18:40'), pin: false, dc: false, body: 'Ardream ve Ronark Land Base haritaları olmayacak, tüm savaş Ronark Land (CZ)’de. Level planınızı buna göre yapın.' }
+      { title: 'Açılış planı', by: 'KaraBey', at: tr('2026-10-03T19:10'), pin: true, ts: true, body: 'Bu hafta herkes telefon doğrulamasını ve OTP’yi açsın; yeni sunuculara OTP olmadan girilemiyor. Ön kayıt 15 Ekim’de başlıyor ve ilk dönem ödüllü.' },
+      { title: 'Sınıf dağılımı', by: 'Asena', at: tr('2026-10-02T23:05'), pin: false, ts: true, body: 'Şu an 5 Warrior, 4 Rogue, 3 Mage, 4 Priest, 2 Kurian var. Mage ve Kurian açığımız var; kararsız kalanlar kanala yazsın.' },
+      { title: 'Yeni sunucularda Ardream yok', by: 'SessizOk', at: tr('2026-10-01T18:40'), pin: false, ts: false, body: 'Ardream ve Ronark Land Base haritaları olmayacak, tüm savaş Ronark Land (CZ)’de. Level planınızı buna göre yapın.' }
     ],
     post: [
-      { title: 'Pazar CSW kadrosu', by: 'KaraBey', at: tr('2026-11-20T22:15'), pin: true, dc: true, body: 'İlk iki parti belli, liste Discord’da. Herkes 20:15’te Ronark Land (CZ) girişinde. Mazereti olan cumartesi akşamına kadar panelden bildirsin.' },
-      { title: 'Boss avı saati', by: 'DemirYumruk', at: tr('2026-11-18T12:30'), pin: false, dc: true, body: 'Perşembe boss avı 21:00’de kalıyor. Drop dağılımı avdan sonra duyurulacak.' },
-      { title: 'Juraid partileri', by: 'Asena', at: tr('2026-11-16T20:00'), pin: false, dc: false, body: 'Juraid için 8 kişilik iki parti kuruyoruz; Priest sayısı az, Bilge ve Nur ikinci partide.' }
+      { title: 'Pazar CSW kadrosu', by: 'KaraBey', at: tr('2026-11-20T22:15'), pin: true, ts: true, body: 'İlk iki parti belli, liste panelde. Herkes 20:15’te Ronark Land (CZ) girişinde. Mazereti olan cumartesi akşamına kadar panelden bildirsin.' },
+      { title: 'Boss avı saati', by: 'DemirYumruk', at: tr('2026-11-18T12:30'), pin: false, ts: true, body: 'Perşembe boss avı 21:00’de kalıyor. Drop dağılımı avdan sonra duyurulacak.' },
+      { title: 'Juraid partileri', by: 'Asena', at: tr('2026-11-16T20:00'), pin: false, ts: false, body: 'Juraid için 8 kişilik iki parti kuruyoruz; Priest sayısı az, Bilge ve Nur ikinci partide.' }
     ]
   };
 
@@ -770,8 +798,12 @@ section[data-tab].on{display:block}
     q: '', cls: '', rank: '', status: '',
     sel: { pre: null, post: null },
     month: null,
-    pf: null
+    pf: null,
+    levelCap: 80,  /* yönetici ayarı: açılışta 80, sonra 83 */
+    rebCap: 0      /* yönetici ayarı: 83'ten sonra 83+1 ... 83+10 */
   };
+  const REB_MAX = 10;
+  const lvText = m => `${m.lv}${m.reb ? `<span class="reb">+${m.reb}</span>` : ''}`;
   function now() { return state.phase === 'pre' ? Date.now() : SIM_POST + (Date.now() - LOADED); }
   const events = () => state.phase === 'pre' ? PRE_EVENTS : POST_EVENTS;
   const me = () => MEMBERS.find(m => m.name === (state.role === 'officer' ? 'KaraBey' : 'GeceKuşu'));
@@ -948,7 +980,7 @@ section[data-tab].on{display:block}
     return `<div class="ann">
       <h3>${a.pin ? icon('i-pin') : ''}${esc(a.title)}</h3>
       <p>${esc(a.body)}</p>
-      <div class="meta"><span>${esc(a.by)} · ${F(a.at, { day: 'numeric', month: 'long' })} ${hm(a.at)}</span>${a.dc ? '<span class="tag">Discord’a gönderildi</span>' : ''}</div>
+      <div class="meta"><span>${esc(a.by)} · ${F(a.at, { day: 'numeric', month: 'long' })} ${hm(a.at)}</span>${a.ts ? '<span class="tag">TeamSpeak’e gönderildi</span>' : ''}</div>
     </div>`;
   }
 
@@ -978,8 +1010,8 @@ section[data-tab].on{display:block}
 
     const q = lower(state.q.trim());
     const rows = MEMBERS
-      .filter(m => (!q || lower(m.name).includes(q) || lower(m.dc).includes(q)) && (!state.cls || m.cls === state.cls) && (!state.rank || m.rank === state.rank) && (!state.status || m.st === state.status))
-      .sort((a, b) => RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank) || b.lv - a.lv);
+      .filter(m => (!q || lower(m.name).includes(q) || lower(m.ts).includes(q)) && (!state.cls || m.cls === state.cls) && (!state.rank || m.rank === state.rank) && (!state.status || m.st === state.status))
+      .sort((a, b) => RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank) || (b.lv * 100 + (b.reb || 0)) - (a.lv * 100 + (a.reb || 0)));
     document.getElementById('members').innerHTML = rows.map(m => {
       const r = memberRate(m);
       const pips = PREP.map(it => {
@@ -990,10 +1022,10 @@ section[data-tab].on{display:block}
       }).join('');
       const [stl, stc] = STATUS[m.st];
       return `<tr>
-        <td class="name"><b>${esc(m.name)}</b><span>@${esc(m.dc)}</span></td>
+        <td class="name"><b>${esc(m.name)}</b><span>TS: ${esc(m.ts)}</span></td>
         <td><span class="cls"><i class="c-${m.cls}"></i>${CLASSES[m.cls]}</span></td>
         <td ${rankAttr(m.rank)}>${m.rank}</td>
-        <td data-when="post" class="num">${m.lv}</td>
+        <td data-when="post" class="num">${lvText(m)}</td>
         <td data-when="pre"><div class="pips">${pips}</div></td>
         <td>${r ? `<div class="att" data-tip="${r.ok} / ${r.n} etkinlik" tabindex="0"><div class="meter"><i style="width:${r.pct}%"></i></div><span class="num">%${r.pct}</span></div>` : '<span class="muted">—</span>'}</td>
         <td><span class="pill ${stc}">${stl}</span></td>
@@ -1030,7 +1062,7 @@ section[data-tab].on{display:block}
       <div class="when2">${longDate(sel.at)} · ${hm(sel.at)} TSİ · ${rel(sel.at)}</div>
       <p class="desc">${esc(sel.desc || '')}</p>`;
     if (!isPast(sel) || !ATT[sel.id]) {
-      d.innerHTML = head + `<div class="callout" style="margin-top:16px">Yoklama etkinlik saatinde açılır. ${canMark() ? 'Kadroyu Discord’a duyurmak için Takvim ve duyurular sekmesini kullanın.' : 'Katılamayacaksanız yetkililere haber verin.'}</div>`;
+      d.innerHTML = head + `<div class="callout" style="margin-top:16px">Yoklama etkinlik saatinde açılır. ${canMark() ? 'Kadroyu Takvim ve duyurular sekmesinden duyurun; TeamSpeak’e de gönderilebilir.' : 'Katılamayacaksanız yetkililere haber verin.'}</div>`;
       return;
     }
     const c = counts(sel.id);
@@ -1117,20 +1149,38 @@ section[data-tab].on{display:block}
   /* ---------- Profilim ---------- */
   function renderProfile() {
     const m = me();
-    if (!state.pf || state.pf.name !== m.name) state.pf = { name: m.name, cls: m.cls, lv: m.lv, saved: m.saved || null };
+    if (!state.pf || state.pf.name !== m.name) state.pf = { name: m.name, cls: m.cls, lv: m.lv, reb: m.reb || 0, ts: m.ts, saved: m.saved || null };
+    document.getElementById('pf-ts').value = state.pf.ts;
     const pre = state.phase === 'pre';
     document.getElementById('pf-nick').value = m.name;
-    document.getElementById('pf-sub').innerHTML = `@${esc(m.dc)} · <span style="color:var(${RANKVAR[m.rank]});font-weight:600">${m.rank}</span>`;
+    document.getElementById('pf-sub').innerHTML = `TS: ${esc(m.ts)} · <span style="color:var(${RANKVAR[m.rank]});font-weight:600">${m.rank}</span>`;
     document.getElementById('pf-classes').innerHTML = Object.entries(CLASSES).map(([k, l]) =>
       `<button type="button" class="pf-cls" role="radio" data-pfcls="${k}" aria-checked="${state.pf.cls === k}"><i class="c-${k}"></i>${l}</button>`).join('');
+    const cap = state.levelCap;
+    if (state.pf.lv > cap) state.pf.lv = cap;
+    const rebCap = cap === 83 ? state.rebCap : 0;
+    const rebOpen = !pre && rebCap > 0 && state.pf.lv === 83;
+    if (!rebOpen) state.pf.reb = 0;
+    if (state.pf.reb > rebCap) state.pf.reb = rebCap;
     const inp = document.getElementById('pf-level');
     inp.value = pre ? '' : state.pf.lv;
+    inp.max = cap;
     inp.placeholder = pre ? 'Açılışta' : '';
     inp.disabled = pre;
     document.querySelectorAll('[data-lv]').forEach(b => { b.disabled = pre; });
+    const rb = document.getElementById('pf-reb');
+    rb.value = rebOpen ? state.pf.reb : '';
+    rb.placeholder = rebOpen ? '' : '83’te';
+    rb.disabled = !rebOpen;
+    rb.max = rebCap;
+    document.querySelectorAll('[data-reb]').forEach(b => { b.disabled = !rebOpen; });
+    document.getElementById('cap-sel').value = rebCap ? `83+${rebCap}` : String(cap);
     document.getElementById('pf-level-hint').textContent = pre
       ? 'Level sunucu açılınca (12 Kasım 16:00) girilir. Şimdilik planladığın sınıfı seç.'
-      : 'Oyundaki levelini yaz. Üst sınır, yöneticinin girdiği sunucu level sınırıdır.';
+      : cap === 80 ? 'Sınırı yönetici belirler; şu an en fazla 80.'
+      : !rebCap ? 'Sınır şu an 83. Yönetici reb açınca 83+1, 83+2 … girilir.'
+      : rebOpen ? `Sınır şu an 83+${rebCap}. Üye listesinde 83+${state.pf.reb || 0} olarak görünür.`
+      : `Sınır şu an 83+${rebCap}. 83’e ulaşınca reb girilir.`;
     document.getElementById('pf-updated').textContent = state.pf.saved ? `Son güncelleme: ${F(state.pf.saved, { day: 'numeric', month: 'long' })} ${hm(state.pf.saved)}` : 'Henüz güncellenmedi';
   }
 
@@ -1165,7 +1215,8 @@ section[data-tab].on{display:block}
     const ik = t.closest('button[data-irk]'); if (ik) { state.irk = ik.dataset.irk; render(); return; }
     const cf = t.closest('[data-cls]'); if (cf) { state.cls = cf.dataset.cls; renderMembers(); return; }
     const pc = t.closest('[data-pfcls]'); if (pc) { state.pf.cls = pc.dataset.pfcls; renderProfile(); return; }
-    const lv = t.closest('[data-lv]'); if (lv) { state.pf.lv = Math.max(1, Math.min(99, (+state.pf.lv || 1) + (+lv.dataset.lv))); renderProfile(); return; }
+    const lv = t.closest('[data-lv]'); if (lv) { state.pf.lv = Math.max(1, Math.min(state.levelCap, (+state.pf.lv || 1) + (+lv.dataset.lv))); renderProfile(); return; }
+    const rbb = t.closest('[data-reb]'); if (rbb) { state.pf.reb = Math.max(0, Math.min(state.rebCap, (+state.pf.reb || 0) + (+rbb.dataset.reb))); renderProfile(); return; }
     const ev = t.closest('[data-ev]'); if (ev) { state.sel[state.phase] = ev.dataset.ev; renderEvents(); return; }
     const op = t.closest('[data-open]');
     if (op) {
@@ -1197,6 +1248,12 @@ section[data-tab].on{display:block}
     }
     if (t.closest('#cal-today')) { state.month = null; renderCalendar(); return; }
     if (t.closest('[data-edit]')) { toast('Prototip: düzenleme formu uygulamada açılacak'); return; }
+    if (t.closest('#pf-pass')) { toast('Prototip: şifre değiştirme formu uygulamada açılacak'); return; }
+    if (t.closest('#ts-copy')) {
+      const sel = () => { getSelection().selectAllChildren(document.getElementById('ts-addr')); toast('Adres seçildi, kopyalayabilirsin'); };
+      try { navigator.clipboard.writeText('L4B').then(() => toast('Sunucu adresi kopyalandı: L4B'), sel); } catch (err) { sel(); }
+      return;
+    }
     if (t.closest('#add-member')) { toast('Prototip: üye ekleme formu uygulamada açılacak'); return; }
     if (t.closest('#add-event')) { toast('Prototip: etkinlik oluşturma formu uygulamada açılacak'); return; }
   });
@@ -1207,12 +1264,21 @@ section[data-tab].on{display:block}
     if (t.id === 'status-filter') { state.status = t.value; renderMembers(); }
   });
   document.getElementById('q').addEventListener('input', e => { state.q = e.target.value; renderMembers(); });
-  document.getElementById('pf-level').addEventListener('input', e => { const v = parseInt(e.target.value, 10); if (v) state.pf.lv = Math.max(1, Math.min(99, v)); });
+  document.getElementById('pf-ts').addEventListener('input', e => { state.pf.ts = e.target.value; });
+  document.getElementById('pf-level').addEventListener('input', e => { const v = parseInt(e.target.value, 10); if (v) { state.pf.lv = Math.max(1, Math.min(state.levelCap, v)); renderProfile(); } });
+  document.getElementById('pf-reb').addEventListener('input', e => { const v = parseInt(e.target.value, 10); state.pf.reb = Math.max(0, Math.min(state.rebCap, v || 0)); });
+  document.getElementById('cap-sel').addEventListener('change', e => {
+    const [lv, rb] = e.target.value.split('+');
+    state.levelCap = +lv; state.rebCap = Math.min(REB_MAX, +(rb || 0));
+    renderProfile();
+    toast(`Level sınırı: ${e.target.value}`);
+  });
   document.getElementById('pf-form').addEventListener('submit', e => {
     e.preventDefault();
     const m = me();
     m.cls = state.pf.cls;
-    if (state.phase === 'post') m.lv = state.pf.lv;
+    m.ts = (state.pf.ts || '').trim() || m.ts;
+    if (state.phase === 'post') { m.lv = state.pf.lv; m.reb = state.pf.reb || 0; }
     m.saved = state.pf.saved = now();
     renderProfile(); renderMembers(); renderHome(); renderEvents();
     toast('Profilin kaydedildi. Üye listesinde görünüyor.');
@@ -1223,11 +1289,11 @@ section[data-tab].on{display:block}
     const err = document.getElementById('ann-err');
     if (!ti.value.trim() || !bo.value.trim()) { err.hidden = false; return; }
     err.hidden = true;
-    const dc = document.getElementById('ann-discord').checked;
-    ANN[state.phase].unshift({ title: ti.value.trim(), body: bo.value.trim(), by: me().name, at: now(), pin: document.getElementById('ann-pin').checked, dc });
+    const ts = document.getElementById('ann-ts').checked;
+    ANN[state.phase].unshift({ title: ti.value.trim(), body: bo.value.trim(), by: me().name, at: now(), pin: document.getElementById('ann-pin').checked, ts });
     ti.value = ''; bo.value = '';
     renderCalendar(); renderHome();
-    toast(dc ? 'Duyuru yayınlandı. Uygulamada Discord kanalına da gidecek.' : 'Duyuru yayınlandı');
+    toast(ts ? 'Duyuru yayınlandı. Uygulamada TeamSpeak’e (L4B) de gidecek.' : 'Duyuru yayınlandı');
   });
 
   const h0 = (location.hash || '').slice(1);

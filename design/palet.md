@@ -77,7 +77,7 @@ Düz yeşil/kırmızı yerine bitkisel, ateş ve büyü tonları. Her durum ikon
 | `--player-combat` | `#f0663f` | Savaş Alevi | Savaşta (çapraz kılıç ikonu) |
 | `--player-afk` | `#a593ea` | Uyku Büyüsü | AFK (hilal ikonu) |
 
-Not: Knight Online'ın resmi API'si olmadığı için bu bilgi otomatik gelmez. Kaynak, sonraki fazdaki Discord botu (Discord durumu) ya da üyenin kendi bildirimi olacak.
+Not: Knight Online'ın resmi API'si olmadığı için bu bilgi otomatik gelmez. Kaynak, sonraki fazda TeamSpeak sunucusu (L4B; WebQuery ile kim bağlı, kim AFK, kim savaş kanalında) ya da üyenin kendi bildirimi olacak.
 
 ## 6. Rütbeler
 
