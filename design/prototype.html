@@ -373,6 +373,29 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .ap-val{font:700 clamp(48px,7vw,72px)/1 var(--font-display);color:var(--gold)}
 .ap-meta{font:600 15px/1.4 var(--font-data);color:var(--fg-2)}
 .ap-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ap-tags:empty{display:none}
+.calc-top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px}
+.calc-mini{flex:1;min-width:240px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.calc-mini div{padding:10px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);min-width:0}
+.calc-mini span,.res-grid span{display:block;font:600 11.5px/1.2 var(--font-data);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.calc-mini b{display:block;font:700 22px/1.25 var(--font-data);color:var(--fg)}
+.ap-break{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;margin:4px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:14px}
+.ap-break dt{color:var(--fg-2)}
+.ap-break dd{margin:0;text-align:right;font:600 14px/1.4 var(--font-data);color:var(--fg)}
+.ap-break small,.calc-h small{font:500 12.5px/1.4 var(--font-data);color:var(--muted);letter-spacing:0;text-transform:none}
+.calc-h{margin:0 0 8px;font:600 13px/1.3 var(--font-data);letter-spacing:.1em;text-transform:uppercase;color:var(--fg-2)}
+.feat-list{display:flex;flex-wrap:wrap;gap:6px}
+.feat{display:inline-flex;align-items:baseline;gap:6px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font:500 13.5px/1.2 var(--font-body);color:var(--fg-2)}
+.feat b{font:700 14px/1 var(--font-data);color:var(--good)}
+.res-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.res-grid div{padding:8px 10px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line)}
+.res-grid b{font:700 18px/1.3 var(--font-data);color:var(--fg)}
+.res-grid small{display:block;font:500 11.5px/1.2 var(--font-data);color:var(--good)}
+.b-meter .item{background:var(--good)}
+.b-ctl output small b{color:var(--good);font-weight:600}
+.ic-sub{margin:0 0 8px;font:600 12.5px/1 var(--font-data);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ic-subs{display:flex;flex-direction:column;gap:14px}
+.it-card .ft{display:block;font:600 12px/1.35 var(--font-data);color:var(--good)}
 .picker-back{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.62);display:grid;place-items:center;padding:16px}
 .picker{width:min(560px,100%);max-height:min(660px,calc(100vh - 32px));display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .picker .search{flex:none;height:42px;max-width:none}
@@ -711,7 +734,7 @@ section[data-tab].on{display:block}
         <div>
           <div class="eyebrow">Build planlayıcı</div>
           <h1>Karakter tasarımı</h1>
-          <p>Stat ve skill puanlarını planla, ekipmanını not et, klanla paylaş. AP, AC ve eşya testi gibi ayrıntılı hesaplar için KO Bugda’yı kullan.</p>
+          <p>Stat ve skill puanlarını planla, eşyalarını ve takılarını tak, klanla paylaş. AP, savunma, can ve mana eşya bonuslarıyla birlikte kendiliğinden hesaplanır.</p>
         </div>
         <a class="btn" href="https://kobugda.com/calculator/advanced" target="_blank" rel="noopener">KO Bugda’da hesapla <svg aria-hidden="true"><use href="#i-out"/></svg></a>
       </div>
@@ -731,7 +754,7 @@ section[data-tab].on{display:block}
         <div class="s6 panel">
           <div class="panel-h"><h2>Statlar</h2><span class="sub" id="b-st-sub"></span></div>
           <div id="b-stats"></div>
-          <p class="muted" style="font-size:13px;margin:12px 0 0">Gri kısım ırkın başlangıç statı, altın kısım senin dağıttığın puan. Karakter oluştururken 10 bonus puan, sonra her level 3 puan gelir. Tek stat en fazla 255; reb puanları bu sınırın üstüne çıkabilir.</p>
+          <p class="muted" style="font-size:13px;margin:12px 0 0">Gri kısım ırkın başlangıç statı, altın kısım senin dağıttığın puan, yeşil kısım takılı eşyaların bonusu. Karakter oluştururken 10 bonus puan, level 60’a kadar her level 3, sonra 5 puan gelir. Tek stat en fazla 255; reb puanları bu sınırın üstüne çıkabilir.</p>
         </div>
         <div class="s6 panel">
           <div class="panel-h"><h2>Skill ağaçları</h2><span class="sub" id="b-sk-sub"></span></div>
@@ -740,27 +763,39 @@ section[data-tab].on{display:block}
         </div>
 
         <div class="s12 panel">
-          <div class="panel-h"><h2>Saldırı gücü (AP)</h2><span class="sub">Formül kaynağı: KO Bugda temel hesaplayıcı · oyun içi değerle doğrulanacak</span></div>
+          <div class="panel-h"><h2>Saldırı, savunma ve can</h2><span class="sub">Stat, takılı eşya ve takılardan otomatik · formüller KO Bugda gelişmiş hesaplayıcıdan, oyun içi değerle doğrulanacak</span></div>
           <div class="ap-grid">
-            <form class="ap-form" id="ap-form" novalidate>
-              <div class="ap-f"><label for="ap-type">Hesap tipi</label><select class="sel" id="ap-type"></select></div>
-              <div class="ap-f" id="ap-sub-wrap"><label for="ap-sub" id="ap-sub-label">Silah tipi</label><select class="sel" id="ap-sub"></select></div>
-              <div class="ap-f"><label for="ap-r" id="ap-r-label">Sağ el silah AP</label><input id="ap-r" type="number" min="0" max="9999" inputmode="numeric" placeholder="0"></div>
-              <div class="ap-f" id="ap-l-wrap"><label for="ap-l">Sol el silah AP</label><input id="ap-l" type="number" min="0" max="9999" inputmode="numeric" placeholder="0"></div>
-              <div class="ap-f"><label for="ap-st" id="ap-st-label">STR (statlarda)</label><input id="ap-st" type="number" min="0" max="999" inputmode="numeric" placeholder="Bonussuz"></div>
-              <div class="ap-f"><label for="ap-bo" id="ap-bo-label">STR (eşya bonusu)</label><input id="ap-bo" type="number" min="0" max="999" inputmode="numeric" placeholder="0"></div>
-              <div class="ap-f"><label for="ap-pc">Ek AP bonusu (%)</label><input id="ap-pc" type="number" min="0" max="999" inputmode="numeric" placeholder="0"></div>
-              <div class="ap-f ap-checks">
-                <label class="check" for="ap-wes"><input type="checkbox" id="ap-wes">WES (+5 AP)</label>
-                <label class="check" for="ap-wolf"><input type="checkbox" id="ap-wolf">Wolf (+%20)</label>
-              </div>
-            </form>
             <div class="ap-out" aria-live="polite">
-              <div class="eyebrow">Saldırı gücü</div>
-              <div class="ap-val num" id="ap-val">0</div>
+              <div class="calc-top">
+                <div><div class="eyebrow">Saldırı gücü (AP)</div><div class="ap-val num" id="ap-val">0</div></div>
+                <div class="calc-mini">
+                  <div><span>Savunma</span><b class="num" id="cv-ac">0</b></div>
+                  <div><span>Can (HP)</span><b class="num" id="cv-hp">0</b></div>
+                  <div><span>Mana (MP)</span><b class="num" id="cv-mp">0</b></div>
+                </div>
+              </div>
               <div class="ap-meta" id="ap-meta"></div>
+              <dl class="ap-break" id="ap-break"></dl>
               <div class="ap-tags" id="ap-tags"></div>
-              <p class="muted" style="font-size:13px;margin:auto 0 0">Level, stat ve silah AP’si build’den gelir (takılı silahın seçili derecesi). Bir alanı elle değiştirirsen öyle kalır.</p>
+              <p class="crit-note" id="b-nodata" hidden style="margin:0"></p>
+            </div>
+            <div class="stack" style="gap:16px">
+              <form class="ap-form" id="ap-form" novalidate>
+                <div class="ap-f ap-checks" style="grid-column:1/-1;justify-content:flex-start">
+                  <label class="check" for="ap-wes"><input type="checkbox" id="ap-wes">WES (+5 silah AP)</label>
+                  <label class="check" for="ap-wolf"><input type="checkbox" id="ap-wolf">Wolf (+%20)</label>
+                </div>
+                <div class="ap-f"><label for="ap-xst" id="ap-xst-label">Ek STR (scroll, buff)</label><input id="ap-xst" type="number" min="0" max="999" inputmode="numeric" placeholder="0"></div>
+                <div class="ap-f"><label for="ap-xpc">Ek AP bonusu (%)</label><input id="ap-xpc" type="number" min="0" max="999" inputmode="numeric" placeholder="0"></div>
+              </form>
+              <div>
+                <h3 class="calc-h">Eşya ve takılardan gelen</h3>
+                <div class="feat-list" id="b-feats"></div>
+              </div>
+              <div>
+                <h3 class="calc-h">Direnç <small>INT 100 üstü + eşya</small></h3>
+                <div class="res-grid" id="b-res"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -768,6 +803,8 @@ section[data-tab].on{display:block}
         <div class="s8 panel">
           <div class="panel-h"><h2>Ekipman</h2><span class="sub">Yuvaya tıkla, eşyayı seç, artı seviyesini belirle</span></div>
           <div class="gear" id="b-gear"></div>
+          <h3 class="calc-h" style="margin-top:20px">Cospre <small>Başlık, zırh, eldiven, kanat, dövme, amblem</small></h3>
+          <div class="gear" id="b-cospre"></div>
         </div>
         <div class="s4 stack">
           <div class="panel">
@@ -801,7 +838,7 @@ section[data-tab].on{display:block}
         <div>
           <div class="eyebrow">Katalog</div>
           <h1>Eşyalar</h1>
-          <p>Sınıfa göre eşyalar. Bir eşyaya tıkla: derece derece AP, savunma ve gereken statlar; tek tıkla build’e tak.</p>
+          <p>Sınıfa göre eşyalar. Bir eşyaya tıkla: derece derece AP, savunma, gereken statlar ve bonuslar; tek tıkla build’e tak.</p>
         </div>
         <span class="muted" style="font-size:13px">Kaynak: KO Bugda · 770 eşya</span>
       </div>
@@ -1021,7 +1058,8 @@ section[data-tab].on{display:block}
   }
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const icon = (id, cls = '') => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"/></svg>`;
-  const lower = s => s.toLocaleLowerCase('tr');
+  /* Türkçe küçük harf: "Iron" → "ıron" olur; ı'yı i'ye çevirerek İngilizce eşya adları da aranabilir */
+  const lower = s => s.toLocaleLowerCase('tr').replace(/ı/g, 'i');
   function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
   function rand(seed) { let t = (seed + 0x6D2B79F5) | 0; t = Math.imul(t ^ (t >>> 15), 1 | t); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
 
@@ -1037,7 +1075,8 @@ section[data-tab].on{display:block}
     month: null,
     pf: null,
     levelCap: 80,  /* yönetici ayarı: açılışta 80, sonra 83 */
-    rebCap: 0      /* yönetici ayarı: 83'ten sonra 83+1 ... 83+10 */
+    rebCap: 0,     /* yönetici ayarı: 83'ten sonra 83+1 ... 83+10 */
+    ap: { wes: false, wolf: false, xst: 0, xpc: 0 }  /* AP panelindeki buff seçimleri ve elle eklenenler */
   };
   const REB_MAX = 10;
   const lvText = m => `${m.lv}${m.reb ? `<span class="reb">+${m.reb}</span>` : ''}`;
@@ -1423,26 +1462,32 @@ section[data-tab].on{display:block}
 
   /* ---------- Karakter tasarımı ---------- */
   const RULES = [
-    { k: 'Level başına stat puanı', v: '3', ok: true },
+    { k: 'Level başına stat puanı', v: '3 · 60’tan sonra 5', ok: true },
     { k: 'Reb başına bonus stat', v: '+2', ok: true },
     { k: 'Tek stat sınırı', v: '255', ok: true },
     { k: 'Skill puanı başlangıcı', v: 'Level 10', ok: true },
-    { k: 'Master skill', v: 'Level 60', ok: true },
-    { k: 'Level başına skill puanı', v: '2', ok: false },
+    { k: 'Level başına skill puanı', v: '2 · reb vermez', ok: true },
+    { k: 'Ağaç başına en fazla', v: 'Level kadar · üst skill 80 (Warrior 3. ağaç 83)', ok: true },
+    { k: 'Master skill', v: 'Level 60 · level − 60 puan, en fazla 23', ok: false },
     { k: 'Oluşturmada bonus stat', v: '10', ok: true },
     { k: 'Irk başlangıç statları', v: '8 ırk', ok: true },
-    { k: 'Kurian başlangıç statları', v: 'Porutu ile aynı', ok: false },
-    { k: 'AP formülü ve katsayıları', v: 'KO Bugda', ok: false },
-    { k: 'Eşya verisi', v: 'KO Bugda · 770 eşya', ok: true }
+    { k: 'Kurian başlangıç statları', v: 'Porutu ile aynı (KO Bugda)', ok: true },
+    { k: 'AP, HP, MP, savunma formülü', v: 'KO Bugda gelişmiş', ok: false },
+    { k: 'Eşya verisi', v: 'KO Bugda · 770 eşya', ok: true },
+    { k: 'Takı ve cospre bonusları', v: 'Veri bekleniyor', ok: false }
   ];
-  const STAT_PER_LV = 3, REB_STAT = 2, SKILL_START = 10, SKILL_PER_LV = 2, MASTER_LV = 60, CREATE_BONUS = 10, STAT_CAP = 255;
-  /* Irk başlangıç statları (toplam her ırkta 290). Kurian değerleri Porutu ile aynı varsayıldı: doğrulanacak */
+  const STAT_PER_LV = 3, STAT_PER_LV_60 = 5, REB_STAT = 2, SKILL_START = 10, SKILL_PER_LV = 2, MASTER_LV = 60, MASTER_MAX = 23, CREATE_BONUS = 10, STAT_CAP = 255;
+  /* Bir ağaca konabilecek en fazla skill puanı. Oyun kuralı: ağaç levelini geçemez ("The value of a Skill Point cannot be greater than your level");
+     ağaçların en üst skill'i 80'de (Warrior'ın 3. ağacı 83). Master: level 60'tan sonra her level 1 puan, en fazla 23
+     (sunucu kodu level − 60; KO Bugda level − 59 kullanıyor, doğrulanacak). */
+  const skCap = (b, i) => i === 3 ? (b.lv <= MASTER_LV ? 0 : Math.min(MASTER_MAX, b.lv - MASTER_LV)) : Math.min(b.lv, b.cls === 'war' && i === 2 ? 83 : 80);
+  /* Irk başlangıç statları (toplam her ırkta 290). Kurian = Porutu; KO Bugda'nın sınıf tablosu da aynı değeri kullanıyor */
   const RACES = [
     { id: 'arch', n: 'Arch Tuarek', side: 'karus', cls: ['war'], st: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
     { id: 'tuarek', n: 'Tuarek', side: 'karus', cls: ['rog', 'pri'], st: { str: 60, hp: 60, dex: 70, int: 50, mp: 50 } },
     { id: 'wrinkle', n: 'Wrinkle Tuarek', side: 'karus', cls: ['mag'], st: { str: 50, hp: 50, dex: 70, int: 70, mp: 50 } },
     { id: 'puri', n: 'Puri Tuarek', side: 'karus', cls: ['mag', 'pri'], st: { str: 50, hp: 60, dex: 60, int: 70, mp: 50 } },
-    { id: 'kurian', n: 'Kurian', side: 'karus', cls: ['kur'], st: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 }, check: true },
+    { id: 'kurian', n: 'Kurian', side: 'karus', cls: ['kur'], st: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
     { id: 'barb', n: 'Barbarian', side: 'el-morad', cls: ['war'], st: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
     { id: 'erkek', n: 'El Moradian (erkek)', side: 'el-morad', cls: ['war', 'rog', 'mag', 'pri'], st: { str: 60, hp: 60, dex: 70, int: 50, mp: 50 } },
     { id: 'kadin', n: 'El Moradian (kadın)', side: 'el-morad', cls: ['war', 'rog', 'mag', 'pri'], st: { str: 50, hp: 60, dex: 60, int: 70, mp: 50 } },
@@ -1450,11 +1495,12 @@ section[data-tab].on{display:block}
   ];
   const raceOptions = cls => RACES.filter(r => r.side === state.irk && r.cls.includes(cls));
   const STATS = [['str', 'STR', 'Güç'], ['hp', 'HP', 'Sağlık'], ['dex', 'DEX', 'Çeviklik'], ['int', 'INT', 'Zeka'], ['mp', 'MP', 'Büyü gücü']];
-  const TREES = { war: ['Attack', 'Defense', 'Passion'], rog: ['Archery', 'Assassin', 'Explore'], mag: ['Flame', 'Glacier', 'Lightning'], pri: ['Heal', 'Buff', 'Debuff'], kur: ['1. ağaç', '2. ağaç', '3. ağaç'] };
+  const TREES = { war: ['Attack', 'Defense', 'Passion'], rog: ['Archery', 'Assassin', 'Explore'], mag: ['Flame', 'Glacier', 'Lightning'], pri: ['Heal', 'Buff', 'Debuff'], kur: ['Attack', 'Defense', 'Devil'] };
   const GRADES = { normal: ['Normal', '--rank-member'], set: ['Set', '--c-mag'], unique: ['Unique', '--c-six'], rare: ['Rare', '--c-pri'], draki: ['Draki', '--c-rog'], cospre: ['Cospre', '--c-kur'] };
   const SLOT_TYPES = ['silah', 'ikinci', 'kask', 'zirh', 'pantolon', 'eldiven', 'bot', 'kolye', 'kupe', 'kupe', 'yuzuk', 'yuzuk', 'kemer', 'cospre_kask', 'cospre_zirh', 'cospre_eldiven', 'kanat', 'dovme', 'amblem'];
   /* Eşya kataloğu: design/katalog.json, scripts/katalog_olustur.py ile data/esyalar/kobugda/ verisinden üretilir.
-     Derece satırı: [derece, AP, savunma, gerekli level, STR, HP, DEX, INT, MP, bonus STR, HP, DEX, INT, MP] */
+     Derece satırı: [derece, AP, savunma, gerekli level, gerekli STR, HP, DEX, INT, MP, bonus STR, HP, DEX, INT, MP,
+     sonra FEATS'teki bonuslar (can, mana, savunma, hasar %, element hasarı, direnç ...)] */
   let ITEMS = [], GRADE_ROWS = {}, IMG_DATA = null, catalogState = 'yükleniyor';
   const IMG_BASE = /\/design\//.test(location.pathname) ? '../data/esyalar/kobugda/gorseller/' : 'gorseller/';
   const REQ = [['str', 4, 'STR'], ['hp', 5, 'HP'], ['dex', 6, 'DEX'], ['int', 7, 'INT'], ['mp', 8, 'MP']];
@@ -1466,20 +1512,34 @@ section[data-tab].on{display:block}
   const fits = (it, b, gr) => usableBy(it, b.cls) && reqLevel(it, gr) <= b.lv;
   const buildTotals = b => { const race = RACES.find(r => r.id === b.race); return Object.fromEntries(STATS.map(([k]) => [k, race.st[k] + b.st[k]])); };
   const unmet = (it, gr, b) => { const r = rowAt(it, gr); if (!r) return []; const tot = buildTotals(b); return REQ.filter(([k, idx]) => r[idx] && tot[k] < r[idx]).map(([k, idx, ab]) => `${ab} ${r[idx]} (sende ${tot[k]})`); };
-  const icoHTML = (t, it) => it
+  const icoHTML = (t, it) => it && it.img == null
+    ? `<span class="ico" style="color:var(${GRADES[it.g][1]})"><svg class="ic" aria-hidden="true"><use href="#s-${t.replace('cospre_', '')}"/></svg></span>`
+    : it
     ? `<span class="ico" style="color:var(${GRADES[it.g][1]})"><img src="${IMG_DATA && IMG_DATA[it.img] ? IMG_DATA[it.img] : IMG_BASE + it.img + '.png'}" alt="" width="36" height="36" loading="lazy"></span>`
     : `<span class="ico empty"><svg class="ic" aria-hidden="true"><use href="#s-${t.replace('cospre_', '')}"/></svg></span>`;
   const clsText = it => it.cls.length && it.cls.length < 5 ? it.cls.map(c => CLASSES[c]).join(', ') : 'Tüm sınıflar';
+  /* Derece satırındaki bonus sütunları: [sütun, tablo başlığı, toplamdaki adı, birim] (katalog.json "alanlar" sırası) */
+  const FEATS = [
+    [9, '+STR', 'STR'], [10, '+HP', 'HP stat'], [11, '+DEX', 'DEX'], [12, '+INT', 'INT'], [13, '+MP', 'MP stat'],
+    [14, 'Can', 'Can (HP)'], [15, 'Mana', 'Mana (MP)'], [16, '+Savunma', 'Savunma'], [17, 'Hasar %', 'Hasar', '%'], [18, 'Savunma %', 'Savunma', '%'],
+    [19, 'Ateş hasarı', 'Ateş hasarı'], [20, 'Buz hasarı', 'Buz hasarı'], [21, 'Şimşek hasarı', 'Şimşek hasarı'], [22, 'Zehir hasarı', 'Zehir hasarı'],
+    [23, 'Ateş dir.', 'Ateş direnci'], [24, 'Buz dir.', 'Buz direnci'], [25, 'Şimşek dir.', 'Şimşek direnci'], [26, 'Zehir dir.', 'Zehir direnci'], [27, 'Karanlık dir.', 'Karanlık direnci'], [28, 'Büyü dir.', 'Büyü direnci'],
+    [29, 'HP yenileme', 'HP yenileme'], [30, 'MP yenileme', 'MP yenileme'], [31, 'Kaçınma %', 'Kaçınma', '%'], [32, 'Yansıtma %', 'Fiziksel yansıtma', '%'],
+    [33, 'Kılıç sav.', 'Kılıca karşı savunma'], [34, 'Hançer sav.', 'Hançere karşı savunma'], [35, 'Topuz sav.', 'Topuza karşı savunma'], [36, 'Balta sav.', 'Baltaya karşı savunma'],
+    [37, 'Mızrak sav.', 'Mızrağa karşı savunma'], [38, 'Ok sav.', 'Oka karşı savunma'], [39, 'Jamadar sav.', 'Jamadara karşı savunma']
+  ];
+  const featText = (r, max = 3) => r ? FEATS.filter(([i]) => r[i]).slice(0, max).map(([i, , l, u]) => `+${r[i]}${u || ''} ${l}`).join(' · ') : '';
   const statText = (it, gr) => { const r = rowAt(it, gr); if (!r) return ''; return [r[1] ? `AP ${r[1]}` : '', r[2] ? `Savunma ${r[2]}` : '', r[3] ? `Lv ${r[3]}` : ''].filter(Boolean).join(' · '); };
   const rangeText = it => {
-    const g = gradesOf(it); if (!g.length) return 'Derece verisi yok';
+    const g = gradesOf(it); if (!g.length) return 'Bonus verisi yok';
     const a = g[0], z = g[g.length - 1];
     const part = (i, lab) => a[i] || z[i] ? `${lab} ${a[i]}${z[i] !== a[i] ? '–' + z[i] : ''}` : '';
     return [part(1, 'AP'), part(2, 'Savunma'), a[3] ? `Lv ${a[3]}` : ''].filter(Boolean).join(' · ');
   };
   fetch('katalog.json').then(r => r.ok ? r.json() : Promise.reject(new Error(String(r.status)))).then(d => {
-    ITEMS = d.esyalar.map(x => ({ id: 'kb' + x.id, kid: String(x.id), n: x.n, k: x.k, slots: x.s, cls: x.c, img: x.i, g: x.g }));
-    GRADE_ROWS = d.dereceler;
+    ITEMS = d.esyalar.map(x => ({ id: 'kb' + x.id, kid: String(x.id), n: x.n, k: x.k, slots: x.s, cls: x.c, img: x.i, g: x.g, ef: x.ef || '' }));
+    /* Satır sonundaki sıfırlar dosyada atıldı; hesaplar sabit uzunluk bekler */
+    GRADE_ROWS = Object.fromEntries(Object.entries(d.dereceler).map(([k, rows]) => [k, rows.map(r => r.concat(Array(Math.max(0, NF - r.length)).fill(0)))]));
     catalogState = 'hazır';
     /* Yayınlanan sürümde görseller tek dosyada (gorseller.json); repoda ayrı PNG'ler kullanılır */
     fetch('gorseller.json').then(r => r.ok ? r.json() : null).then(m => { if (m) { IMG_DATA = m; if (state.build) renderBuild(); if (!document.getElementById('picker').hidden) renderPicker(); } }).catch(() => {});
@@ -1500,20 +1560,21 @@ section[data-tab].on{display:block}
     box.innerHTML = list.slice(0, 250).map(it => `
       <button type="button" class="pk-item" role="option" data-item="${it.id}" aria-selected="${it.id === cur}">
         ${icoHTML(t, it)}
-        <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${esc(it.k)} · ${clsText(it)} · ${rangeText(it)}</span></span>
+        <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${esc(it.k)} · ${clsText(it)} · ${rangeText(it)}${gradesOf(it).length && featText(gradesOf(it)[0], 2) ? ` · <span style="color:var(--good)">${featText(gradesOf(it)[0], 2)}</span>` : ''}</span></span>
         <span class="grade" style="color:var(${GRADES[it.g][1]})">${GRADES[it.g][0]}</span>
       </button>`).join('') || '<div class="empty">Bu yuvaya uygun eşya yok. Filtreyi kapatmayı dene.</div>';
   }
   /* ---------- Eşyalar (sınıfa göre katalog) ---------- */
   const SLOT_GROUPS = [
     ['silah', 'Silah', ['silah']],
-    ['ikinci', 'İkinci el ve kalkan', ['ikinci']],
+    ['ikinci', 'Kalkan', ['ikinci']],
     ['zirh', 'Zırh parçaları', ['kask', 'zirh', 'pantolon', 'eldiven', 'bot']],
     ['taki', 'Takılar', ['kolye', 'kupe', 'yuzuk', 'kemer']],
-    ['diger', 'Cospre ve diğer', ['cospre_kask', 'cospre_zirh', 'cospre_eldiven', 'kanat', 'dovme', 'amblem']]
+    ['cospre', 'Cospre', ['cospre_kask', 'cospre_zirh', 'cospre_eldiven', 'kanat', 'dovme', 'amblem']]
   ];
+  const SLOT_NAME = { kask: 'Kask', zirh: 'Zırh', pantolon: 'Pantolon', eldiven: 'Eldiven', bot: 'Bot', kolye: 'Kolye', kupe: 'Küpe', yuzuk: 'Yüzük', kemer: 'Kemer', cospre_kask: 'Cospre başlık', cospre_zirh: 'Cospre zırh', cospre_eldiven: 'Cospre eldiven', kanat: 'Kanat', dovme: 'Dövme', amblem: 'Amblem' };
   const groupOf = it => (SLOT_GROUPS.find(([, , sl]) => it.slots.some(x => sl.includes(x))) || SLOT_GROUPS[4])[0];
-  const GT_COLS = [[1, 'AP'], [2, 'Savunma'], [3, 'Level'], [4, 'STR'], [5, 'HP'], [6, 'DEX'], [7, 'INT'], [8, 'MP'], [9, '+STR'], [10, '+HP'], [11, '+DEX'], [12, '+INT'], [13, '+MP']];
+  const GT_COLS = [[1, 'AP'], [2, 'Savunma'], [3, 'Level'], [4, 'Gerekli STR'], [5, 'Gerekli HP'], [6, 'Gerekli DEX'], [7, 'Gerekli INT'], [8, 'Gerekli MP'], ...FEATS.map(([i, l]) => [i, l])];
   function renderItems() {
     const host = document.getElementById('ic-list');
     if (!host) return;
@@ -1529,14 +1590,18 @@ section[data-tab].on{display:block}
     if (catalogState !== 'hazır') { host.innerHTML = `<div class="panel empty">${catalogState === 'hata' ? 'Eşya kataloğu yüklenemedi.' : 'Eşya kataloğu yükleniyor…'}</div>`; return; }
     const q = lower(ic.q.trim());
     const list = ITEMS.filter(it => usableBy(it, ic.cls) && (!ic.grade || it.g === ic.grade) && (!q || lower(it.n).includes(q) || lower(it.k).includes(q)) && (!ic.grp || groupOf(it) === ic.grp));
-    const html = SLOT_GROUPS.map(([k, l]) => {
-      const items = list.filter(it => groupOf(it) === k).sort((a, b) => a.k.localeCompare(b.k) || reqLevel(b) - reqLevel(a) || a.n.localeCompare(b.n));
-      if (!items.length) return '';
-      return `<div class="ic-group"><h2><b>${l}</b> · ${items.length}</h2><div class="items-grid">${items.map(it => `
+    const card = it => `
         <button type="button" class="it-card" data-icitem="${it.id}">
           ${icoHTML(it.slots[0], it)}
-          <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${esc(it.k)} · ${rangeText(it)}</span><span class="gr" style="color:var(${GRADES[it.g][1]})">${GRADES[it.g][0]}</span></span>
-        </button>`).join('')}</div></div>`;
+          <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${esc(it.k)} · ${rangeText(it)}</span>${gradesOf(it).length ? `<span class="ft">${featText(gradesOf(it)[0], 2)}</span>` : ''}<span class="gr" style="color:var(${GRADES[it.g][1]})">${GRADES[it.g][0]}</span></span>
+        </button>`;
+    const html = SLOT_GROUPS.map(([k, l, sl]) => {
+      const items = list.filter(it => groupOf(it) === k).sort((a, b) => a.k.localeCompare(b.k) || reqLevel(b) - reqLevel(a) || a.n.localeCompare(b.n));
+      if (!items.length) return '';
+      /* Birden çok yuvalı gruplar (zırh, takı, cospre) yuva türüne göre alt bölümlere ayrılır */
+      const body = sl.length === 1 ? `<div class="items-grid">${items.map(card).join('')}</div>`
+        : `<div class="ic-subs">${sl.map(t => { const sub = items.filter(it => it.slots[0] === t); return sub.length ? `<div><h3 class="ic-sub">${SLOT_NAME[t]} · ${sub.length}</h3><div class="items-grid">${sub.map(card).join('')}</div></div>` : ''; }).join('')}</div>`;
+      return `<div class="ic-group"><h2><b>${l}</b> · ${items.length}</h2>${body}</div>`;
     }).join('');
     host.innerHTML = html || '<div class="panel empty">Bu filtrelerle eşya yok.</div>';
   }
@@ -1557,12 +1622,12 @@ section[data-tab].on{display:block}
       <div class="id-head">${icoHTML(it.slots[0], it)}<div>
         <div class="gr" style="font:600 13px/1.3 var(--font-data);color:var(${GRADES[it.g][1]})">${GRADES[it.g][0]}</div>
         <div style="color:var(--fg-2)">${esc(it.k)} · ${clsText(it)}</div>
-        <div class="muted" style="font-size:13px">${rangeText(it)}</div></div></div>
+        <div class="muted" style="font-size:13px">${rangeText(it)}</div>${it.ef ? `<div style="font-size:13.5px;color:var(--good);margin-top:2px">Özel etki · ${esc(it.ef)}</div>` : ''}</div></div>
       <div class="id-actions">${slotChoices(it).map(i => `<button type="button" class="btn ${canUse ? 'primary' : ''}" data-equip="${i}" ${canUse ? '' : 'disabled'}>Tak: ${SLOTS[i]}</button>`).join('')}</div>
       ${b && !canUse ? `<p class="crit-note" style="margin:0 0 12px">Build’inin sınıfı ${CLASSES[b.cls]}; bu eşya ${clsText(it)} için. Takmak için Karakter tasarımında sınıfı değiştir.</p>` : ''}
       ${rows.length ? `<div class="table-wrap" style="margin-inline:0;padding-inline:0"><table class="gt"><thead><tr><th>Derece</th>${cols.map(([, l]) => `<th>${l}</th>`).join('')}</tr></thead>
         <tbody>${rows.map(r => `<tr><td>+${r[0]}</td>${cols.map(([i]) => `<td>${r[i] || '—'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
-        : '<p class="muted">Bu eşyanın derece verisi yok (KO Bugda’da da yok).</p>'}`;
+        : '<p class="muted">Bu eşyanın bonus verisi henüz katalogda yok; takarsan hesaba girmez.</p>'}`;
     document.getElementById('item-detail').hidden = false;
     document.getElementById('id-close').focus();
   }
@@ -1586,90 +1651,117 @@ section[data-tab].on{display:block}
   }
   /* AP: katsayı tablosu ve formül KO Bugda temel hesaplayıcısından (kaynak gösterilir, oyunla doğrulanacak).
      Kademe: level < 10 → 0, 10–59 → 1, 60+ → 2 */
+  /* KO Bugda gelişmiş hesaplayıcının katsayıları: [level 1–9, 10–59, 60–83] */
   const AP_COEF = {
-    ROGUE: [{ dagger: .00015, bow: .00015 }, { dagger: .00025, bow: .00035 }, { dagger: .00032, bow: .00038 }],
-    WARRIOR: [{ axe: .00013 }, { axe: .00025 }, { axe: .00032 }],
-    PRIEST: [{ club: .00005, sword: 0 }, { club: .0002, sword: 0 }, { club: .00025, sword: .00025 }],
-    KURIAN: [{ sword: .0001 }, { sword: .0002 }, { sword: .0002 }],
-    MAGE: [{ staff: .0001 }, { staff: .00015 }, { staff: .00015 }]
+    WARRIOR: { axe: [.00013, .00025, .00032] },
+    ROGUE: { dagger: [.00015, .00025, .00032], bow: [.00015, .00035, .00038], crossbow: [.00015, .00035, .00038] },
+    PRIEST: { club: [.00005, .0002, .00025], sword: [0, 0, .00025] },
+    MAGE: { staff: [.0001, .00015, .00015] },
+    KURIAN: { sword: [.0001, .0002, .0002] }
   };
-  const AP_TYPES = {
-    ASSASSIN: { l: 'Assassin', stat: 'DEX', cc: 'ROGUE', w: 'dagger', left: true, base: false },
-    ARCHER: { l: 'Archer', stat: 'DEX', cc: 'ROGUE', w: 'bow', left: false, base: false, subs: [['bow', 'Yay'], ['crossbow', 'Arbalet']] },
-    WARRIOR: { l: 'Warrior', stat: 'STR', cc: 'WARRIOR', w: 'axe', left: true, base: true, subs: [['onehanded', 'Tek elli'], ['twohanded', 'Çift elli']] },
-    PRIEST: { l: 'Priest', stat: 'STR', cc: 'PRIEST', w: 'club', left: false, base: true, subs: [['str', 'STR Battle Priest'], ['int', 'INT Battle Priest']] },
-    KURIAN: { l: 'Kurian', stat: 'STR', cc: 'KURIAN', w: 'sword', left: false, base: true },
-    MAGE: { l: 'Mage', stat: 'STR', cc: 'MAGE', w: 'staff', left: false, base: true }
-  };
-  const AP_DEFAULT = { war: 'WARRIOR', rog: 'ASSASSIN', mag: 'MAGE', pri: 'PRIEST', kur: 'KURIAN' };
-  function apCalc(a, level) {
-    const T = AP_TYPES[a.type];
-    const lv = Math.min(83, Math.max(1, level || 1));
-    const tier = (lv >= 10 ? 1 : 0) + (lv >= 60 ? 1 : 0);
-    const row = AP_COEF[T.cc][tier];
-    const k = row[T.w] ?? Object.values(row)[0] ?? 0;
-    const leftOn = T.left && !(a.type === 'WARRIOR' && a.sub === 'twohanded');
-    let right = a.r || 0, left = a.l || 0;
-    let baseAP = 0;
-    if (T.base && a.st > 150) { baseAP = a.st - 150; if (a.st === 160) baseAP--; }
-    const total = (a.st || 0) + (a.bo || 0);
-    if (a.wes) { right += 5; if (a.type === 'ASSASSIN' && left > 0) left += 3; }
-    let weapon = right;
-    if (leftOn) weapon += Math.floor(0.5 * left);
-    if (weapon < 3) weapon = 3;
-    const pct = (a.pc || 0) + (a.wolf ? 20 : 0);
-    let ap = Math.floor((pct + 100) / 100 * Math.floor(0.005 * weapon * (total + 40) + k * weapon * lv * total + 3)) + baseAP;
-    if (a.wes) ap += 1;
-    return { ap: Number.isFinite(ap) ? ap : 0, k, tier, leftOn, baseAP, total, pct, lv, statLabel: a.type === 'PRIEST' && a.sub === 'int' ? 'INT' : T.stat };
+  const HP_COEF = { WARRIOR: [.0015, .003, .003], ROGUE: [.0005, .0015, .0015], PRIEST: [.001, .0012, .0015], MAGE: [.0004, .0008, .001], KURIAN: [.0015, .003, .002] };
+  const MP_COEF = { WARRIOR: [.0015, .003, .003], ROGUE: [.0015, .003, .003], PRIEST: [.0015, .0015, .0015], MAGE: [.0015, .0015, .0018], KURIAN: [.0005, .0005, .0032] };
+  const CC = { war: 'WARRIOR', rog: 'ROGUE', mag: 'MAGE', pri: 'PRIEST', kur: 'KURIAN' };
+  const W_LABEL = { axe: 'Silah', dagger: 'Hançer', bow: 'Yay', crossbow: 'Arbalet', club: 'Topuz', sword: 'Silah', staff: 'Asa' };
+  const tierOf = lv => lv >= 60 ? 2 : lv >= 10 ? 1 : 0;
+  function apCalc(o) {
+    const t = AP_COEF[o.cc] && AP_COEF[o.cc][o.w];
+    if (!t) return 3;
+    const k = t[tierOf(o.lv)], n = (o.pct + 100) / 100;
+    let i = o.weapon + (o.wes ? 5 : 0);
+    if (o.left > 0) i += Math.floor(.5 * (o.left + (o.wes && o.cc === 'ROGUE' ? 3 : 0)));
+    if (i < 3) i = 3;
+    let ap = Math.floor(Math.floor(.005 * i * (o.stat + 40) + k * i * o.lv * o.stat + 3) * n) + o.baseAP;
+    if (o.wes) ap += 1;
+    return Math.max(ap, 3);
   }
   const SLOTS = ['Silah', 'İkinci el', 'Kask', 'Zırh', 'Pantolon', 'Eldiven', 'Bot', 'Kolye', 'Küpe 1', 'Küpe 2', 'Yüzük 1', 'Yüzük 2', 'Kemer', 'Cospre başlık', 'Cospre zırh', 'Cospre eldiven', 'Kanat', 'Dövme', 'Amblem'];
+  const NF = 40, COSPRE_FROM = 13;  /* SLOTS içinde cospre yuvalarının başladığı sıra */
   const newBuild = m => ({ race: '', cls: m.cls, lv: Math.max(1, m.lv || 1), reb: m.reb || 0, st: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, sk: [0, 0, 0, 0], gear: {} });
   const pools = b => {
-    const stTot = CREATE_BONUS + STAT_PER_LV * (b.lv - 1) + REB_STAT * (b.lv === 83 ? b.reb : 0);
+    const stTot = CREATE_BONUS + STAT_PER_LV * (Math.min(b.lv, MASTER_LV) - 1) + STAT_PER_LV_60 * Math.max(0, b.lv - MASTER_LV) + REB_STAT * (b.lv === 83 ? b.reb : 0);
     const skTot = b.lv >= SKILL_START ? SKILL_PER_LV * (b.lv - SKILL_START + 1) : 0;
     const stUsed = Object.values(b.st).reduce((a, x) => a + x, 0);
     const skUsed = b.sk.reduce((a, x) => a + x, 0);
     return { stTot, skTot, stUsed, skUsed, stLeft: stTot - stUsed, skLeft: skTot - skUsed };
   };
-  function apSyncForm() {
-    const a = state.ap, T = AP_TYPES[a.type];
-    const typeSel = document.getElementById('ap-type');
-    if (!typeSel.options.length) typeSel.innerHTML = Object.entries(AP_TYPES).map(([k, v]) => `<option value="${k}">${v.l}</option>`).join('');
-    typeSel.value = a.type;
-    document.getElementById('ap-sub-wrap').hidden = !T.subs;
-    if (T.subs) {
-      const sub = document.getElementById('ap-sub');
-      sub.innerHTML = T.subs.map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
-      sub.value = a.sub;
-      document.getElementById('ap-sub-label').textContent = a.type === 'PRIEST' ? 'Battle Priest tipi' : 'Silah tipi';
-    }
-    document.getElementById('ap-r-label').textContent = a.type === 'ARCHER' ? 'Silah AP' : 'Sağ el silah AP';
-    document.getElementById('ap-l-wrap').hidden = !(T.left && !(a.type === 'WARRIOR' && a.sub === 'twohanded'));
-    const sl = a.type === 'PRIEST' && a.sub === 'int' ? 'INT' : T.stat;
-    document.getElementById('ap-st-label').textContent = `${sl} (statlarda)`;
-    document.getElementById('ap-bo-label').textContent = `${sl} (eşya bonusu)`;
+  /* Takılı eşyaların seçili derecedeki satırlarının toplamı. apFlat: silah dışı eşyaların AP'si */
+  function gearSum(b) {
+    const s = Array(NF).fill(0);
+    let apFlat = 0, n = 0;
+    SLOT_TYPES.forEach((t, i) => {
+      const g = b.gear[i], it = g && itemById(g.id), r = it && rowAt(it, g.up);
+      if (!it) return;
+      n++;
+      if (!r) return;
+      for (let k = 1; k < NF; k++) if (k < 3 || k > 8) s[k] += r[k] || 0;
+      if (i > 1) apFlat += r[1] || 0;
+    });
+    return { s, apFlat, n };
   }
-  function apAutoStat() {
-    if (!state.ap) return;
-    const b = state.build, race = RACES.find(r => r.id === b.race);
-    if (!state.ap.stManual) {
-      const key = { STR: 'str', DEX: 'dex', INT: 'int' }[state.ap.type === 'PRIEST' && state.ap.sub === 'int' ? 'INT' : AP_TYPES[state.ap.type].stat];
-      state.ap.st = race.st[key] + b.st[key];
-      document.getElementById('ap-st').value = state.ap.st;
-    }
-    /* Takılı silahların seçili derecedeki AP'si */
-    const weaponAP = slot => { const g = b.gear[slot], it = g && itemById(g.id), r = it && rowAt(it, g.up); return r && r[1] ? r[1] : 0; };
-    if (!state.ap.rManual) { state.ap.r = weaponAP(0); document.getElementById('ap-r').value = state.ap.r || ''; }
-    if (!state.ap.lManual) { state.ap.l = weaponAP(1); document.getElementById('ap-l').value = state.ap.l || ''; }
+  /* KO Bugda gelişmiş hesaplayıcının mantığı: hesap tipi sınıftan ve takılı silahtan çıkar */
+  function derived(b) {
+    const G = gearSum(b), ch = buildTotals(b), x = state.ap;
+    const tot = Object.fromEntries(STATS.map(([k], j) => [k, ch[k] + G.s[9 + j]]));
+    const cc = CC[b.cls], lv = Math.min(b.lv, 83);
+    const W = i => { const g = b.gear[i], it = g && itemById(g.id); return it ? { it, r: rowAt(it, g.up) } : null; };
+    const R = W(0), L = W(1);
+    const rAP = R && R.r ? R.r[1] : 0, lAP = L && L.r && L.it.k !== 'Shield' ? L.r[1] : 0;
+    let w = 'sword', left = 0;
+    if (cc === 'WARRIOR') { w = 'axe'; left = lAP; }
+    else if (cc === 'ROGUE') { if (R && (R.it.k === 'Bow' || R.it.k === 'Crossbow')) w = R.it.k === 'Bow' ? 'bow' : 'crossbow'; else { w = 'dagger'; left = lAP; } }
+    else if (cc === 'PRIEST') w = R && R.it.k.startsWith('Club') ? 'club' : 'sword';
+    else if (cc === 'MAGE') w = 'staff';
+    const intPri = cc === 'PRIEST' && !!R && R.it.k === 'Priest Weapon / Mace';
+    const sk = cc === 'ROGUE' ? 'dex' : intPri ? 'int' : 'str';
+    const stat = tot[sk] + x.xst;
+    let baseAP = 0;
+    if (cc !== 'ROGUE') { const c = intPri ? ch.int : ch.str; if (c > 150) baseAP = c - 150 - (c === 160 ? 1 : 0); }
+    const pct = G.s[17] + (x.wolf ? 20 : 0) + x.xpc;
+    const ap = apCalc({ cc, w, lv, weapon: rAP, left, stat, baseAP: baseAP + G.apFlat, pct, wes: x.wes });
+    const hk = HP_COEF[cc][tierOf(lv)], mk = MP_COEF[cc][tierOf(lv)], h = tot.hp;
+    const hp = Math.min(14000, G.s[14] + Math.floor(hk * lv * lv * h + lv * h * .1 + Math.floor(h / 5)) + 20);
+    let mp;
+    if (cc === 'MAGE' || cc === 'PRIEST') { const m = tot.int + 30; mp = Math.floor(mk * lv * lv * m + .1 * lv * 2 * m + Math.floor(m / 5)) + 20; }
+    else mp = Math.floor(mk * lv * lv * h + .1 * lv * h + Math.floor(h / 5));
+    mp += G.s[15];
+    let ac = lv + (cc !== 'KURIAN' && ch.hp > 100 ? ch.hp - 100 : 0) + G.s[2] + G.s[16];
+    if (cc === 'KURIAN') ac = Math.floor(.8 * ac);
+    if (G.s[18] > 0) ac = Math.floor(ac * (G.s[18] + 100) / 100);
+    const resBase = tot.int > 101 ? Math.floor((tot.int - 100) / 2) : 0;
+    return { G, ch, tot, cc, lv, w, rAP, left, stat, sk, baseAP, pct, ap, hp, mp, ac, resBase, k: AP_COEF[cc][w][tierOf(lv)] };
   }
-  function apRender() {
-    const b = state.build, res = apCalc(state.ap, b.lv), T = AP_TYPES[state.ap.type];
-    document.getElementById('ap-val').textContent = res.ap;
-    document.getElementById('ap-meta').textContent = `${T.l} · Lv ${b.lv === 83 && b.reb ? '83+' + b.reb : b.lv} · katsayı ${res.k} · toplam ${res.statLabel} ${res.total}${res.pct ? ` · +%${res.pct}` : ''}`;
+  const RESISTS = [[23, 'Ateş'], [24, 'Buz'], [25, 'Şimşek'], [26, 'Zehir'], [27, 'Karanlık'], [28, 'Büyü']];
+  function renderCalc() {
+    const b = state.build, D = derived(b), x = state.ap, SK = { str: 'STR', dex: 'DEX', int: 'INT' }[D.sk];
+    const lvLabel = b.lv === 83 && b.reb ? '83+' + b.reb : b.lv;
+    document.getElementById('ap-val').textContent = D.ap;
+    document.getElementById('cv-ac').textContent = D.ac;
+    document.getElementById('cv-hp').textContent = D.hp;
+    document.getElementById('cv-mp').textContent = D.mp;
+    document.getElementById('ap-meta').textContent = `${CLASSES[b.cls]} · ${W_LABEL[D.w]}${D.cc === 'PRIEST' ? (D.sk === 'int' ? ' · INT Battle Priest' : ' · STR Battle Priest') : ''} · Lv ${lvLabel} · katsayı ${D.k}`;
+    const item = n => n ? ` <small>+${n} eşya</small>` : '';
+    const rows = [
+      ['Silah AP', D.rAP ? `${D.rAP}${D.left ? ` <small>+ sol el ${D.left} (yarısı)</small>` : ''}` : '<small>Silah takılı değil</small>'],
+      [`Toplam ${SK}`, `${D.stat}${item(D.G.s[{ str: 9, dex: 11, int: 12 }[D.sk]])}${x.xst ? ` <small>+${x.xst} ek</small>` : ''}`],
+      ['Base AP', D.baseAP ? `+${D.baseAP} <small>(${SK} 150 üstü)</small>` : '<small>yok</small>'],
+      ['Takı ve zırhtan AP', D.G.apFlat ? `+${D.G.apFlat}` : '<small>yok</small>'],
+      ['AP bonusu', D.pct ? `+%${D.pct}${D.G.s[17] ? ` <small>eşya %${D.G.s[17]}</small>` : ''}` : '<small>yok</small>']
+    ];
+    document.getElementById('ap-break').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
     document.getElementById('ap-tags').innerHTML =
-      (state.ap.wes ? '<span class="tag official">WES +5 AP</span>' : '') +
-      (state.ap.wolf ? '<span class="tag official">Wolf +%20</span>' : '') +
-      (res.baseAP > 0 ? `<span class="tag official">Base AP +${res.baseAP}</span>` : '');
+      (x.wes ? '<span class="tag official">WES +5 AP</span>' : '') +
+      (x.wolf ? '<span class="tag official">Wolf +%20</span>' : '');
+    document.getElementById('ap-xst-label').textContent = `Ek ${SK} (scroll, buff)`;
+    const effects = SLOT_TYPES.map((t, i) => b.gear[i] && itemById(b.gear[i].id)).filter(it => it && it.ef).map(it => `<span class="feat" title="${esc(it.n)}"><b>Etki</b>${esc(it.ef)}</span>`);
+    const feats = FEATS.filter(([i]) => D.G.s[i]).map(([i, , l, u]) => `<span class="feat"><b>+${D.G.s[i]}${u || ''}</b>${l}</span>`).concat(effects);
+    document.getElementById('b-feats').innerHTML = feats.join('') ||
+      `<p class="muted" style="margin:0;font-size:14px">${D.G.n ? 'Takılı eşyaların bu derecede bonusu yok.' : 'Eşya takınca bonuslar burada toplanır.'}</p>`;
+    document.getElementById('b-res').innerHTML = RESISTS.map(([i, l]) => `<div><span>${l}</span><b class="num">${D.resBase + D.G.s[i]}</b>${D.G.s[i] ? `<small>+${D.G.s[i]} eşya</small>` : ''}</div>`).join('');
+    const miss = SLOT_TYPES.map((t, i) => b.gear[i] && itemById(b.gear[i].id)).filter(it => it && !gradesOf(it).length);
+    const mn = document.getElementById('b-nodata');
+    mn.hidden = !miss.length;
+    mn.textContent = `Bonus verisi olmayan eşya: ${miss.map(it => it.n).join(', ')}. Bu eşyaların katkısı hesaba girmedi.`;
   }
   function renderBuild() {
     const m = me();
@@ -1677,7 +1769,6 @@ section[data-tab].on{display:block}
     const b = state.build;
     if (!raceOptions(b.cls).some(r => r.id === b.race)) b.race = raceOptions(b.cls)[0].id;
     if (b.lv < 83) b.reb = 0;
-    if (b.lv < MASTER_LV) b.sk[3] = 0;
     const P = pools(b);
     const sel = document.getElementById('b-cls');
     sel.innerHTML = Object.entries(CLASSES).map(([k, l]) => `<option value="${k}" ${k === b.cls ? 'selected' : ''}>${l}</option>`).join('');
@@ -1695,55 +1786,53 @@ section[data-tab].on{display:block}
     document.getElementById('b-race').innerHTML = raceOptions(b.cls).map(r => `<option value="${r.id}" ${r.id === b.race ? 'selected' : ''}>${r.n}</option>`).join('');
     document.getElementById('b-st-sub').textContent = `${race.n} · Level ${lvLabel} · ${P.stUsed} puan dağıtıldı`;
     const cap = STAT_CAP + REB_STAT * (b.lv === 83 ? b.reb : 0);
-    document.getElementById('b-stats').innerHTML = STATS.map(([k, ab, nm]) => {
-      const base = race.st[k], add = b.st[k], total = base + add;
+    const GS = gearSum(b).s;
+    document.getElementById('b-stats').innerHTML = STATS.map(([k, ab, nm], j) => {
+      const base = race.st[k], add = b.st[k], own = base + add, item = GS[9 + j], total = own + item;
+      const w = v => Math.max(0, Math.min(v, STAT_CAP)) / STAT_CAP * 100;
       return `<div class="b-row">
         <div class="nm"><b>${ab}</b><span>${nm}</span></div>
-        <div class="b-meter" role="img" aria-label="${ab}: başlangıç ${base}, eklenen ${add}, toplam ${total}"><i class="base" style="width:${base / STAT_CAP * 100}%"></i><i class="add" style="width:${Math.min(add, STAT_CAP - base) / STAT_CAP * 100}%"></i></div>
-        <div class="b-ctl"><button type="button" data-st="${k}" data-d="-1" aria-label="${ab} azalt" ${add ? '' : 'disabled'}>−</button><output class="num" title="${base} + ${add}">${total}<small>${base}+${add}</small></output><button type="button" data-st="${k}" data-d="1" aria-label="${ab} artır" ${P.stLeft > 0 && total < cap ? '' : 'disabled'}>+</button></div>
+        <div class="b-meter" role="img" aria-label="${ab}: başlangıç ${base}, eklenen ${add}, eşyadan ${item}, toplam ${total}"><i class="base" style="width:${w(base)}%"></i><i class="add" style="width:${w(Math.min(add, STAT_CAP - base))}%"></i><i class="item" style="width:${w(Math.min(item, STAT_CAP - own))}%"></i></div>
+        <div class="b-ctl"><button type="button" data-st="${k}" data-d="-1" aria-label="${ab} azalt" ${add ? '' : 'disabled'}>−</button><output class="num" title="${base} + ${add}${item ? ` + ${item} eşya` : ''}">${total}<small>${base}+${add}${item ? `<b>+${item}</b>` : ''}</small></output><button type="button" data-st="${k}" data-d="1" aria-label="${ab} artır" ${P.stLeft > 0 && own < cap ? '' : 'disabled'}>+</button></div>
       </div>`;
     }).join('');
     const names = [...TREES[b.cls], 'Master'];
     const maxSk = Math.max(1, ...b.sk);
     document.getElementById('b-sk-sub').textContent = `${P.skUsed} puan dağıtıldı`;
+    const overTrees = [];
     document.getElementById('b-skills').innerHTML = names.map((n, i) => {
-      const lock = i === 3 && b.lv < MASTER_LV;
+      const lock = i === 3 && b.lv < MASTER_LV, cap = skCap(b, i), over = b.sk[i] > cap;
+      if (over) overTrees.push(`${n} en fazla ${cap}`);
       return `<div class="b-row ${lock ? 'locked' : ''}">
-        <div class="nm"><b>${n}</b><span>${i === 3 ? (lock ? 'Level 60’ta açılır' : 'Master') : `${i + 1}. ağaç`}</span></div>
+        <div class="nm"><b>${n}</b><span>${i === 3 ? (lock ? 'Level 60’ta açılır' : `Master · en fazla ${cap}`) : `${i + 1}. ağaç · en fazla ${cap}`}</span></div>
         <div class="meter" aria-hidden="true"><i style="width:${b.sk[i] / maxSk * 100}%"></i></div>
-        <div class="b-ctl"><button type="button" data-sk="${i}" data-d="-1" aria-label="${n} azalt" ${b.sk[i] && !lock ? '' : 'disabled'}>−</button><output class="num">${b.sk[i]}</output><button type="button" data-sk="${i}" data-d="1" aria-label="${n} artır" ${P.skLeft > 0 && !lock ? '' : 'disabled'}>+</button></div>
+        <div class="b-ctl"><button type="button" data-sk="${i}" data-d="-1" aria-label="${n} azalt" ${b.sk[i] ? '' : 'disabled'}>−</button><output class="num" ${over ? 'style="color:var(--crit)"' : ''}>${b.sk[i]}</output><button type="button" data-sk="${i}" data-d="1" aria-label="${n} artır" ${P.skLeft > 0 && b.sk[i] < cap ? '' : 'disabled'}>+</button></div>
       </div>`;
     }).join('');
-    document.getElementById('b-sk-note').textContent = b.cls === 'kur'
-      ? `${CLASSES.kur} ağaç adları kural tablosuna girilecek. Skill puanı level 10’da başlar.`
-      : 'Skill puanı level 10’da başlar; master ağacı level 60’ta açılır.';
-    document.getElementById('b-gear').innerHTML = SLOTS.map((sl, i) => {
+    document.getElementById('b-sk-note').textContent = 'Skill puanı level 10’da başlar, her level 2 puan (reb puan vermez). Bir ağaca levelinden fazla puan konamaz; master ağacına level 60’tan sonra her level 1 puan, en fazla 23.';
+    const slotHTML = (sl, i) => {
       const g = b.gear[i] || {}, it = g.id && itemById(g.id);
       const grades = it ? gradesOf(it) : [];
       const bad = it && !fits(it, b, g.up);
       const miss = it ? unmet(it, g.up, b) : [];
-      const info = it ? (bad ? 'Sınıfına ya da levelına uygun değil' : miss.length ? `Gerekli: ${miss.join(', ')}` : [GRADES[it.g][0], statText(it, g.up) || esc(it.k)].join(' · ')) : '';
+      const info = it ? (bad ? 'Sınıfına ya da levelına uygun değil' : miss.length ? `Gerekli: ${miss.join(', ')}` : [GRADES[it.g][0], statText(it, g.up) || esc(it.k), featText(rowAt(it, g.up), 2)].filter(Boolean).join(' · ')) : '';
       return `<div class="gear-slot">
         <button type="button" class="slot-btn" data-pick="${i}" aria-label="${sl}: ${it ? esc(it.n) : 'boş'}. Eşya seç">
           ${icoHTML(SLOT_TYPES[i], it)}
           <span class="sl"><small>${sl}</small><b>${it ? esc(it.n) : 'Seç'}</b>${it ? `<em class="${bad || miss.length ? 'bad' : ''}">${info}</em>` : ''}</span>
         </button>
-        <select data-gup="${i}" aria-label="${sl} derecesi" ${grades.length ? '' : 'disabled'}>${grades.length ? grades.map(r => `<option value="${r[0]}" ${r[0] === g.up ? 'selected' : ''}>+${r[0]}</option>`).join('') : '<option>—</option>'}</select>
+        <select data-gup="${i}" aria-label="${sl} derecesi" ${grades.length > 1 ? '' : 'disabled'}>${grades.length ? grades.map(r => `<option value="${r[0]}" ${r[0] === g.up ? 'selected' : ''}>+${r[0]}</option>`).join('') : '<option>—</option>'}</select>
       </div>`;
-    }).join('');
+    };
+    document.getElementById('b-gear').innerHTML = SLOTS.slice(0, COSPRE_FROM).map(slotHTML).join('');
+    document.getElementById('b-cospre').innerHTML = SLOTS.slice(COSPRE_FROM).map((sl, j) => slotHTML(sl, COSPRE_FROM + j)).join('');
     const err = document.getElementById('b-err');
-    err.hidden = P.stLeft >= 0 && P.skLeft >= 0;
-    err.textContent = `Dağıtılan puan bu level için fazla: ${Math.max(0, -P.stLeft)} stat, ${Math.max(0, -P.skLeft)} skill düşür.`;
+    err.hidden = P.stLeft >= 0 && P.skLeft >= 0 && !overTrees.length;
+    err.textContent = P.stLeft < 0 || P.skLeft < 0
+      ? `Dağıtılan puan bu level için fazla: ${Math.max(0, -P.stLeft)} stat, ${Math.max(0, -P.skLeft)} skill düşür.${overTrees.length ? ` Ağaç sınırı: ${overTrees.join(', ')}.` : ''}`
+      : `Ağaç sınırı aşıldı: ${overTrees.join(', ')}.`;
     document.getElementById('b-save').disabled = !err.hidden;
-    if (!state.ap || state.ap.cls !== b.cls) {
-      const type = AP_DEFAULT[b.cls], T = AP_TYPES[type];
-      state.ap = { cls: b.cls, type, sub: T.subs ? T.subs[0][0] : '', r: 0, l: 0, st: 0, bo: 0, pc: 0, wes: false, wolf: false };
-      ['ap-r', 'ap-l', 'ap-st', 'ap-bo', 'ap-pc'].forEach(id => { document.getElementById(id).value = ''; });
-      document.getElementById('ap-wes').checked = false; document.getElementById('ap-wolf').checked = false;
-      apSyncForm();
-    }
-    apAutoStat();
-    apRender();
+    renderCalc();
     document.getElementById('b-rules').innerHTML = RULES.map(r => `<li><span>${r.k}</span><span class="tag ${r.ok ? 'official' : ''}">${r.v}${r.ok ? '' : ' · doğrulanacak'}</span></li>`).join('');
   }
 
@@ -1796,7 +1885,7 @@ section[data-tab].on{display:block}
     if (t.closest('#pk-clear')) { delete state.build.gear[state.pick]; closePicker(); renderBuild(); return; }
     if (t.closest('#pk-close') || t.id === 'picker') { closePicker(); return; }
     const stb = t.closest('[data-st]'); if (stb) { const b = state.build, P = pools(b); const d = +stb.dataset.d; if (d < 0 ? b.st[stb.dataset.st] > 0 : P.stLeft > 0) b.st[stb.dataset.st] += d; renderBuild(); return; }
-    const skb = t.closest('[data-sk]'); if (skb) { const b = state.build, P = pools(b); const d = +skb.dataset.d, i = +skb.dataset.sk; if (d < 0 ? b.sk[i] > 0 : P.skLeft > 0) b.sk[i] += d; renderBuild(); return; }
+    const skb = t.closest('[data-sk]'); if (skb) { const b = state.build, P = pools(b); const d = +skb.dataset.d, i = +skb.dataset.sk; if (d < 0 ? b.sk[i] > 0 : P.skLeft > 0 && b.sk[i] < skCap(b, i)) b.sk[i] += d; renderBuild(); return; }
     const blv = t.closest('[data-blv]'); if (blv) { state.build.lv = Math.max(1, Math.min(83, state.build.lv + (+blv.dataset.blv))); renderBuild(); return; }
     const brb = t.closest('[data-breb]'); if (brb) { state.build.reb = Math.max(0, Math.min(REB_MAX, state.build.reb + (+brb.dataset.breb))); renderBuild(); return; }
     if (t.closest('#b-save')) { const b = state.build; toast(`Build kaydedildi: ${CLASSES[b.cls]}, level ${b.lv === 83 && b.reb ? '83+' + b.reb : b.lv}. ${document.getElementById('b-sh-k').checked ? 'Klan görebilir.' : 'Yalnızca sen ve yetkililer görebilir.'}`); return; }
@@ -1862,20 +1951,16 @@ section[data-tab].on{display:block}
   };
   document.getElementById('b-lv').addEventListener('input', setBuildNum('lv', 83, 1));
   document.getElementById('b-reb').addEventListener('input', setBuildNum('reb', REB_MAX, 0));
-  document.getElementById('b-gear').addEventListener('change', e => { const i = e.target.dataset.gup; if (i === undefined || !state.build.gear[i]) return; state.build.gear[i].up = +e.target.value; renderBuild(); });
+  const onGrade = e => { const i = e.target.dataset.gup; if (i === undefined || !state.build.gear[i]) return; state.build.gear[i].up = +e.target.value; renderBuild(); };
+  document.getElementById('b-gear').addEventListener('change', onGrade);
+  document.getElementById('b-cospre').addEventListener('change', onGrade);
   document.getElementById('pk-q').addEventListener('input', renderPicker);
-  document.getElementById('ap-form').addEventListener('input', e => {
-    if (e.target.tagName === 'SELECT') return;
+  document.getElementById('ap-form').addEventListener('input', () => {
     const n = id => Math.max(0, parseInt(document.getElementById(id).value, 10) || 0);
-    if (e.target.id === 'ap-st') state.ap.stManual = true;
-    if (e.target.id === 'ap-r') state.ap.rManual = true;
-    if (e.target.id === 'ap-l') state.ap.lManual = true;
-    Object.assign(state.ap, { r: n('ap-r'), l: n('ap-l'), st: n('ap-st'), bo: n('ap-bo'), pc: n('ap-pc'), wes: document.getElementById('ap-wes').checked, wolf: document.getElementById('ap-wolf').checked });
-    apRender();
+    Object.assign(state.ap, { xst: n('ap-xst'), xpc: n('ap-xpc'), wes: document.getElementById('ap-wes').checked, wolf: document.getElementById('ap-wolf').checked });
+    renderCalc();
   });
   document.getElementById('ap-form').addEventListener('submit', e => e.preventDefault());
-  document.getElementById('ap-type').addEventListener('change', e => { const T = AP_TYPES[e.target.value]; state.ap.type = e.target.value; state.ap.sub = T.subs ? T.subs[0][0] : ''; apSyncForm(); apAutoStat(); apRender(); });
-  document.getElementById('ap-sub').addEventListener('change', e => { state.ap.sub = e.target.value; apSyncForm(); apAutoStat(); apRender(); });
   document.getElementById('b-race').addEventListener('change', e => { state.build.race = e.target.value; renderBuild(); });
   document.getElementById('pk-fit').addEventListener('change', renderPicker);
   document.addEventListener('keydown', e => {
