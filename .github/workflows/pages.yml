@@ -1,0 +1,67 @@
+# Prototipi GitHub Pages'te yayınlar: https://<kullanıcı>.github.io/knight-online-dashboard/
+# Site yalnızca prototip, katalog ve eşya görsellerinden oluşur; repodaki diğer dosyalar yayınlanmaz.
+# Pages kapalıyken iş hata vermeden atlanır. Açmak için: Settings → Pages → Source: GitHub Actions.
+name: Siteyi yayınla
+
+on:
+  push:
+    branches: [claude/relaxed-galileo-qvzykz]
+    paths:
+      - design/prototype.html
+      - design/katalog.json
+      - data/esyalar/kobugda/gorseller/**
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    outputs:
+      acik: ${{ steps.pages.outputs.acik }}
+    steps:
+      - id: pages
+        name: Pages açık mı
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" --silent; then
+            echo "acik=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::GitHub Pages kapalı; Settings → Pages → Source: GitHub Actions seçilince site yayınlanır."
+            echo "acik=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  derle:
+    needs: kontrol
+    if: needs.kontrol.outputs.acik == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Site klasörü
+        run: |
+          mkdir -p _site/gorseller
+          cp design/prototype.html _site/index.html
+          cp design/katalog.json _site/
+          cp data/esyalar/kobugda/gorseller/*.png _site/gorseller/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  yayinla:
+    needs: derle
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
