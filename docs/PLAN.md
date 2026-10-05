@@ -55,7 +55,7 @@ Yeni sunucuda klan adları boş; **L4BEL** adını ilk kuran alır. Panel bu ad�
 | Şimdi – 15 Ekim | Herkes telefon doğrulaması ve OTP'yi açar, panelde işaretler | Tüm üyeler |
 | 15 – 29 Ekim | Ödüllü 1. ön kayıt | Tüm üyeler |
 | 29 Ekim – 9 Kasım | Sunucu oylaması; herkes aynı sunucuyu seçer | Yönetim oylar, üyeler seçer |
-| 10 – 11 Kasım | Karakter adları alınır (lider ve asistanlar öncelikli) | Tüm üyeler |
+| 10 – 11 Kasım | Nick'ler alınır (lider ve asistanlar öncelikli) | Tüm üyeler |
 | 12 Kasım 16:00 | Lider klan kurma şartlarını en hızlı şekilde tamamlayıp **L4BEL**'i kurar; tutmazsa yedek ad kullanılır | Lider, asistanlar destek |
 | Açılış sonrası | Üyeler klana davet edilir, panelde "L4BEL'e katıldım" işaretlenir | Asistanlar davet eder |
 
@@ -86,7 +86,7 @@ Yetkililer Ayarlar › Davet kodları'ndan kod üretir ve klan Discord'unda payl
 |---|---|---|
 | 1 | **Davet kodu**: kodu yaz, "Devam et" | Kod doğrulanır (aktif mi, süresi dolmuş mu, kullanım sınırı dolmuş mu). Geçerliyse 15 dakikalık imzalı, `httpOnly` bir çerez yazılır. Hata mesajı tek tip: "Kod geçersiz ya da süresi dolmuş" (hangi koşulun tuttuğu söylenmez) |
 | 2 | **Discord ile devam et** | Discord OAuth. Dönüşte (`/auth/callback`) çerez varsa `davet_kullan()` çalışır: kullanım sayısı satır kilidiyle artırılır, profil `uye` yetkisiyle ve kodun rütbesiyle (Üye ya da Aday) açılır, kullanım kaydı yazılır |
-| 3 | **Karakterin**: karakter adı, sınıf (level açılıştan sonra) | `characters` satırı oluşur. Karakter adı benzersiz olmalı |
+| 3 | **Karakterin**: nick, sınıf (level açılıştan sonra) | `characters` satırı oluşur. Nick benzersiz olmalı |
 | 4 | **Hoş geldin**: sıradaki hazırlık adımları, "Panele git" | |
 
 Zaten üye olan biri `/giris`'ten doğrudan Discord ile girer. Kodsuz ve kaydı olmayan biri Discord'la girmeye çalışırsa "Klana katılmak için davet kodu gerekli" sayfasına yönlenir.
@@ -99,11 +99,11 @@ Güvenlik:
 
 ### Profilim
 
-Üye `/profil` sayfasından (üst bardaki adına tıklayarak da) şunları değiştirir:
+Üye `/profil` sayfasından (üst bardaki adına tıklayarak da) **nick**'ini görür (kilitli alan) ve şunları değiştirir:
 - **Sınıf:** açılıştan önce "planlanan sınıf", sonra oyundaki sınıf.
 - **Level:** açılıştan önce kapalı. Açılıştan sonra 1 ile `clan_settings.level_siniri` arası tam sayı.
 
-Karakter adı, rütbe ve durum yetkililerdedir. Her değişiklik `character_changes` tablosuna yazılır (kim, hangi alan, eski ve yeni değer, zaman); yetkililer karakter detayında görür.
+Nick, rütbe ve durum yetkililerdedir; nick oyunda farklı alındıysa üye bir yetkiliye yazar. Her değişiklik `character_changes` tablosuna yazılır (kim, hangi alan, eski ve yeni değer, zaman); yetkililer karakter detayında görür.
 
 ---
 
@@ -155,6 +155,8 @@ Seed: `clan_settings` → `klan_adi = 'L4BEL'`, `monogram = 'L4'`. Klan adı kod
 Enum'lar:
 - `sinif`: warrior, rogue, mage, priest, kurian (El Morad'da Porutu; görüntülemede ırka göre ad değişir)
 - `rutbe`: lider, asistan, subay, uye, aday
+
+Terim: arayüzde karakter adı her yerde **Nick** olarak geçer (tablo başlığı, arama, kayıt ve profil formları); veritabanında sütun adı `characters.ad`.
 - `durum` (karakter): aktif, izinli, pasif, ayrildi
 - `yoklama`: katildi, gec, mazeretli, yok
 - `yetki`: yonetici, yetkili, uye

@@ -312,6 +312,9 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .pf-cls{display:flex;align-items:center;gap:9px;min-height:46px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:transparent;font:600 15px/1.2 var(--font-body);color:var(--fg);text-align:left}
 .pf-cls[aria-checked="true"]{border-color:var(--gold);background:var(--surface-2)}
 .pf-cls i{width:12px;height:12px;border-radius:3px;flex:none}
+.nick-field{position:relative;max-width:320px}
+.nick-field input{width:100%;height:48px;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:0 40px 0 12px;font:600 18px/1 var(--font-body);color:var(--fg)}
+.nick-field svg{position:absolute;right:14px;top:50%;width:14px;height:14px;margin-top:-7px;color:var(--muted)}
 .stepper{display:flex;align-items:center;gap:8px;max-width:280px}
 .stepper button{width:48px;height:48px;border-radius:9px;border:1px solid var(--input-line);background:var(--surface-2);font:700 22px/1 var(--font-data);color:var(--fg)}
 .stepper input{flex:1;min-width:0;height:48px;border:1px solid var(--input-line);border-radius:9px;background:var(--surface-2);text-align:center;font:600 24px/1 var(--font-data);color:var(--fg)}
@@ -484,7 +487,7 @@ section[data-tab].on{display:block}
         </div>
         <div class="s12 panel">
           <div class="toolbar">
-            <label class="search" for="q"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="Karakter veya Discord adı ara" autocomplete="off"></label>
+            <label class="search" for="q"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="Nick veya Discord adı ara" autocomplete="off"></label>
             <div class="chips" id="cls-filter" role="group" aria-label="Sınıf filtresi"></div>
             <select class="sel" id="rank-filter" aria-label="Rütbe filtresi"></select>
             <select class="sel" id="status-filter" aria-label="Durum filtresi">
@@ -494,7 +497,7 @@ section[data-tab].on{display:block}
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Karakter</th><th>Sınıf</th><th>Rütbe</th>
+                <th>Nick</th><th>Sınıf</th><th>Rütbe</th>
                 <th data-when="post">Level</th>
                 <th data-when="pre">Hazırlık</th>
                 <th>Katılım</th><th>Durum</th>
@@ -585,13 +588,19 @@ section[data-tab].on{display:block}
         <div>
           <div class="eyebrow">Hesabım</div>
           <h1>Profilim</h1>
-          <p>Sınıfını ve levelini kendin güncelle; değişiklik üye listesine hemen yansır. Karakter adını ve rütbeni yetkililer değiştirir.</p>
+          <p>Sınıfını ve levelini kendin güncelle; değişiklik üye listesine hemen yansır. Nick’ini ve rütbeni yetkililer değiştirir.</p>
         </div>
       </div>
       <div class="grid">
         <div class="s7 panel">
-          <div class="panel-h"><h2 id="pf-name"></h2><span class="sub" id="pf-sub"></span></div>
+          <div class="panel-h"><h2>Karakterim</h2><span class="sub" id="pf-sub"></span></div>
           <form id="pf-form" novalidate>
+            <label class="pf-label" for="pf-nick">Nick</label>
+            <div class="nick-field">
+              <input id="pf-nick" type="text" readonly aria-describedby="pf-nick-hint">
+              <svg aria-hidden="true"><use href="#i-lock"/></svg>
+            </div>
+            <p class="muted" id="pf-nick-hint" style="font-size:13px;margin:8px 0 0">Nick’ini yetkililer değiştirir. Oyunda farklı bir nick aldıysan bir yetkiliye yaz.</p>
             <div class="pf-label" id="pf-cls-label">Sınıf</div>
             <div class="pf-classes" id="pf-classes" role="radiogroup" aria-labelledby="pf-cls-label"></div>
             <label class="pf-label" for="pf-level">Level</label>
@@ -612,7 +621,7 @@ section[data-tab].on{display:block}
           <ul class="list who-edits">
             <li><span>Sınıf, level</span><span class="tag official">Sen</span></li>
             <li><span>Hazırlık adımları</span><span class="tag official">Sen</span></li>
-            <li><span>Karakter adı, rütbe, durum</span><span class="tag">Yetkililer</span></li>
+            <li><span>Nick, rütbe, durum</span><span class="tag">Yetkililer</span></li>
             <li><span>Discord adı ve resmi</span><span class="tag">Discord’dan otomatik</span></li>
           </ul>
         </div>
@@ -650,14 +659,14 @@ section[data-tab].on{display:block}
   const PHASES = [
     { n: 1, title: '1. Ön kayıt', start: tr('2026-10-15'), end: tr('2026-10-29'), d: '15 – 29 Ekim', x: 'Ödüllü dönem. Telefon doğrulaması gerekli.' },
     { n: 2, title: '2. Ön kayıt ve sunucu seçimi', start: tr('2026-10-29'), end: tr('2026-11-10'), d: '29 Ekim – 9 Kasım', x: 'Bitiş bazı kaynaklarda 12 Kasım.' },
-    { n: 3, title: 'Karakter oluşturma', start: tr('2026-11-10'), end: OPEN, d: '10 – 11 Kasım', x: 'Karakter adları ilk saatlerde alınmalı.' },
+    { n: 3, title: 'Karakter oluşturma', start: tr('2026-11-10'), end: OPEN, d: '10 – 11 Kasım', x: 'Nick’ler ilk saatlerde alınmalı.' },
     { n: 4, title: 'Sunucu açılışı', start: OPEN, end: OPEN + DAY, d: '12 Kasım, 16:00', x: 'Lider L4BEL klanını ilk gün kurar. Savaş yalnızca Ronark Land (CZ)’de.' }
   ];
   const PREP = [
     { k: 0, label: 'Telefon doğrulama ve OTP', opens: null, hint: 'Yeni sunuculara OTP olmadan girilemiyor' },
     { k: 1, label: 'Ön kayıt', opens: tr('2026-10-15'), hint: 'İlk dönem ödüllü' },
     { k: 2, label: 'Sunucu seçimi', opens: tr('2026-10-29'), hint: 'Tüm klan aynı sunucuyu seçmeli' },
-    { k: 3, label: 'Karakter adı alındı', opens: tr('2026-11-10'), hint: 'Planlanan ad kapılmadan' }
+    { k: 3, label: 'Nick alındı', opens: tr('2026-11-10'), hint: 'Planlanan nick kapılmadan' }
   ];
 
   /* rel: katılım eğilimi (örnek veri üretmek için) */
@@ -1110,7 +1119,7 @@ section[data-tab].on{display:block}
     const m = me();
     if (!state.pf || state.pf.name !== m.name) state.pf = { name: m.name, cls: m.cls, lv: m.lv, saved: m.saved || null };
     const pre = state.phase === 'pre';
-    document.getElementById('pf-name').textContent = m.name;
+    document.getElementById('pf-nick').value = m.name;
     document.getElementById('pf-sub').innerHTML = `@${esc(m.dc)} · <span style="color:var(${RANKVAR[m.rank]});font-weight:600">${m.rank}</span>`;
     document.getElementById('pf-classes').innerHTML = Object.entries(CLASSES).map(([k, l]) =>
       `<button type="button" class="pf-cls" role="radio" data-pfcls="${k}" aria-checked="${state.pf.cls === k}"><i class="c-${k}"></i>${l}</button>`).join('');
