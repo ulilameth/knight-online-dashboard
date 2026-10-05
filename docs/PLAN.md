@@ -133,6 +133,19 @@ KO Bugda'nın eşya ve formül verisi onların içeriği; panele kopyalanmaz. Pa
 
 Hesap: dağıtılabilir stat = 3 × (level − 1) + 2 × reb; dağıtılabilir skill = level ≥ 10 ise 2 × (level − 9).
 
+**AP hesabı.** Formül ve katsayı tablosu KO Bugda'nın temel hesaplayıcısından alındı (klan lideri paylaştı); panelde kendi kodumuzla yazıldı, kaynağı ekranda belirtilir, oyun içi değerle doğrulanacak. Prototipteki uygulama, paylaşılan hesapla 20.000 rastgele girdide aynı sonucu veriyor.
+- Hesap tipleri: Assassin (DEX, sol el var), Archer (DEX, yay/arbalet), Warrior (STR, tek/çift elli; çift elde sol el yok), Priest (STR ya da INT Battle Priest), Kurian (STR), Mage (STR).
+- Katsayı kademesi: level < 10, 10–59, 60+. Katsayılar `game_rules.ap_katsayilari`'nda.
+- Girdiler: sağ/sol el silah AP, stat (statlarda, bonussuz), stat bonusu, ek AP %, WES (+5 AP, Assassin'de sol ele +3, sonuca +1), Wolf (+%20). Base AP: STR/INT tabanlı sınıflarda stat 150'nin üstündeyse stat − 150 (stat tam 160 ise bir eksik).
+- Seçilen silahın `item_stats` kaydı varsa, o artı seviyesindeki AP otomatik dolar.
+
+**Eşya kataloğu ve seçici.** Ekipman yuvaları serbest metin değil, katalogdan seçilir: yuvaya tıklanınca arama + "sınıfıma ve levelime uygun" filtresi olan bir liste açılır; derece renkle ve yazıyla gösterilir; sınıfa ya da levela uymayan takılı eşya uyarı verir. Katalog `items` tablosundadır ve yöneticiler Ayarlar › Eşya kataloğu'ndan doldurur:
+- Tek tek ekleme/düzenleme.
+- JSON ya da CSV içe aktarma. Alanlar KO Bugda API'sinin biçimiyle eşlenir (`name`, `category`, `slot`, `handType`, `isOneHanded`, `canUseWarrior` … `canUseKurian`, `requiredLevel`, `requiredStr` …, `stats[].grade`, `stats[].attackPower`, `setParts`); böylece izinli bir kaynaktan alınan dosya doğrudan yüklenebilir.
+- Görseller: varsayılan olarak panelin kendi yuva ikonları (yuva tipine göre, dereceye göre renkli çerçeve). Yönetici kendi hakkı olan görselleri Supabase Storage'a yükleyebilir.
+
+Telif ve izin: Oyun ikonları oyun şirketine ait; KO Bugda'nın eşya veritabanı ve API'si de onların emeği. Panel bu verileri izinsiz çekmez ve görselleri onların sunucusundan göstermez (hotlink yok). KO Bugda'dan izin alınırsa içe aktarma aracı bu biçimi zaten okuyor.
+
 Nick, rütbe ve durum yetkililerdedir; nick oyunda farklı alındıysa üye bir yetkiliye yazar. Her değişiklik `character_changes` tablosuna yazılır (kim, hangi alan, eski ve yeni değer, zaman); yetkililer karakter detayında görür.
 
 ---
@@ -179,7 +192,10 @@ clan_settings       tek satır: klan_adi, yedek_ad?, monogram, irk (karus | el_m
 invite_codes        id, kod_hash (unique), son_dort, rutbe (uye | aday), max_kullanim, kullanim, bitis, aktif, not, olusturan, created_at
 invite_redemptions  id, code_id, profile_id, created_at
 password_resets     id, profile_id, kod_hash, bitis, kullanildi_at?, olusturan, created_at
-builds              id, character_id?, ad, sinif, level, reb, statlar jsonb {str,hp,dex,int,mp}, skiller int[4] (3 ağaç + master), ekipman jsonb {slot: {ad, arti}}, paylasim (klan | yetkili), sablon bool, olusturan, updated_at
+builds              id, character_id?, ad, sinif, level, reb, statlar jsonb {str,hp,dex,int,mp}, skiller int[4] (3 ağaç + master), ekipman jsonb {yuva: {item_id, arti}}, ap_girdileri jsonb, paylasim (klan | yetkili), sablon bool, olusturan, updated_at
+items               id, dis_id? (ör. legacyId), ad, kategori, yuva, el_tipi, tek_elli bool, siniflar text[] (warrior | rogue | mage | priest | kurian; boş = hepsi), gerekli_level, gerekli_str, gerekli_hp, gerekli_dex, gerekli_int, gerekli_mp, derece (normal | magic | rare | unique | set), set_id?, gorsel_yolu?, not, kaynak, ekleyen, updated_at
+item_stats          item_id + arti (0-10) (pk), ap, diger jsonb       -- artı seviyesine göre değerler
+item_sets           id, ad, bonuslar jsonb
 game_rules          anahtar (pk), deger jsonb, dogrulandi bool, kaynak?   -- stat_per_level, reb_bonus_stat, stat_cap, skill_start_level, skill_per_level, master_level, sinif_baslangic_statlari
 class_trees         sinif, sira (1-4), ad                              -- ör. mage: Flame, Glacier, Lightning, Master
 ```
@@ -224,6 +240,7 @@ Katılım oranı = (katildi + gec) / işaretlenmiş yoklama sayısı. Mazeretli 
 | `/etkinlikler/[id]` | Yoklama ekranı | Etkinlikler (sağ panel) |
 | `/takvim` | Aylık takvim, haftalık düzen | Takvim ve duyurular |
 | `/duyurular` | Duyuru listesi ve yazma formu | Takvim ve duyurular |
+| `/ayarlar/esyalar` | Eşya kataloğu: ekle/düzenle, JSON/CSV içe aktar, görsel yükle | yok |
 | `/ayarlar` | Açılış tarihleri, klan bilgisi, TS adresi, level sınırı (80 / 83 / 83+1 … 83+10), yetkiler, şifre sıfırlama kodu | Profilim sekmesindeki yönetici kutusu |
 | `/ayarlar/davet-kodlari` | Kod üret, listele (son 4 hane, kullanım, bitiş), iptal et, kimin hangi kodla katıldığı | yok |
 
@@ -269,7 +286,7 @@ Her oturum Faz 0'ın birleştiği `main` dalından başlar, kendi dalında çal�
 | **B: Etkinlik + yoklama** | `feat/etkinlikler` | `app/(panel)/etkinlikler/**`, `components/etkinlikler/**`, `lib/data/events.ts`, `lib/data/attendance.ts` | Yaklaşan/geçmiş listesi, etkinlik oluştur-düzenle, yoklama ekranı (tek tıkla işaretleme, iyimser güncelleme, toplu işlemler), tür bazında katılım grafiği, en istikrarlı 5 üye, üyeler için salt okunur görünüm |
 | **C: Takvim + duyurular** | `feat/takvim-duyurular` | `app/(panel)/takvim/**`, `app/(panel)/duyurular/**`, `components/takvim/**`, `components/duyurular/**`, `lib/data/announcements.ts`, `lib/data/schedule.ts`, `lib/teamspeak/**` | Aylık takvim + telefonda ajanda, haftalık düzen düzenleme ve "bu haftanın etkinliklerini oluştur", duyuru yaz/sabitle/sil, TeamSpeak WebQuery ile gönderim (yapılandırılmamışsa kutucuk gizli; hata durumunda kullanıcıya açık mesaj), "Metni kopyala" düğmesi, WebQuery birim testi (fetch mock) |
 | **D: Genel bakış + ayarlar + kayıt** | `feat/genel-ayarlar` | `app/(panel)/page.tsx`, `app/(panel)/ayarlar/**`, `app/kayit/**`, `app/giris/**`, `app/sifre-sifirla/**`, `components/genel/**`, `components/kayit/**`, `lib/data/milestones.ts`, `lib/data/prep.ts`, `lib/data/settings.ts`, `lib/data/invites.ts` | Geri sayım (istemci bileşeni, saniyelik), aşama zaman çizelgesi, klan hazırlığı + "benim hazırlığım" (açılıştan sonra "L4BEL'e katıldım" adımı eklenir), açılış sonrası özet kutuları; Giriş (nick + şifre), Kayıt: 4 adımlı akış (kod, hesap, karakter, hoş geldin), tek tip hata mesajı, deneme sınırı, şifre sıfırlama; ana sayfada TeamSpeak kartı (L4B, kopyala); Ayarlar: açılış tarihleri, klan adı/ırk, TS adresi, level sınırı seçimi, yetki verme, davet kodu ve sıfırlama kodu üret/listele/iptal |
-| **E: Karakter tasarımı** | `feat/karakter` | `app/(panel)/karakter/**`, `components/karakter/**`, `lib/data/builds.ts`, `lib/rules/**` | Sınıf, level ve reb seçimi; stat dağıtımı (5 stat, kalan puan, 255 sınırı başlangıç statları girilince); skill dağıtımı (3 ağaç + master, master level 60'ta); level düşünce fazla puan uyarısı ve kaydetmenin kapanması; ekipman yuvaları (14 yuva, ad + artı 0–10); paylaşım seçimi; yetkili şablonları (oluştur, sınıfa göre listele, üyenin planına yükle); tüm sayılar `game_rules` ve `class_trees` tablolarından, kodda sabit yok; puan hesabı için birim testleri; KO Bugda bağlantısı |
+| **E: Karakter tasarımı** | `feat/karakter` | `app/(panel)/karakter/**`, `app/(panel)/ayarlar/esyalar/**`, `components/karakter/**`, `lib/data/builds.ts`, `lib/data/items.ts`, `lib/rules/**` | Sınıf, level ve reb seçimi; stat dağıtımı (5 stat, kalan puan, 255 sınırı başlangıç statları girilince); skill dağıtımı (3 ağaç + master, master level 60'ta); level düşünce fazla puan uyarısı ve kaydetmenin kapanması; ekipman yuvaları (14 yuva, ad + artı 0–10); paylaşım seçimi; yetkili şablonları (oluştur, sınıfa göre listele, üyenin planına yükle); tüm sayılar `game_rules` ve `class_trees` tablolarından, kodda sabit yok; puan hesabı için birim testleri; eşya seçici (arama, uygunluk filtresi, derece, uyumsuzluk uyarısı); AP paneli (6 hesap tipi, WES/Wolf/base AP; referans hesapla karşılaştırmalı birim testi); Ayarlar › Eşya kataloğu (ekle, JSON/CSV içe aktar, görsel yükle); KO Bugda bağlantısı |
 
 Ortak kurallar:
 - Her oturum bitmeden önce `lint`, `typecheck`, `test`, `build` temiz geçmeli.
@@ -305,3 +322,4 @@ Klan adı netleşti: **L4BEL**.
 6. Haftalık etkinlik saatleri sunucu açılınca belli olacak; prototipteki saatler örnek.
 7. TeamSpeak sunucusunda (L4B) yönetici erişiminiz var mı? Varsa duyurular TS'e otomatik gönderilebilir, ileride kim TS'te bağlı ya da AFK panelde görünebilir.
 8. Karakter tasarımı kuralları: level başına skill puanı (2 mi?), sınıfların başlangıç statları ve Kurian/Porutu skill ağaçlarının adları. Klandan deneyimli biri doğrulayabilir mi?
+9. Eşya verisi: KO Bugda'dan eşya listesini kullanma izni alınabilir mi? Alınırsa içe aktarma hazır; alınmazsa katalog yöneticiler tarafından doldurulur.

@@ -27,7 +27,7 @@
   --info:#56b6d0;                                      /* Mana Işığı */
   --idle-soft:rgba(156,146,130,.18);
   --rank-leader:#e7c46e; --rank-assistant:#c9ced6; --rank-officer:#cf9258; --rank-member:#a69d8f; --rank-candidate:#958b7d;
-  --c-war:#3f88dc; --c-rog:#d9622d; --c-mag:#1fa077; --c-pri:#c48410; --c-kur:#d35a84;
+  --c-war:#3f88dc; --c-rog:#d9622d; --c-mag:#1fa077; --c-pri:#c48410; --c-kur:#d35a84; --c-six:#8a7fe3;
   --on-series:#0f0e0d;
   --shadow:0 1px 0 rgba(241,232,212,.03) inset, 0 8px 24px rgba(0,0,0,.35);
   --font-display:"Cinzel", "Times New Roman", serif;
@@ -42,6 +42,7 @@
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{background:var(--bg)}
 body{color:var(--fg-2);font:400 15px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
 h1,h2,h3,b,strong,.brand-name{color:var(--fg)}
@@ -342,9 +343,42 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .b-row.locked{opacity:.55}
 .gear{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
 @media (max-width:640px){.gear{grid-template-columns:minmax(0,1fr)}}
-.gear-slot{display:grid;grid-template-columns:84px minmax(0,1fr) 64px;gap:8px;align-items:center}
-.gear-slot label{font:600 13px/1.2 var(--font-data);color:var(--muted)}
-.gear-slot input,.gear-slot select{height:38px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface-2);padding:0 8px;font-size:14px;color:var(--fg);min-width:0}
+.gear-slot{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:8px;align-items:center}
+.ic{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ico{width:44px;height:44px;flex:none;border-radius:9px;display:grid;place-items:center;background:var(--bg);border:1.5px solid currentColor}
+.ico.empty{border-style:dashed;color:var(--muted)}
+.slot-btn{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center;min-height:58px;padding:6px 10px 6px 6px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);text-align:left;color:var(--fg)}
+.slot-btn:hover{border-color:var(--input-line)}
+.slot-btn .sl{min-width:0;display:flex;flex-direction:column}
+.slot-btn small{font:600 11.5px/1.2 var(--font-data);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.slot-btn b{font:600 14.5px/1.3 var(--font-body);overflow-wrap:anywhere}
+.slot-btn em{font-style:normal;font-size:12.5px;color:var(--muted)}
+.slot-btn em.bad{color:var(--crit)}
+.ap-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.ap-grid{grid-template-columns:minmax(0,1fr)}}
+.ap-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;align-content:start}
+@media (max-width:520px){.ap-form{grid-template-columns:minmax(0,1fr)}}
+.ap-f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ap-f label:not(.check){font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ap-f input[type="number"],.ap-f .sel{height:44px;border:1px solid var(--input-line);border-radius:9px;background:var(--surface-2);padding:0 10px;font:600 17px/1 var(--font-data);color:var(--fg);width:100%}
+.ap-checks{justify-content:flex-end;gap:10px}
+.ap-out{display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.ap-val{font:700 clamp(48px,7vw,72px)/1 var(--font-display);color:var(--gold)}
+.ap-meta{font:600 15px/1.4 var(--font-data);color:var(--fg-2)}
+.ap-tags{display:flex;flex-wrap:wrap;gap:6px}
+.picker-back{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.62);display:grid;place-items:center;padding:16px}
+.picker{width:min(560px,100%);max-height:min(660px,calc(100vh - 32px));display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.picker .search{flex:none;height:42px;max-width:none}
+.pk-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pk-head h2{margin:0;font:700 22px/1.1 var(--font-display)}
+.pk-list{overflow:auto;min-height:120px;flex:1;display:flex;flex-direction:column;gap:4px;margin-inline:-6px;padding-inline:6px}
+.pk-item{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px;border-radius:10px;border:1px solid transparent;background:transparent;text-align:left;color:var(--fg)}
+.pk-item:hover,.pk-item[aria-selected="true"]{background:var(--surface-2);border-color:var(--line)}
+.pk-item b{display:block;font:600 15px/1.3 var(--font-body)}
+.pk-item span.meta{font-size:12.5px;color:var(--muted)}
+.pk-item .grade{font:600 12.5px/1 var(--font-data);letter-spacing:.04em;white-space:nowrap}
+.pk-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;font-size:13px}
+.gear-slot select{height:38px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface-2);padding:0 8px;font-size:14px;color:var(--fg);min-width:0}
 .b-share{display:flex;flex-direction:column;gap:8px}
 .crit-note{margin:12px 0 0;padding:9px 12px;border-radius:8px;background:var(--crit-soft);color:var(--fg);font-size:14px}
 .rules li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding-block:8px;border-bottom:1px solid var(--line-subtle);font-size:14px}
@@ -376,6 +410,18 @@ section[data-tab].on{display:block}
   <symbol id="i-edit" viewBox="0 0 16 16"><path d="M11 2.5l2.5 2.5L6 12.5l-3.2.7.7-3.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
   <symbol id="i-left" viewBox="0 0 16 16"><path d="M10 3.5L5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-right" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="s-silah" viewBox="0 0 24 24"><path d="M20 4l-1 4.5-9.5 9.5-3-3L16 5.5zM6 13.5l4.5 4.5M3.5 20.5l4-4"/></symbol>
+  <symbol id="s-ikinci" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3.2 8.6-7 10-3.8-1.4-7-5-7-10V6z"/><path d="M12 7v10M8 11h8"/></symbol>
+  <symbol id="s-kask" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0v4h-5v-4H9v4H4z"/><path d="M12 7v5"/></symbol>
+  <symbol id="s-zirh" viewBox="0 0 24 24"><path d="M8 3L4 6v5h3v10h10V11h3V6l-4-3c-.6 1.6-2.2 2.5-4 2.5S8.6 4.6 8 3z"/></symbol>
+  <symbol id="s-pantolon" viewBox="0 0 24 24"><path d="M6 3h12l1.5 18h-5L12 10l-2.5 11h-5z"/></symbol>
+  <symbol id="s-eldiven" viewBox="0 0 24 24"><path d="M7 21v-6l-2.5-3.5L6 10l2 2V5.5a1.2 1.2 0 0 1 2.4 0V10V4a1.2 1.2 0 0 1 2.4 0v6V5a1.2 1.2 0 0 1 2.4 0v6V7a1.2 1.2 0 0 1 2.4 0v8c0 3.5-2 6-5 6z"/></symbol>
+  <symbol id="s-bot" viewBox="0 0 24 24"><path d="M7 3h6v9l6 3c.7.4 1 1 1 1.8V21H7z"/></symbol>
+  <symbol id="s-pelerin" viewBox="0 0 24 24"><path d="M8 3h8l4 18-8-3-8 3z"/><path d="M8 3c1 2 2.5 3 4 3s3-1 4-3"/></symbol>
+  <symbol id="s-kolye" viewBox="0 0 24 24"><path d="M5 4c0 6 3 9.5 7 9.5S19 10 19 4M12 13.5v2"/><circle cx="12" cy="18" r="2.5"/></symbol>
+  <symbol id="s-kupe" viewBox="0 0 24 24"><path d="M12 3v5"/><circle cx="12" cy="10" r="2"/><path d="M12 12l-3 5a3 3 0 0 0 6 0z"/></symbol>
+  <symbol id="s-yuzuk" viewBox="0 0 24 24"><circle cx="12" cy="14.5" r="6"/><path d="M9.5 5.5L12 3l2.5 2.5L12 8z"/></symbol>
+  <symbol id="s-kemer" viewBox="0 0 24 24"><path d="M3 9h18v6H3zM9 8h6v8H9zM12 11v2"/></symbol>
   <symbol id="i-out" viewBox="0 0 16 16"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2L7.5 8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
@@ -658,8 +704,34 @@ section[data-tab].on{display:block}
           <p class="muted" style="font-size:13px;margin:12px 0 0" id="b-sk-note"></p>
         </div>
 
+        <div class="s12 panel">
+          <div class="panel-h"><h2>Saldırı gücü (AP)</h2><span class="sub">Formül kaynağı: KO Bugda temel hesaplayıcı · oyun içi değerle doğrulanacak</span></div>
+          <div class="ap-grid">
+            <form class="ap-form" id="ap-form" novalidate>
+              <div class="ap-f"><label for="ap-type">Hesap tipi</label><select class="sel" id="ap-type"></select></div>
+              <div class="ap-f" id="ap-sub-wrap"><label for="ap-sub" id="ap-sub-label">Silah tipi</label><select class="sel" id="ap-sub"></select></div>
+              <div class="ap-f"><label for="ap-r" id="ap-r-label">Sağ el silah AP</label><input id="ap-r" type="number" min="0" max="9999" inputmode="numeric" placeholder="0"></div>
+              <div class="ap-f" id="ap-l-wrap"><label for="ap-l">Sol el silah AP</label><input id="ap-l" type="number" min="0" max="9999" inputmode="numeric" placeholder="0"></div>
+              <div class="ap-f"><label for="ap-st" id="ap-st-label">STR (statlarda)</label><input id="ap-st" type="number" min="0" max="999" inputmode="numeric" placeholder="Bonussuz"></div>
+              <div class="ap-f"><label for="ap-bo" id="ap-bo-label">STR (eşya bonusu)</label><input id="ap-bo" type="number" min="0" max="999" inputmode="numeric" placeholder="0"></div>
+              <div class="ap-f"><label for="ap-pc">Ek AP bonusu (%)</label><input id="ap-pc" type="number" min="0" max="999" inputmode="numeric" placeholder="0"></div>
+              <div class="ap-f ap-checks">
+                <label class="check" for="ap-wes"><input type="checkbox" id="ap-wes">WES (+5 AP)</label>
+                <label class="check" for="ap-wolf"><input type="checkbox" id="ap-wolf">Wolf (+%20)</label>
+              </div>
+            </form>
+            <div class="ap-out" aria-live="polite">
+              <div class="eyebrow">Saldırı gücü</div>
+              <div class="ap-val num" id="ap-val">0</div>
+              <div class="ap-meta" id="ap-meta"></div>
+              <div class="ap-tags" id="ap-tags"></div>
+              <p class="muted" style="font-size:13px;margin:auto 0 0">Level yukarıdaki build’den gelir. Stat değerini oyundaki karakter penceresinden, bonussuz gir.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="s8 panel">
-          <div class="panel-h"><h2>Ekipman</h2><span class="sub">Eşya adı ve artı seviyesi</span></div>
+          <div class="panel-h"><h2>Ekipman</h2><span class="sub">Yuvaya tıkla, eşyayı seç, artı seviyesini belirle</span></div>
           <div class="gear" id="b-gear"></div>
         </div>
         <div class="s4 stack">
@@ -750,6 +822,15 @@ section[data-tab].on{display:block}
       </div>
     </section>
   </main>
+</div>
+<div class="picker-back" id="picker" hidden>
+  <div class="picker" role="dialog" aria-modal="true" aria-labelledby="pk-title">
+    <div class="pk-head"><h2 id="pk-title">Eşya seç</h2><button type="button" class="icon-btn" id="pk-close" aria-label="Kapat"><svg><use href="#i-x"/></svg></button></div>
+    <label class="search" for="pk-q" style="max-width:none"><svg><use href="#i-search"/></svg><input id="pk-q" type="search" placeholder="Eşya ara" autocomplete="off"></label>
+    <label class="check" for="pk-fit"><input type="checkbox" id="pk-fit" checked>Yalnızca sınıfıma ve levelime uygun olanlar</label>
+    <div class="pk-list" id="pk-list" role="listbox" aria-labelledby="pk-title"></div>
+    <div class="pk-foot"><button type="button" class="btn" id="pk-clear">Yuvayı boşalt</button><span class="muted">Örnek katalog. Gerçek eşyaları yetkililer ekler.</span></div>
+  </div>
 </div>
 <div id="tip" hidden></div>
 <div id="toast" hidden></div>
@@ -1286,11 +1367,102 @@ section[data-tab].on{display:block}
     { k: 'Skill puanı başlangıcı', v: 'Level 10', ok: true },
     { k: 'Master skill', v: 'Level 60', ok: true },
     { k: 'Level başına skill puanı', v: '2', ok: false },
-    { k: 'Sınıf başlangıç statları', v: 'girilecek', ok: false }
+    { k: 'Sınıf başlangıç statları', v: 'girilecek', ok: false },
+    { k: 'AP formülü ve katsayıları', v: 'KO Bugda', ok: false }
   ];
   const STAT_PER_LV = 3, REB_STAT = 2, SKILL_START = 10, SKILL_PER_LV = 2, MASTER_LV = 60;
   const STATS = [['str', 'STR', 'Güç'], ['hp', 'HP', 'Sağlık'], ['dex', 'DEX', 'Çeviklik'], ['int', 'INT', 'Zeka'], ['mp', 'MP', 'Büyü gücü']];
   const TREES = { war: ['Attack', 'Defense', 'Passion'], rog: ['Archery', 'Assassin', 'Explore'], mag: ['Flame', 'Glacier', 'Lightning'], pri: ['Heal', 'Buff', 'Debuff'], kur: ['1. ağaç', '2. ağaç', '3. ağaç'] };
+  const GRADES = { normal: ['Normal', '--rank-member'], magic: ['Magic', '--c-war'], rare: ['Rare', '--c-pri'], unique: ['Unique', '--c-six'], set: ['Set', '--c-mag'] };
+  const SLOT_TYPES = ['silah', 'ikinci', 'kask', 'zirh', 'pantolon', 'eldiven', 'bot', 'pelerin', 'kolye', 'kupe', 'kupe', 'yuzuk', 'yuzuk', 'kemer'];
+  /* ÖRNEK katalog: adlar uydurmadır; gerçek eşyaları yetkililer ekler ya da CSV ile içe aktarır */
+  const ITEMS = [];
+  const addItem = (n, t, g, cls, lv) => ITEMS.push({ id: 'it' + ITEMS.length, n, t, g, cls, lv });
+  [['Demir Kılıç', 'normal', ['war'], 10], ['Savaşçı Baltası', 'rare', ['war'], 60], ['Gölge Hançeri', 'rare', ['rog'], 60], ['Avcı Yayı', 'unique', ['rog'], 70],
+   ['Alev Asası', 'rare', ['mag'], 60], ['Buz Asası', 'unique', ['mag'], 75], ['Şifa Topuzu', 'magic', ['pri'], 40], ['Kutsal Topuz', 'unique', ['pri'], 75], ['Pençe Mızrağı', 'rare', ['kur'], 60]]
+    .forEach(([n, g, c, l]) => addItem(n, 'silah', g, c, l));
+  [['Ahşap Kalkan', 'normal', ['war', 'pri', 'kur'], 10], ['Kale Kalkanı', 'rare', ['war', 'pri', 'kur'], 60], ['Yedek Hançer', 'magic', ['rog'], 40]]
+    .forEach(([n, g, c, l]) => addItem(n, 'ikinci', g, c, l));
+  const PIECE = { kask: 'Miğferi', zirh: 'Zırhı', pantolon: 'Pantolonu', eldiven: 'Eldiveni', bot: 'Botu' };
+  Object.entries(PIECE).forEach(([t, nm]) => {
+    addItem(`Deri ${nm}`, t, 'normal', [], 1);
+    addItem(`Zincir ${nm}`, t, 'magic', [], 30);
+    [['Plaka', ['war', 'kur']], ['Gölge', ['rog']], ['Bilge', ['mag']], ['Kutsal', ['pri']]].forEach(([set, c]) => addItem(`${set} ${nm}`, t, 'set', c, 70));
+  });
+  [['Klan Pelerini', 'pelerin', 'normal', 1], ['Savaş Pelerini', 'pelerin', 'magic', 50], ['Gümüş Kolye', 'kolye', 'magic', 30], ['Ejder Kolyesi', 'kolye', 'unique', 70],
+   ['Bakır Küpe', 'kupe', 'normal', 10], ['Yakut Küpe', 'kupe', 'rare', 60], ['Mana Küpesi', 'kupe', 'unique', 70],
+   ['Demir Yüzük', 'yuzuk', 'normal', 10], ['Güç Yüzüğü', 'yuzuk', 'rare', 60], ['Bilgelik Yüzüğü', 'yuzuk', 'unique', 70],
+   ['Deri Kemer', 'kemer', 'normal', 10], ['Savaşçı Kemeri', 'kemer', 'rare', 60]]
+    .forEach(([n, t, g, l]) => addItem(n, t, g, [], l));
+  const itemById = id => ITEMS.find(x => x.id === id);
+  const fits = (it, b) => (!it.cls.length || it.cls.includes(b.cls)) && it.lv <= b.lv;
+  const icoHTML = (t, g) => `<span class="ico ${g ? '' : 'empty'}" ${g ? `style="color:var(${GRADES[g][1]})"` : ''}><svg class="ic" aria-hidden="true"><use href="#s-${t}"/></svg></span>`;
+  const reqText = it => `Lv ${it.lv}${it.cls.length ? ' · ' + it.cls.map(c => CLASSES[c]).join(', ') : ' · Tüm sınıflar'}`;
+  function renderPicker() {
+    const b = state.build, i = state.pick, t = SLOT_TYPES[i];
+    document.getElementById('pk-title').textContent = `${SLOTS[i]} seç`;
+    const q = lower(document.getElementById('pk-q').value.trim());
+    const fit = document.getElementById('pk-fit').checked;
+    const cur = b.gear[i] && b.gear[i].id;
+    const list = ITEMS.filter(it => it.t === t && (!fit || fits(it, b)) && (!q || lower(it.n).includes(q)));
+    document.getElementById('pk-list').innerHTML = list.map(it => `
+      <button type="button" class="pk-item" role="option" data-item="${it.id}" aria-selected="${it.id === cur}">
+        ${icoHTML(it.t, it.g)}
+        <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${reqText(it)}</span></span>
+        <span class="grade" style="color:var(${GRADES[it.g][1]})">${GRADES[it.g][0]}</span>
+      </button>`).join('') || '<div class="empty">Bu yuvaya uygun eşya yok. Filtreyi kapatmayı dene.</div>';
+  }
+  function openPicker(i) {
+    state.pick = i;
+    document.getElementById('pk-q').value = '';
+    renderPicker();
+    document.getElementById('picker').hidden = false;
+    document.getElementById('pk-q').focus();
+  }
+  function closePicker() {
+    const i = state.pick;
+    document.getElementById('picker').hidden = true;
+    const back = document.querySelector(`[data-pick="${i}"]`);
+    if (back) back.focus();
+  }
+  /* AP: katsayı tablosu ve formül KO Bugda temel hesaplayıcısından (kaynak gösterilir, oyunla doğrulanacak).
+     Kademe: level < 10 → 0, 10–59 → 1, 60+ → 2 */
+  const AP_COEF = {
+    ROGUE: [{ dagger: .00015, bow: .00015 }, { dagger: .00025, bow: .00035 }, { dagger: .00032, bow: .00038 }],
+    WARRIOR: [{ axe: .00013 }, { axe: .00025 }, { axe: .00032 }],
+    PRIEST: [{ club: .00005, sword: 0 }, { club: .0002, sword: 0 }, { club: .00025, sword: .00025 }],
+    KURIAN: [{ sword: .0001 }, { sword: .0002 }, { sword: .0002 }],
+    MAGE: [{ staff: .0001 }, { staff: .00015 }, { staff: .00015 }]
+  };
+  const AP_TYPES = {
+    ASSASSIN: { l: 'Assassin', stat: 'DEX', cc: 'ROGUE', w: 'dagger', left: true, base: false },
+    ARCHER: { l: 'Archer', stat: 'DEX', cc: 'ROGUE', w: 'bow', left: false, base: false, subs: [['bow', 'Yay'], ['crossbow', 'Arbalet']] },
+    WARRIOR: { l: 'Warrior', stat: 'STR', cc: 'WARRIOR', w: 'axe', left: true, base: true, subs: [['onehanded', 'Tek elli'], ['twohanded', 'Çift elli']] },
+    PRIEST: { l: 'Priest', stat: 'STR', cc: 'PRIEST', w: 'club', left: false, base: true, subs: [['str', 'STR Battle Priest'], ['int', 'INT Battle Priest']] },
+    KURIAN: { l: 'Kurian', stat: 'STR', cc: 'KURIAN', w: 'sword', left: false, base: true },
+    MAGE: { l: 'Mage', stat: 'STR', cc: 'MAGE', w: 'staff', left: false, base: true }
+  };
+  const AP_DEFAULT = { war: 'WARRIOR', rog: 'ASSASSIN', mag: 'MAGE', pri: 'PRIEST', kur: 'KURIAN' };
+  function apCalc(a, level) {
+    const T = AP_TYPES[a.type];
+    const lv = Math.min(83, Math.max(1, level || 1));
+    const tier = (lv >= 10 ? 1 : 0) + (lv >= 60 ? 1 : 0);
+    const row = AP_COEF[T.cc][tier];
+    const k = row[T.w] ?? Object.values(row)[0] ?? 0;
+    const leftOn = T.left && !(a.type === 'WARRIOR' && a.sub === 'twohanded');
+    let right = a.r || 0, left = a.l || 0;
+    let baseAP = 0;
+    if (T.base && a.st > 150) { baseAP = a.st - 150; if (a.st === 160) baseAP--; }
+    const total = (a.st || 0) + (a.bo || 0);
+    if (a.wes) { right += 5; if (a.type === 'ASSASSIN' && left > 0) left += 3; }
+    let weapon = right;
+    if (leftOn) weapon += Math.floor(0.5 * left);
+    if (weapon < 3) weapon = 3;
+    const pct = (a.pc || 0) + (a.wolf ? 20 : 0);
+    let ap = Math.floor((pct + 100) / 100 * Math.floor(0.005 * weapon * (total + 40) + k * weapon * lv * total + 3)) + baseAP;
+    if (a.wes) ap += 1;
+    return { ap: Number.isFinite(ap) ? ap : 0, k, tier, leftOn, baseAP, total, pct, lv, statLabel: a.type === 'PRIEST' && a.sub === 'int' ? 'INT' : T.stat };
+  }
   const SLOTS = ['Silah', 'İkinci el', 'Kask', 'Zırh', 'Pantolon', 'Eldiven', 'Bot', 'Pelerin', 'Kolye', 'Küpe 1', 'Küpe 2', 'Yüzük 1', 'Yüzük 2', 'Kemer'];
   const newBuild = m => ({ cls: m.cls, lv: Math.max(1, m.lv || 1), reb: m.reb || 0, st: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, sk: [0, 0, 0, 0], gear: {} });
   const pools = b => {
@@ -1300,6 +1472,33 @@ section[data-tab].on{display:block}
     const skUsed = b.sk.reduce((a, x) => a + x, 0);
     return { stTot, skTot, stUsed, skUsed, stLeft: stTot - stUsed, skLeft: skTot - skUsed };
   };
+  function apSyncForm() {
+    const a = state.ap, T = AP_TYPES[a.type];
+    const typeSel = document.getElementById('ap-type');
+    if (!typeSel.options.length) typeSel.innerHTML = Object.entries(AP_TYPES).map(([k, v]) => `<option value="${k}">${v.l}</option>`).join('');
+    typeSel.value = a.type;
+    document.getElementById('ap-sub-wrap').hidden = !T.subs;
+    if (T.subs) {
+      const sub = document.getElementById('ap-sub');
+      sub.innerHTML = T.subs.map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
+      sub.value = a.sub;
+      document.getElementById('ap-sub-label').textContent = a.type === 'PRIEST' ? 'Battle Priest tipi' : 'Silah tipi';
+    }
+    document.getElementById('ap-r-label').textContent = a.type === 'ARCHER' ? 'Silah AP' : 'Sağ el silah AP';
+    document.getElementById('ap-l-wrap').hidden = !(T.left && !(a.type === 'WARRIOR' && a.sub === 'twohanded'));
+    const sl = a.type === 'PRIEST' && a.sub === 'int' ? 'INT' : T.stat;
+    document.getElementById('ap-st-label').textContent = `${sl} (statlarda)`;
+    document.getElementById('ap-bo-label').textContent = `${sl} (eşya bonusu)`;
+  }
+  function apRender() {
+    const b = state.build, res = apCalc(state.ap, b.lv), T = AP_TYPES[state.ap.type];
+    document.getElementById('ap-val').textContent = res.ap;
+    document.getElementById('ap-meta').textContent = `${T.l} · Lv ${b.lv === 83 && b.reb ? '83+' + b.reb : b.lv} · katsayı ${res.k} · toplam ${res.statLabel} ${res.total}${res.pct ? ` · +%${res.pct}` : ''}`;
+    document.getElementById('ap-tags').innerHTML =
+      (state.ap.wes ? '<span class="tag official">WES +5 AP</span>' : '') +
+      (state.ap.wolf ? '<span class="tag official">Wolf +%20</span>' : '') +
+      (res.baseAP > 0 ? `<span class="tag official">Base AP +${res.baseAP}</span>` : '');
+  }
   function renderBuild() {
     const m = me();
     if (!state.build || state.build.owner !== m.name) state.build = { owner: m.name, ...newBuild(m) };
@@ -1341,15 +1540,29 @@ section[data-tab].on{display:block}
     document.getElementById('b-sk-note').textContent = b.cls === 'kur'
       ? `${CLASSES.kur} ağaç adları kural tablosuna girilecek. Skill puanı level 10’da başlar.`
       : 'Skill puanı level 10’da başlar; master ağacı level 60’ta açılır.';
-    const gearEl = document.getElementById('b-gear');
-    if (!gearEl.children.length) gearEl.innerHTML = SLOTS.map((sl, i) => `
-      <div class="gear-slot"><label for="g-${i}">${sl}</label><input id="g-${i}" data-gear="${i}" type="text" placeholder="Eşya adı" autocomplete="off">
-        <select data-gup="${i}" aria-label="${sl} artı seviyesi">${Array.from({ length: 11 }, (_, n) => `<option value="${n}">+${n}</option>`).join('')}</select></div>`).join('');
-    SLOTS.forEach((sl, i) => { const g = b.gear[i] || {}; document.getElementById('g-' + i).value = g.name || ''; gearEl.querySelector(`[data-gup="${i}"]`).value = g.up || 0; });
+    document.getElementById('b-gear').innerHTML = SLOTS.map((sl, i) => {
+      const g = b.gear[i] || {}, it = g.id && itemById(g.id);
+      const warn = it && !fits(it, b);
+      return `<div class="gear-slot">
+        <button type="button" class="slot-btn" data-pick="${i}" aria-label="${sl}: ${it ? esc(it.n) : 'boş'}. Eşya seç">
+          ${icoHTML(SLOT_TYPES[i], it ? it.g : '')}
+          <span class="sl"><small>${sl}</small><b>${it ? esc(it.n) : 'Seç'}</b>${it ? `<em class="${warn ? 'bad' : ''}">${warn ? 'Sınıfına ya da levelına uygun değil' : `${GRADES[it.g][0]} · ${reqText(it)}`}</em>` : ''}</span>
+        </button>
+        <select data-gup="${i}" aria-label="${sl} artı seviyesi" ${it ? '' : 'disabled'}>${Array.from({ length: 11 }, (_, n) => `<option value="${n}" ${n === (g.up || 0) ? 'selected' : ''}>+${n}</option>`).join('')}</select>
+      </div>`;
+    }).join('');
     const err = document.getElementById('b-err');
     err.hidden = P.stLeft >= 0 && P.skLeft >= 0;
     err.textContent = `Dağıtılan puan bu level için fazla: ${Math.max(0, -P.stLeft)} stat, ${Math.max(0, -P.skLeft)} skill düşür.`;
     document.getElementById('b-save').disabled = !err.hidden;
+    if (!state.ap || state.ap.cls !== b.cls) {
+      const type = AP_DEFAULT[b.cls], T = AP_TYPES[type];
+      state.ap = { cls: b.cls, type, sub: T.subs ? T.subs[0][0] : '', r: 0, l: 0, st: 0, bo: 0, pc: 0, wes: false, wolf: false };
+      ['ap-r', 'ap-l', 'ap-st', 'ap-bo', 'ap-pc'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('ap-wes').checked = false; document.getElementById('ap-wolf').checked = false;
+      apSyncForm();
+    }
+    apRender();
     document.getElementById('b-rules').innerHTML = RULES.map(r => `<li><span>${r.k}</span><span class="tag ${r.ok ? 'official' : ''}">${r.v}${r.ok ? '' : ' · doğrulanacak'}</span></li>`).join('');
   }
 
@@ -1383,6 +1596,11 @@ section[data-tab].on{display:block}
     const rl = t.closest('[data-role]'); if (rl) { state.role = rl.dataset.role; render(); return; }
     const ik = t.closest('button[data-irk]'); if (ik) { state.irk = ik.dataset.irk; render(); return; }
     const cf = t.closest('[data-cls]'); if (cf) { state.cls = cf.dataset.cls; renderMembers(); return; }
+    const pk = t.closest('[data-pick]'); if (pk) { openPicker(+pk.dataset.pick); return; }
+    const pit = t.closest('[data-item]');
+    if (pit) { const it = itemById(pit.dataset.item), i = state.pick; state.build.gear[i] = { id: it.id, up: (state.build.gear[i] && state.build.gear[i].up) || 0 }; closePicker(); renderBuild(); document.querySelector(`[data-pick="${i}"]`).focus(); toast(`${it.n} takıldı`); return; }
+    if (t.closest('#pk-clear')) { delete state.build.gear[state.pick]; closePicker(); renderBuild(); return; }
+    if (t.closest('#pk-close') || t.id === 'picker') { closePicker(); return; }
     const stb = t.closest('[data-st]'); if (stb) { const b = state.build, P = pools(b); const d = +stb.dataset.d; if (d < 0 ? b.st[stb.dataset.st] > 0 : P.stLeft > 0) b.st[stb.dataset.st] += d; renderBuild(); return; }
     const skb = t.closest('[data-sk]'); if (skb) { const b = state.build, P = pools(b); const d = +skb.dataset.d, i = +skb.dataset.sk; if (d < 0 ? b.sk[i] > 0 : P.skLeft > 0) b.sk[i] += d; renderBuild(); return; }
     const blv = t.closest('[data-blv]'); if (blv) { state.build.lv = Math.max(1, Math.min(83, state.build.lv + (+blv.dataset.blv))); renderBuild(); return; }
@@ -1450,7 +1668,19 @@ section[data-tab].on{display:block}
   };
   document.getElementById('b-lv').addEventListener('input', setBuildNum('lv', 83, 1));
   document.getElementById('b-reb').addEventListener('input', setBuildNum('reb', REB_MAX, 0));
-  document.getElementById('b-gear').addEventListener('input', e => { const i = e.target.dataset.gear ?? e.target.dataset.gup; if (i === undefined) return; const g = state.build.gear[i] = state.build.gear[i] || {}; if (e.target.dataset.gear !== undefined) g.name = e.target.value; else g.up = +e.target.value; });
+  document.getElementById('b-gear').addEventListener('change', e => { const i = e.target.dataset.gup; if (i === undefined || !state.build.gear[i]) return; state.build.gear[i].up = +e.target.value; });
+  document.getElementById('pk-q').addEventListener('input', renderPicker);
+  document.getElementById('ap-form').addEventListener('input', e => {
+    if (e.target.tagName === 'SELECT') return;
+    const n = id => Math.max(0, parseInt(document.getElementById(id).value, 10) || 0);
+    Object.assign(state.ap, { r: n('ap-r'), l: n('ap-l'), st: n('ap-st'), bo: n('ap-bo'), pc: n('ap-pc'), wes: document.getElementById('ap-wes').checked, wolf: document.getElementById('ap-wolf').checked });
+    apRender();
+  });
+  document.getElementById('ap-form').addEventListener('submit', e => e.preventDefault());
+  document.getElementById('ap-type').addEventListener('change', e => { const T = AP_TYPES[e.target.value]; state.ap.type = e.target.value; state.ap.sub = T.subs ? T.subs[0][0] : ''; apSyncForm(); apRender(); });
+  document.getElementById('ap-sub').addEventListener('change', e => { state.ap.sub = e.target.value; apSyncForm(); apRender(); });
+  document.getElementById('pk-fit').addEventListener('change', renderPicker);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.getElementById('picker').hidden) closePicker(); });
   document.getElementById('pf-ts').addEventListener('input', e => { state.pf.ts = e.target.value; });
   document.getElementById('pf-level').addEventListener('input', e => { const v = parseInt(e.target.value, 10); if (v) { state.pf.lv = Math.max(1, Math.min(state.levelCap, v)); renderProfile(); } });
   document.getElementById('pf-reb').addEventListener('input', e => { const v = parseInt(e.target.value, 10); state.pf.reb = Math.max(0, Math.min(state.rebCap, v || 0)); });
