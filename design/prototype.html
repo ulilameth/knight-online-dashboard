@@ -336,6 +336,11 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .b-row .nm b{display:block;font:700 15px/1.1 var(--font-data);letter-spacing:.04em}
 .b-row .nm span{font-size:12.5px;color:var(--muted)}
 .b-row .meter{height:8px}
+.b-meter{display:flex;height:8px;border-radius:999px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.b-meter i{display:block;height:100%}
+.b-meter .base{background:var(--input-line)}
+.b-meter .add{background:var(--gold)}
+.b-ctl output small{display:block;font:500 11px/1 var(--font-data);color:var(--muted);margin-top:2px}
 .b-ctl{display:flex;align-items:center;gap:4px}
 .b-ctl button{width:36px;height:36px;border-radius:8px;border:1px solid var(--input-line);background:var(--surface-2);font:700 16px/1 var(--font-data);color:var(--fg)}
 .b-ctl button:disabled{opacity:.4;cursor:not-allowed}
@@ -685,6 +690,7 @@ section[data-tab].on{display:block}
         <div class="s12 panel">
           <div class="b-head">
             <div class="b-field"><label class="pf-label" for="b-cls" style="margin-top:0">Sınıf</label><select class="sel" id="b-cls"></select></div>
+            <div class="b-field"><label class="pf-label" for="b-race" style="margin-top:0">Irk</label><select class="sel" id="b-race"></select></div>
             <div class="b-field"><span class="pf-label" style="margin-top:0">Level</span>
               <div class="stepper sm"><button type="button" data-blv="-1" aria-label="Level azalt">−</button><input id="b-lv" type="number" min="1" max="83" inputmode="numeric" aria-label="Level"><button type="button" data-blv="1" aria-label="Level artır">+</button></div></div>
             <div class="b-field"><span class="pf-label" style="margin-top:0">Reb</span>
@@ -696,7 +702,7 @@ section[data-tab].on{display:block}
         <div class="s6 panel">
           <div class="panel-h"><h2>Statlar</h2><span class="sub" id="b-st-sub"></span></div>
           <div id="b-stats"></div>
-          <p class="muted" style="font-size:13px;margin:12px 0 0">Değerler sınıfın başlangıç statlarına eklenir. Tek stat en fazla 255 olabilir; reb puanları bu sınırın üstüne bonus olarak eklenir.</p>
+          <p class="muted" style="font-size:13px;margin:12px 0 0">Gri kısım ırkın başlangıç statı, altın kısım senin dağıttığın puan. Karakter oluştururken 10 bonus puan, sonra her level 3 puan gelir. Tek stat en fazla 255; reb puanları bu sınırın üstüne çıkabilir.</p>
         </div>
         <div class="s6 panel">
           <div class="panel-h"><h2>Skill ağaçları</h2><span class="sub" id="b-sk-sub"></span></div>
@@ -725,7 +731,7 @@ section[data-tab].on{display:block}
               <div class="ap-val num" id="ap-val">0</div>
               <div class="ap-meta" id="ap-meta"></div>
               <div class="ap-tags" id="ap-tags"></div>
-              <p class="muted" style="font-size:13px;margin:auto 0 0">Level yukarıdaki build’den gelir. Stat değerini oyundaki karakter penceresinden, bonussuz gir.</p>
+              <p class="muted" style="font-size:13px;margin:auto 0 0">Level ve stat yukarıdaki build’den gelir (başlangıç + dağıtılan). Stat alanını elle değiştirirsen öyle kalır.</p>
             </div>
           </div>
         </div>
@@ -1367,10 +1373,25 @@ section[data-tab].on{display:block}
     { k: 'Skill puanı başlangıcı', v: 'Level 10', ok: true },
     { k: 'Master skill', v: 'Level 60', ok: true },
     { k: 'Level başına skill puanı', v: '2', ok: false },
-    { k: 'Sınıf başlangıç statları', v: 'girilecek', ok: false },
+    { k: 'Oluşturmada bonus stat', v: '10', ok: true },
+    { k: 'Irk başlangıç statları', v: '8 ırk', ok: true },
+    { k: 'Kurian başlangıç statları', v: 'Porutu ile aynı', ok: false },
     { k: 'AP formülü ve katsayıları', v: 'KO Bugda', ok: false }
   ];
-  const STAT_PER_LV = 3, REB_STAT = 2, SKILL_START = 10, SKILL_PER_LV = 2, MASTER_LV = 60;
+  const STAT_PER_LV = 3, REB_STAT = 2, SKILL_START = 10, SKILL_PER_LV = 2, MASTER_LV = 60, CREATE_BONUS = 10, STAT_CAP = 255;
+  /* Irk başlangıç statları (toplam her ırkta 290). Kurian değerleri Porutu ile aynı varsayıldı: doğrulanacak */
+  const RACES = [
+    { id: 'arch', n: 'Arch Tuarek', side: 'karus', cls: ['war'], st: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
+    { id: 'tuarek', n: 'Tuarek', side: 'karus', cls: ['rog', 'pri'], st: { str: 60, hp: 60, dex: 70, int: 50, mp: 50 } },
+    { id: 'wrinkle', n: 'Wrinkle Tuarek', side: 'karus', cls: ['mag'], st: { str: 50, hp: 50, dex: 70, int: 70, mp: 50 } },
+    { id: 'puri', n: 'Puri Tuarek', side: 'karus', cls: ['mag', 'pri'], st: { str: 50, hp: 60, dex: 60, int: 70, mp: 50 } },
+    { id: 'kurian', n: 'Kurian', side: 'karus', cls: ['kur'], st: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 }, check: true },
+    { id: 'barb', n: 'Barbarian', side: 'el-morad', cls: ['war'], st: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
+    { id: 'erkek', n: 'El Moradian (erkek)', side: 'el-morad', cls: ['war', 'rog', 'mag', 'pri'], st: { str: 60, hp: 60, dex: 70, int: 50, mp: 50 } },
+    { id: 'kadin', n: 'El Moradian (kadın)', side: 'el-morad', cls: ['war', 'rog', 'mag', 'pri'], st: { str: 50, hp: 60, dex: 60, int: 70, mp: 50 } },
+    { id: 'porutu', n: 'Porutu', side: 'el-morad', cls: ['kur'], st: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } }
+  ];
+  const raceOptions = cls => RACES.filter(r => r.side === state.irk && r.cls.includes(cls));
   const STATS = [['str', 'STR', 'Güç'], ['hp', 'HP', 'Sağlık'], ['dex', 'DEX', 'Çeviklik'], ['int', 'INT', 'Zeka'], ['mp', 'MP', 'Büyü gücü']];
   const TREES = { war: ['Attack', 'Defense', 'Passion'], rog: ['Archery', 'Assassin', 'Explore'], mag: ['Flame', 'Glacier', 'Lightning'], pri: ['Heal', 'Buff', 'Debuff'], kur: ['1. ağaç', '2. ağaç', '3. ağaç'] };
   const GRADES = { normal: ['Normal', '--rank-member'], magic: ['Magic', '--c-war'], rare: ['Rare', '--c-pri'], unique: ['Unique', '--c-six'], set: ['Set', '--c-mag'] };
@@ -1464,9 +1485,9 @@ section[data-tab].on{display:block}
     return { ap: Number.isFinite(ap) ? ap : 0, k, tier, leftOn, baseAP, total, pct, lv, statLabel: a.type === 'PRIEST' && a.sub === 'int' ? 'INT' : T.stat };
   }
   const SLOTS = ['Silah', 'İkinci el', 'Kask', 'Zırh', 'Pantolon', 'Eldiven', 'Bot', 'Pelerin', 'Kolye', 'Küpe 1', 'Küpe 2', 'Yüzük 1', 'Yüzük 2', 'Kemer'];
-  const newBuild = m => ({ cls: m.cls, lv: Math.max(1, m.lv || 1), reb: m.reb || 0, st: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, sk: [0, 0, 0, 0], gear: {} });
+  const newBuild = m => ({ race: '', cls: m.cls, lv: Math.max(1, m.lv || 1), reb: m.reb || 0, st: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, sk: [0, 0, 0, 0], gear: {} });
   const pools = b => {
-    const stTot = STAT_PER_LV * (b.lv - 1) + REB_STAT * (b.lv === 83 ? b.reb : 0);
+    const stTot = CREATE_BONUS + STAT_PER_LV * (b.lv - 1) + REB_STAT * (b.lv === 83 ? b.reb : 0);
     const skTot = b.lv >= SKILL_START ? SKILL_PER_LV * (b.lv - SKILL_START + 1) : 0;
     const stUsed = Object.values(b.st).reduce((a, x) => a + x, 0);
     const skUsed = b.sk.reduce((a, x) => a + x, 0);
@@ -1490,6 +1511,13 @@ section[data-tab].on{display:block}
     document.getElementById('ap-st-label').textContent = `${sl} (statlarda)`;
     document.getElementById('ap-bo-label').textContent = `${sl} (eşya bonusu)`;
   }
+  function apAutoStat() {
+    if (!state.ap || state.ap.stManual) return;
+    const b = state.build, race = RACES.find(r => r.id === b.race);
+    const key = { STR: 'str', DEX: 'dex', INT: 'int' }[state.ap.type === 'PRIEST' && state.ap.sub === 'int' ? 'INT' : AP_TYPES[state.ap.type].stat];
+    state.ap.st = race.st[key] + b.st[key];
+    document.getElementById('ap-st').value = state.ap.st;
+  }
   function apRender() {
     const b = state.build, res = apCalc(state.ap, b.lv), T = AP_TYPES[state.ap.type];
     document.getElementById('ap-val').textContent = res.ap;
@@ -1503,6 +1531,7 @@ section[data-tab].on{display:block}
     const m = me();
     if (!state.build || state.build.owner !== m.name) state.build = { owner: m.name, ...newBuild(m) };
     const b = state.build;
+    if (!raceOptions(b.cls).some(r => r.id === b.race)) b.race = raceOptions(b.cls)[0].id;
     if (b.lv < 83) b.reb = 0;
     if (b.lv < MASTER_LV) b.sk[3] = 0;
     const P = pools(b);
@@ -1518,14 +1547,18 @@ section[data-tab].on{display:block}
     document.getElementById('b-sum').innerHTML =
       `<div class="b-pool ${P.stLeft < 0 ? 'over' : ''}"><b class="num">${P.stLeft}</b><span>Kalan stat · ${P.stTot}</span></div>` +
       `<div class="b-pool ${P.skLeft < 0 ? 'over' : ''}"><b class="num">${P.skLeft}</b><span>Kalan skill · ${P.skTot}</span></div>`;
-    document.getElementById('b-st-sub').textContent = `Level ${lvLabel} · ${P.stUsed} puan dağıtıldı`;
-    const maxSt = Math.max(1, ...Object.values(b.st));
-    document.getElementById('b-stats').innerHTML = STATS.map(([k, ab, nm]) => `
-      <div class="b-row">
+    const race = RACES.find(r => r.id === b.race);
+    document.getElementById('b-race').innerHTML = raceOptions(b.cls).map(r => `<option value="${r.id}" ${r.id === b.race ? 'selected' : ''}>${r.n}</option>`).join('');
+    document.getElementById('b-st-sub').textContent = `${race.n} · Level ${lvLabel} · ${P.stUsed} puan dağıtıldı`;
+    const cap = STAT_CAP + REB_STAT * (b.lv === 83 ? b.reb : 0);
+    document.getElementById('b-stats').innerHTML = STATS.map(([k, ab, nm]) => {
+      const base = race.st[k], add = b.st[k], total = base + add;
+      return `<div class="b-row">
         <div class="nm"><b>${ab}</b><span>${nm}</span></div>
-        <div class="meter" aria-hidden="true"><i style="width:${b.st[k] / maxSt * 100}%"></i></div>
-        <div class="b-ctl"><button type="button" data-st="${k}" data-d="-1" aria-label="${ab} azalt" ${b.st[k] ? '' : 'disabled'}>−</button><output class="num">${b.st[k]}</output><button type="button" data-st="${k}" data-d="1" aria-label="${ab} artır" ${P.stLeft > 0 ? '' : 'disabled'}>+</button></div>
-      </div>`).join('');
+        <div class="b-meter" role="img" aria-label="${ab}: başlangıç ${base}, eklenen ${add}, toplam ${total}"><i class="base" style="width:${base / STAT_CAP * 100}%"></i><i class="add" style="width:${Math.min(add, STAT_CAP - base) / STAT_CAP * 100}%"></i></div>
+        <div class="b-ctl"><button type="button" data-st="${k}" data-d="-1" aria-label="${ab} azalt" ${add ? '' : 'disabled'}>−</button><output class="num" title="${base} + ${add}">${total}<small>${base}+${add}</small></output><button type="button" data-st="${k}" data-d="1" aria-label="${ab} artır" ${P.stLeft > 0 && total < cap ? '' : 'disabled'}>+</button></div>
+      </div>`;
+    }).join('');
     const names = [...TREES[b.cls], 'Master'];
     const maxSk = Math.max(1, ...b.sk);
     document.getElementById('b-sk-sub').textContent = `${P.skUsed} puan dağıtıldı`;
@@ -1562,6 +1595,7 @@ section[data-tab].on{display:block}
       document.getElementById('ap-wes').checked = false; document.getElementById('ap-wolf').checked = false;
       apSyncForm();
     }
+    apAutoStat();
     apRender();
     document.getElementById('b-rules').innerHTML = RULES.map(r => `<li><span>${r.k}</span><span class="tag ${r.ok ? 'official' : ''}">${r.v}${r.ok ? '' : ' · doğrulanacak'}</span></li>`).join('');
   }
@@ -1673,12 +1707,14 @@ section[data-tab].on{display:block}
   document.getElementById('ap-form').addEventListener('input', e => {
     if (e.target.tagName === 'SELECT') return;
     const n = id => Math.max(0, parseInt(document.getElementById(id).value, 10) || 0);
+    if (e.target.id === 'ap-st') state.ap.stManual = true;
     Object.assign(state.ap, { r: n('ap-r'), l: n('ap-l'), st: n('ap-st'), bo: n('ap-bo'), pc: n('ap-pc'), wes: document.getElementById('ap-wes').checked, wolf: document.getElementById('ap-wolf').checked });
     apRender();
   });
   document.getElementById('ap-form').addEventListener('submit', e => e.preventDefault());
-  document.getElementById('ap-type').addEventListener('change', e => { const T = AP_TYPES[e.target.value]; state.ap.type = e.target.value; state.ap.sub = T.subs ? T.subs[0][0] : ''; apSyncForm(); apRender(); });
-  document.getElementById('ap-sub').addEventListener('change', e => { state.ap.sub = e.target.value; apSyncForm(); apRender(); });
+  document.getElementById('ap-type').addEventListener('change', e => { const T = AP_TYPES[e.target.value]; state.ap.type = e.target.value; state.ap.sub = T.subs ? T.subs[0][0] : ''; apSyncForm(); apAutoStat(); apRender(); });
+  document.getElementById('ap-sub').addEventListener('change', e => { state.ap.sub = e.target.value; apSyncForm(); apAutoStat(); apRender(); });
+  document.getElementById('b-race').addEventListener('change', e => { state.build.race = e.target.value; renderBuild(); });
   document.getElementById('pk-fit').addEventListener('change', renderPicker);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.getElementById('picker').hidden) closePicker(); });
   document.getElementById('pf-ts').addEventListener('input', e => { state.pf.ts = e.target.value; });

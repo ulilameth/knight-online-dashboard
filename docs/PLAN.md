@@ -122,16 +122,31 @@ KO Bugda'nın eşya ve formül verisi onların içeriği; panele kopyalanmaz. Pa
 
 | Kural | Değer | Durum |
 |---|---|---|
+| Karakter oluştururken bonus stat | 10 | Doğrulandı |
 | Level başına stat puanı | 3 | Doğrulandı |
 | Reb başına bonus stat | +2 (255 sınırının üstüne) | Doğrulandı |
 | Tek stat sınırı | 255 | Doğrulandı |
 | Skill puanı başlangıcı | Level 10 | Doğrulandı |
 | Master skill | Level 60 | Doğrulandı |
 | Level başına skill puanı | 2 | Doğrulanacak |
-| Sınıf başlangıç statları | (girilecek) | Doğrulanacak |
+| Irk başlangıç statları | aşağıdaki tablo | Doğrulandı (Kurian hariç) |
 | Skill ağaçları | Warrior: Attack, Defense, Passion · Rogue: Archery, Assassin, Explore · Mage: Flame, Glacier, Lightning · Priest: Heal, Buff, Debuff · Kurian/Porutu: girilecek | Kurian/Porutu doğrulanacak |
 
-Hesap: dağıtılabilir stat = 3 × (level − 1) + 2 × reb; dağıtılabilir skill = level ≥ 10 ise 2 × (level − 9).
+Başlangıç statları ırka bağlıdır (her ırkta toplam 290). Dağıtılan puanlar bunların üstüne eklenir; ekranda "başlangıç + eklenen = toplam" gösterilir.
+
+| Irk | Taraf | Sınıflar | STR | HP | DEX | INT | MP |
+|---|---|---|---|---|---|---|---|
+| Arch Tuarek | Karus | Warrior | 65 | 65 | 60 | 50 | 50 |
+| Tuarek | Karus | Rogue, Priest | 60 | 60 | 70 | 50 | 50 |
+| Wrinkle Tuarek | Karus | Mage | 50 | 50 | 70 | 70 | 50 |
+| Puri Tuarek | Karus | Mage, Priest | 50 | 60 | 60 | 70 | 50 |
+| Kurian | Karus | Kurian | 65 | 65 | 60 | 50 | 50 (Porutu ile aynı varsayıldı, doğrulanacak) |
+| Barbarian | El Morad | Warrior | 65 | 65 | 60 | 50 | 50 |
+| El Moradian (erkek) | El Morad | Warrior, Rogue, Mage, Priest | 60 | 60 | 70 | 50 | 50 |
+| El Moradian (kadın) | El Morad | Warrior, Rogue, Mage, Priest | 50 | 60 | 60 | 70 | 50 |
+| Porutu | El Morad | Porutu | 65 | 65 | 60 | 50 | 50 |
+
+Hesap: dağıtılabilir stat = 10 + 3 × (level − 1) + 2 × reb; toplam stat = ırk başlangıcı + dağıtılan, en fazla 255 (reb puanları bu sınırın üstüne çıkabilir); dağıtılabilir skill = level ≥ 10 ise 2 × (level − 9). AP panelindeki stat alanı build'deki toplamdan otomatik dolar.
 
 **AP hesabı.** Formül ve katsayı tablosu KO Bugda'nın temel hesaplayıcısından alındı (klan lideri paylaştı); panelde kendi kodumuzla yazıldı, kaynağı ekranda belirtilir, oyun içi değerle doğrulanacak. Prototipteki uygulama, paylaşılan hesapla 20.000 rastgele girdide aynı sonucu veriyor.
 - Hesap tipleri: Assassin (DEX, sol el var), Archer (DEX, yay/arbalet), Warrior (STR, tek/çift elli; çift elde sol el yok), Priest (STR ya da INT Battle Priest), Kurian (STR), Mage (STR).
@@ -179,7 +194,7 @@ Tek migration (`supabase/migrations/0001_init.sql`) Faz 0'da yazılır; Faz 1 ot
 
 ```
 profiles            id (auth.users), ts_nick?, yetki, son_giris?, created_at
-characters          id, profile_id?, ad (unique), sinif, level?, reb (0-10), rutbe, durum, ana_karakter, notlar, katilma_tarihi, guncellendi_at, guncelleyen
+characters          id, profile_id?, ad (unique), sinif, irk_turu?, level?, reb (0-10), rutbe, durum, ana_karakter, notlar, katilma_tarihi, guncellendi_at, guncelleyen
 character_changes   id, character_id, alan (sinif | level | reb | ...), eski, yeni, degistiren, created_at
 hazirlik            profile_id (pk), otp, on_kayit, sunucu_secimi, karakter_adi, klana_katildi, updated_at
 milestones          id, sira, baslik, baslangic, bitis?, saat_belli, aciklama, kaynak_url
@@ -192,12 +207,13 @@ clan_settings       tek satır: klan_adi, yedek_ad?, monogram, irk (karus | el_m
 invite_codes        id, kod_hash (unique), son_dort, rutbe (uye | aday), max_kullanim, kullanim, bitis, aktif, not, olusturan, created_at
 invite_redemptions  id, code_id, profile_id, created_at
 password_resets     id, profile_id, kod_hash, bitis, kullanildi_at?, olusturan, created_at
-builds              id, character_id?, ad, sinif, level, reb, statlar jsonb {str,hp,dex,int,mp}, skiller int[4] (3 ağaç + master), ekipman jsonb {yuva: {item_id, arti}}, ap_girdileri jsonb, paylasim (klan | yetkili), sablon bool, olusturan, updated_at
+builds              id, character_id?, ad, sinif, irk_turu, level, reb, statlar jsonb {str,hp,dex,int,mp}, skiller int[4] (3 ağaç + master), ekipman jsonb {yuva: {item_id, arti}}, ap_girdileri jsonb, paylasim (klan | yetkili), sablon bool, olusturan, updated_at
 items               id, dis_id? (ör. legacyId), ad, kategori, yuva, el_tipi, tek_elli bool, siniflar text[] (warrior | rogue | mage | priest | kurian; boş = hepsi), gerekli_level, gerekli_str, gerekli_hp, gerekli_dex, gerekli_int, gerekli_mp, derece (normal | magic | rare | unique | set), set_id?, gorsel_yolu?, not, kaynak, ekleyen, updated_at
 item_stats          item_id + arti (0-10) (pk), ap, diger jsonb       -- artı seviyesine göre değerler
 item_sets           id, ad, bonuslar jsonb
 game_rules          anahtar (pk), deger jsonb, dogrulandi bool, kaynak?   -- stat_per_level, reb_bonus_stat, stat_cap, skill_start_level, skill_per_level, master_level, sinif_baslangic_statlari
 class_trees         sinif, sira (1-4), ad                              -- ör. mage: Flame, Glacier, Lightning, Master
+race_stats          irk_turu (pk), taraf (karus | el_morad), siniflar text[], str, hp, dex, int, mp, dogrulandi bool
 ```
 
 Seed: `clan_settings` → `klan_adi = 'L4BEL'`, `monogram = 'L4'`, `ts_adres = 'L4B'`, `level_siniri = 80`, `reb_siniri = 0`. Klan adı kodda sabit yazılmaz; başlık, arma ve sayfa başlıkları bu satırdan okunur.
@@ -321,5 +337,5 @@ Klan adı netleşti: **L4BEL**.
 5. Davet kodları varsayılan olarak kaç gün geçerli olsun, kaç kişi kullanabilsin? (Öneri: 7 gün, 25 kullanım)
 6. Haftalık etkinlik saatleri sunucu açılınca belli olacak; prototipteki saatler örnek.
 7. TeamSpeak sunucusunda (L4B) yönetici erişiminiz var mı? Varsa duyurular TS'e otomatik gönderilebilir, ileride kim TS'te bağlı ya da AFK panelde görünebilir.
-8. Karakter tasarımı kuralları: level başına skill puanı (2 mi?), sınıfların başlangıç statları ve Kurian/Porutu skill ağaçlarının adları. Klandan deneyimli biri doğrulayabilir mi?
+8. Karakter tasarımı kuralları: level başına skill puanı (2 mi?), Kurian'ın başlangıç statları (Porutu ile aynı mı?) ve Kurian/Porutu skill ağaçlarının adları. Klandan deneyimli biri doğrulayabilir mi?
 9. Eşya verisi: KO Bugda'dan eşya listesini kullanma izni alınabilir mi? Alınırsa içe aktarma hazır; alınmazsa katalog yöneticiler tarafından doldurulur.
