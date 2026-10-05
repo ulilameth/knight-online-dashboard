@@ -1,0 +1,1140 @@
+<title>Knight Online Klan Paneli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Grenze:wght@600;700&display=swap">
+<style>
+/* Layout: çelik tonlu komuta panosu. Üstte klan arması + sekme rayı, içerik 12 kolonluk ızgarada; tek cesur an geri sayım. */
+:root{
+  color-scheme: dark;
+  --bg:#0e1116;
+  --surface:#161a21;
+  --surface-2:#1e232c;
+  --line:#2a303a;
+  --hatch:rgba(212,168,79,.05);
+  --fg:#ece8e0;
+  --fg-2:#bcc2cb;
+  --muted:#8c949f;
+  --gold:#d4a84f;
+  --gold-soft:rgba(212,168,79,.14);
+  --on-gold:#1a1408;
+  --good:#3fb35f; --good-soft:rgba(63,179,95,.18);
+  --warn:#e2a72e; --warn-soft:rgba(226,167,46,.18);
+  --crit:#e0605a; --crit-soft:rgba(224,96,90,.18);
+  --idle-soft:rgba(140,148,159,.18);
+  --c-war:#3987e5; --c-rog:#d95926; --c-mag:#199e70; --c-pri:#c98500; --c-kur:#d55181;
+  --on-series:#10141a;
+  --shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 8px 24px rgba(0,0,0,.25);
+  --font-display:"Grenze", Georgia, "Times New Roman", serif;
+  --font-body:"Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --bg:#eceff3; --surface:#ffffff; --surface-2:#f3f5f8; --line:#d6dbe2; --hatch:rgba(138,97,16,.05);
+    --fg:#141820; --fg-2:#3b4350; --muted:#5f6874;
+    --gold:#8a6110; --gold-soft:rgba(138,97,16,.10); --on-gold:#ffffff;
+    --good:#1f8a3c; --good-soft:rgba(31,138,60,.13);
+    --warn:#a66f00; --warn-soft:rgba(214,150,10,.16);
+    --crit:#c43c37; --crit-soft:rgba(196,60,55,.12);
+    --idle-soft:rgba(95,104,116,.13);
+    --c-war:#2a78d6; --c-rog:#eb6834; --c-mag:#1baf7a; --c-pri:#eda100; --c-kur:#e87ba4;
+    --shadow:0 1px 2px rgba(20,24,32,.06), 0 6px 20px rgba(20,24,32,.05);
+  }
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --bg:#eceff3; --surface:#ffffff; --surface-2:#f3f5f8; --line:#d6dbe2; --hatch:rgba(138,97,16,.05);
+  --fg:#141820; --fg-2:#3b4350; --muted:#5f6874;
+  --gold:#8a6110; --gold-soft:rgba(138,97,16,.10); --on-gold:#ffffff;
+  --good:#1f8a3c; --good-soft:rgba(31,138,60,.13);
+  --warn:#a66f00; --warn-soft:rgba(214,150,10,.16);
+  --crit:#c43c37; --crit-soft:rgba(196,60,55,.12);
+  --idle-soft:rgba(95,104,116,.13);
+  --c-war:#2a78d6; --c-rog:#eb6834; --c-mag:#1baf7a; --c-pri:#eda100; --c-kur:#e87ba4;
+  --shadow:0 1px 2px rgba(20,24,32,.06), 0 6px 20px rgba(20,24,32,.05);
+}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--fg);font:400 15px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:0 56px}
+@media (min-width:760px){.wrap{padding-inline:28px}}
+
+/* ---------- Üst bar ---------- */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding-block:18px 14px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand svg{flex:none}
+.brand-name{font:700 26px/1 var(--font-display);letter-spacing:.01em}
+.brand-sub{font:600 12.5px/1.2 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.ctl-label{font:600 11.5px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ctl{display:flex;align-items:center;gap:8px}
+.seg{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:6px 11px;border-radius:6px;font:600 14px/1 var(--font-data);letter-spacing:.02em;color:var(--fg-2)}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+.me{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold);font:700 13px/1 var(--font-data)}
+.me b{font:600 14px/1 var(--font-data)}
+.me span{font:500 12.5px/1 var(--font-data);color:var(--muted)}
+
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs-in{display:flex;gap:2px;min-width:max-content}
+.tab{border:0;background:transparent;padding:12px 14px 11px;border-bottom:2px solid transparent;font:600 15px/1 var(--font-body);color:var(--fg-2)}
+.tab:hover{color:var(--fg)}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--gold)}
+.proto-note{display:flex;gap:8px;align-items:flex-start;margin-block:14px 6px;font-size:13px;color:var(--muted);max-width:90ch}
+.proto-note i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-top:6px}
+
+/* ---------- Sayfa başlıkları ---------- */
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-block:22px 16px}
+.page-head h1{margin:0;font:700 34px/1.05 var(--font-display);text-wrap:balance}
+.page-head p{margin:6px 0 0;color:var(--fg-2);max-width:65ch}
+.eyebrow{font:600 12px/1 var(--font-data);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- Izgara ve paneller ---------- */
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.s12{grid-column:span 12}.s7{grid-column:span 7}.s5{grid-column:span 5}.s8{grid-column:span 8}.s4{grid-column:span 4}
+@media (max-width:960px){.s7,.s5,.s8,.s4{grid-column:span 12}}
+.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0;box-shadow:var(--shadow)}
+.panel-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:14px}
+.panel-h h2{margin:0;font:600 17px/1.2 var(--font-body)}
+.panel-h .sub{font-size:13px;color:var(--muted)}
+
+/* ---------- Butonlar, etiketler ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface-2);padding:8px 12px;border-radius:8px;font:600 14px/1 var(--font-data);letter-spacing:.02em}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
+.btn svg{width:14px;height:14px}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font:600 12px/1.5 var(--font-data);letter-spacing:.04em;background:var(--surface-2);color:var(--fg-2);border:1px solid var(--line);white-space:nowrap}
+.tag.official{background:var(--gold-soft);border-color:transparent;color:var(--gold)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font:600 13px/1.3 var(--font-data);white-space:nowrap;color:var(--fg)}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.good{background:var(--good-soft)}.pill.good::before{background:var(--good)}
+.pill.warn{background:var(--warn-soft)}.pill.warn::before{background:var(--warn)}
+.pill.crit{background:var(--crit-soft)}.pill.crit::before{background:var(--crit)}
+.pill.idle{background:var(--idle-soft)}.pill.idle::before{background:var(--muted)}
+.cls{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.cls i{width:10px;height:10px;border-radius:3px;flex:none}
+.c-war{background:var(--c-war)}.c-rog{background:var(--c-rog)}.c-mag{background:var(--c-mag)}.c-pri{background:var(--c-pri)}.c-kur{background:var(--c-kur)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- Geri sayım (tek cesur an) ---------- */
+.hero{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--surface);
+  background-image:repeating-linear-gradient(135deg,var(--hatch) 0 1px,transparent 1px 10px);
+  padding:26px clamp(18px,3vw,32px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:24px;box-shadow:var(--shadow)}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}}
+.hero .eyebrow{color:var(--gold)}
+.hero h2{margin:8px 0 0;font:700 clamp(22px,3vw,30px)/1.1 var(--font-display);text-wrap:balance}
+.count{display:flex;flex-wrap:wrap;gap:clamp(10px,3vw,34px);margin-top:18px}
+.unit{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.unit b{font:700 clamp(48px,9vw,104px)/.85 var(--font-display);color:var(--gold);font-variant-numeric:tabular-nums;min-width:1.15em}
+.unit span{font:600 12.5px/1 var(--font-data);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.when{margin-top:18px;font:600 16px/1.3 var(--font-data);letter-spacing:.02em;color:var(--fg-2)}
+.next{align-self:stretch;display:flex;flex-direction:column;justify-content:space-between;gap:14px;border-left:1px solid var(--line);padding-left:24px}
+@media (max-width:860px){.next{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:18px}}
+.next h3{margin:6px 0 2px;font:600 19px/1.25 var(--font-body)}
+.next p{margin:0;color:var(--fg-2);font-size:14px}
+.next .rel{font:600 15px/1.2 var(--font-data);color:var(--gold);margin-top:6px}
+
+/* ---------- Açılış aşamaları ---------- */
+.phases{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.phases{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media (max-width:520px){.phases{grid-template-columns:minmax(0,1fr)}}
+.phase{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.phase.current{border-color:var(--gold);background:linear-gradient(var(--gold-soft),var(--gold-soft)),var(--surface)}
+.phase.done{opacity:.7}
+.phase .n{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.phase .n b{font:700 22px/1 var(--font-display);color:var(--gold)}
+.phase h3{margin:0;font:600 16px/1.25 var(--font-body)}
+.phase .d{font:600 14px/1.3 var(--font-data);color:var(--fg-2)}
+.phase .x{font-size:13px;color:var(--muted)}
+
+/* ---------- Hazırlık ---------- */
+.prep-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,170px) 56px;gap:14px;align-items:center;padding-block:11px;border-bottom:1px solid var(--line)}
+.prep-row:last-of-type{border-bottom:0}
+.prep-row h3{margin:0;font:600 15px/1.3 var(--font-body)}
+.prep-row p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.meter{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.meter i{display:block;height:100%;background:var(--gold);border-radius:999px}
+.prep-n{font:600 15px/1 var(--font-data);text-align:right}
+.locked{display:inline-flex;align-items:center;gap:6px;font:600 13px/1.2 var(--font-data);color:var(--muted)}
+.locked svg{width:13px;height:13px}
+.mine{margin-top:16px;padding:14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.mine h3{margin:0 0 10px;font:600 14px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+@media (max-width:520px){.checks{grid-template-columns:minmax(0,1fr)}}
+.check{display:flex;align-items:center;gap:9px;font-size:14px}
+.check input{width:17px;height:17px;accent-color:var(--gold);margin:0}
+.check.dis{color:var(--muted)}
+
+/* ---------- Listeler ---------- */
+.list{list-style:none;margin:0;padding:0}
+.item{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.date{display:flex;flex-direction:column;align-items:center;justify-content:center;width:48px;height:50px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
+.date b{font:700 21px/1 var(--font-display)}
+.date span{font:600 11px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.item h3{margin:0;font:600 15px/1.3 var(--font-body)}
+.item p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.ann{padding-block:14px;border-bottom:1px solid var(--line)}
+.ann:last-child{border-bottom:0}
+.ann h3{margin:0;font:600 16px/1.3 var(--font-body);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ann h3 svg{width:14px;height:14px;color:var(--gold)}
+.ann p{margin:6px 0 8px;color:var(--fg-2);max-width:68ch}
+.ann .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+
+/* ---------- İstatistik kutuları ---------- */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile .v{font:600 36px/1 var(--font-data);margin-top:10px}
+.tile .v small{font-size:18px;color:var(--muted);font-weight:500}
+.tile .s{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* ---------- Grafikler ---------- */
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:grid;grid-template-columns:118px minmax(0,1fr) 46px;gap:12px;align-items:center}
+.bar-row .lab{font:600 14px/1.2 var(--font-data);letter-spacing:.02em}
+.bar-row .lab small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.track{position:relative;height:14px;border-radius:0 4px 4px 0;background:
+  linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/25% 100% repeat-x}
+.track i{position:absolute;inset:2px auto 2px 0;background:var(--gold);border-radius:0 4px 4px 0}
+.bar-row .val{font:600 15px/1 var(--font-data);text-align:right}
+.axis{display:grid;grid-template-columns:118px minmax(0,1fr) 46px;gap:12px;margin-top:4px}
+.axis div{display:flex;justify-content:space-between;font:500 11.5px/1 var(--font-data);color:var(--muted)}
+.hitrow{cursor:default;border-radius:6px}
+.hitrow:hover .track i,.hitrow:focus-visible .track i{filter:brightness(1.12)}
+.stackbar{display:flex;gap:2px;height:26px;border-radius:6px;overflow:hidden}
+.stackbar span{display:flex;align-items:center;justify-content:center;font:700 13px/1 var(--font-data);color:var(--on-series);min-width:0}
+.roster-sum{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px 40px}
+@media (max-width:860px){.roster-sum{grid-template-columns:minmax(0,1fr)}}
+.ranks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.ranks div{padding:8px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
+.ranks b{display:block;font:600 22px/1 var(--font-data)}
+.ranks span{font:600 12px/1 var(--font-data);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ranks .lead span{color:var(--gold)}
+@media (max-width:520px){.ranks{gap:6px}.ranks div{padding:8px 6px}.ranks span{font-size:11px;letter-spacing:.02em}}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font:600 14px/1.2 var(--font-data)}
+.legend .cls b{font-weight:600}
+.legend .cls span{color:var(--muted);font-weight:500}
+#tip{position:fixed;z-index:30;pointer-events:none;background:var(--fg);color:var(--bg);font:600 13px/1.35 var(--font-data);padding:7px 10px;border-radius:7px;max-width:240px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+
+/* ---------- Üyeler ---------- */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.search{display:flex;align-items:center;gap:8px;padding:0 10px;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);flex:1 1 220px;min-width:0;max-width:320px}
+.search svg{width:15px;height:15px;color:var(--muted);flex:none}
+.search input{border:0;background:transparent;outline:0;width:100%;min-width:0;height:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 11px;font:600 13.5px/1 var(--font-data);color:var(--fg-2);display:inline-flex;gap:6px;align-items:center}
+.chip[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);border-color:var(--muted)}
+.chip i{width:9px;height:9px;border-radius:2px}
+select.sel{height:38px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);padding:0 10px;font:600 14px/1 var(--font-data)}
+.table-wrap{overflow-x:auto;margin-inline:-20px;padding-inline:20px}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th{text-align:left;font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:hover{background:var(--surface-2)}
+td.name b{display:block;font-weight:600}
+td.name span{font-size:12.5px;color:var(--muted)}
+.rank-lead{color:var(--gold);font-weight:600}
+.pips{display:flex;gap:5px}
+.pip{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;border:1px solid var(--line);color:var(--muted)}
+.pip svg{width:12px;height:12px}
+.pip.on{background:var(--good-soft);border-color:transparent;color:var(--good)}
+.pip.off{background:var(--crit-soft);border-color:transparent;color:var(--crit)}
+.att{display:flex;align-items:center;gap:8px}
+.att .meter{width:64px;height:6px}
+.att .meter i{background:var(--fg-2)}
+.icon-btn{border:1px solid var(--line);background:transparent;border-radius:7px;width:30px;height:30px;display:grid;place-items:center;color:var(--fg-2)}
+.icon-btn svg{width:14px;height:14px}
+.empty{padding:28px 0;text-align:center;color:var(--muted)}
+
+/* ---------- Etkinlikler ---------- */
+.ev-layout{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.ev-layout{grid-template-columns:minmax(0,1fr)}}
+.ev-group{font:600 12px/1 var(--font-data);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.ev-group:first-child{margin-top:0}
+.ev-item{width:100%;text-align:left;display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px;border-radius:10px;border:1px solid transparent;background:transparent}
+.ev-item:hover{background:var(--surface-2)}
+.ev-item[aria-current="true"]{border-color:var(--gold);background:var(--gold-soft)}
+.ev-item h3{margin:0;font:600 14.5px/1.3 var(--font-body)}
+.ev-item p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.ev-item .cnt{font:600 14px/1 var(--font-data)}
+.detail h2{margin:6px 0 4px;font:700 28px/1.1 var(--font-display);text-wrap:balance}
+.detail .when2{font:600 15px/1.3 var(--font-data);color:var(--fg-2)}
+.detail .desc{color:var(--fg-2);margin:10px 0 0;max-width:65ch}
+.summary{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.bulk{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.roster{list-style:none;margin:0;padding:0}
+.roster li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;padding-block:9px;border-bottom:1px solid var(--line)}
+.roster li:last-child{border-bottom:0}
+.roster .who{display:flex;align-items:center;gap:10px;min-width:0}
+.roster .who b{font-weight:600}
+.mark{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+.mark button{border:0;background:transparent;border-radius:6px;padding:5px 9px;font:600 13px/1 var(--font-data);color:var(--muted)}
+.mark button[aria-pressed="true"][data-s="present"]{background:var(--good-soft);color:var(--fg)}
+.mark button[aria-pressed="true"][data-s="late"]{background:var(--warn-soft);color:var(--fg)}
+.mark button[aria-pressed="true"][data-s="excused"]{background:var(--idle-soft);color:var(--fg)}
+.mark button[aria-pressed="true"][data-s="absent"]{background:var(--crit-soft);color:var(--fg)}
+.callout{padding:14px 16px;border-radius:10px;background:var(--surface-2);border:1px dashed var(--line);color:var(--fg-2);font-size:14px}
+.top5 li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding-block:8px;border-bottom:1px solid var(--line)}
+.top5 li:last-child{border-bottom:0}
+.top5 .rk{font:700 16px/1 var(--font-display);color:var(--muted)}
+
+/* ---------- Takvim ---------- */
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-nav h2{margin:0;min-width:9ch;text-align:center;font:700 22px/1 var(--font-display)}
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.dow{padding:8px;font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface-2)}
+.day{min-height:92px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:4px;min-width:0}
+.day.out{background:var(--surface-2)}
+.day.out .dn{color:var(--muted);opacity:.6}
+.dn{font:600 13px/22px var(--font-data);width:22px;text-align:center}
+.day.today .dn{background:var(--gold);color:var(--on-gold);border-radius:50%}
+.ev{display:block;width:100%;text-align:left;border:0;border-radius:5px;padding:3px 6px;background:var(--surface-2);font:600 12.5px/1.25 var(--font-data);color:var(--fg)}
+.day.out .ev{background:var(--surface)}
+.ev .t{color:var(--muted);margin-right:4px;font-weight:500}
+.ev.official{background:var(--gold-soft);color:var(--gold)}
+.ev.official .t{color:var(--gold)}
+.ev:hover{filter:brightness(1.1)}
+.agenda{display:none}
+@media (max-width:640px){.month-wrap{display:none}.agenda{display:block}}
+.ag-day{padding-block:10px;border-bottom:1px solid var(--line)}
+.ag-day:last-child{border-bottom:0}
+.ag-day h3{margin:0 0 6px;font:600 14px/1 var(--font-data);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ag-day.today h3{color:var(--gold)}
+.ag-day .ev{margin-top:4px;padding:7px 9px;font-size:14px}
+.sched td,.sched th{padding-inline:6px}
+.form{display:grid;gap:10px;margin-bottom:10px;padding:14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.form label{font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.form input[type="text"],.form textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:9px 10px;margin-top:6px}
+.form textarea{min-height:76px;resize:vertical}
+.form .row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}
+.form .opts{display:flex;flex-wrap:wrap;gap:8px 18px}
+
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:9px;font:600 14px/1.3 var(--font-data);box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:calc(100% - 32px)}
+
+/* ---------- Görünüm anahtarları ---------- */
+body.role-member .officer-only{display:none!important}
+body.phase-pre [data-when="post"],body.phase-post [data-when="pre"]{display:none!important}
+section[data-tab]{display:none}
+section[data-tab].on{display:block}
+@media (prefers-reduced-motion:no-preference){section[data-tab].on{animation:rise .25s ease-out}}
+@keyframes rise{from{transform:translateY(4px)}to{transform:none}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-lock" viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7.5" rx="1.6" fill="currentColor"/><path d="M5.3 7V5.1a2.7 2.7 0 0 1 5.4 0V7" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 16 16"><path d="M9.8 1.8l4.4 4.4-2.1.7-2.4 2.4.3 3.1-1.4 1.4-2.6-2.6L3 14.2l-1.2-.1L1.7 13l3-3-2.6-2.6 1.4-1.4 3.1.3L9 3.9z" fill="currentColor"/></symbol>
+  <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 16 16"><path d="M11 2.5l2.5 2.5L6 12.5l-3.2.7.7-3.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-left" viewBox="0 0 16 16"><path d="M10 3.5L5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-right" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-out" viewBox="0 0 16 16"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2L7.5 8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="42" height="46" viewBox="0 0 42 46" aria-hidden="true">
+        <path d="M21 2l17 6.5V22c0 11-7.6 18.6-17 22C11.6 40.6 4 33 4 22V8.5z" fill="var(--surface-2)" stroke="var(--gold)" stroke-width="2"/>
+        <path d="M21 9v28M13 17h16" stroke="var(--gold)" stroke-width="2" opacity=".55"/>
+        <text x="21" y="28" text-anchor="middle" font-family="Grenze, Georgia, serif" font-weight="700" font-size="14" fill="var(--fg)">DS</text>
+      </svg>
+      <div>
+        <div class="brand-name">Demir Sancak</div>
+        <div class="brand-sub">El Morad · Yeni sunucu 2026</div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="ctl">
+        <span class="ctl-label" id="lbl-phase">Önizleme</span>
+        <div class="seg" role="group" aria-labelledby="lbl-phase">
+          <button type="button" id="ph-pre" data-phase="pre">Açılış öncesi</button>
+          <button type="button" id="ph-post" data-phase="post">Açılış sonrası</button>
+        </div>
+      </div>
+      <div class="ctl">
+        <span class="ctl-label" id="lbl-role">Yetki</span>
+        <div class="seg" role="group" aria-labelledby="lbl-role">
+          <button type="button" id="rl-off" data-role="officer">Yetkili</button>
+          <button type="button" id="rl-mem" data-role="member">Üye</button>
+        </div>
+      </div>
+      <div class="me" id="me"></div>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Bölümler">
+    <div class="tabs-in" role="tablist">
+      <button class="tab" role="tab" id="t-genel" data-go="genel">Genel bakış</button>
+      <button class="tab" role="tab" id="t-uyeler" data-go="uyeler">Üyeler</button>
+      <button class="tab" role="tab" id="t-etkinlikler" data-go="etkinlikler">Etkinlikler ve katılım</button>
+      <button class="tab" role="tab" id="t-takvim" data-go="takvim">Takvim ve duyurular</button>
+    </div>
+  </nav>
+
+  <p class="proto-note"><i></i><span>Tasarım prototipi. Klan adı, üyeler, etkinlikler ve duyurular örnektir. Açılış tarihleri NTTGame duyurusundan alındı; 2. ön kayıt bitişi kaynaklarda 9 veya 12 Kasım olarak geçiyor, panelde yetkililer düzeltebilecek.</span></p>
+
+  <main>
+    <!-- ================= GENEL BAKIŞ ================= -->
+    <section data-tab="genel" aria-labelledby="t-genel">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow" id="home-eyebrow"></div>
+          <h1 id="home-title"></h1>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="s12 hero" id="hero">
+          <div>
+            <div class="eyebrow" id="hero-eyebrow"></div>
+            <h2 id="hero-title"></h2>
+            <div class="count" aria-live="off">
+              <div class="unit"><b id="cd-d">00</b><span>Gün</span></div>
+              <div class="unit"><b id="cd-h">00</b><span>Saat</span></div>
+              <div class="unit"><b id="cd-m">00</b><span>Dakika</span></div>
+              <div class="unit"><b id="cd-s">00</b><span>Saniye</span></div>
+            </div>
+            <div class="when" id="hero-when"></div>
+          </div>
+          <div class="next" id="hero-next"></div>
+        </div>
+
+        <div class="s12 panel" data-when="pre">
+          <div class="panel-h"><h2>Açılış takvimi</h2><span class="sub">Saatler yalnızca açılış için duyuruldu (16:00, TSİ)</span></div>
+          <ol class="phases" id="phases"></ol>
+        </div>
+
+        <div class="s12 tiles" data-when="post" id="tiles"></div>
+
+        <div class="s7 stack" data-when="pre">
+        <div class="panel">
+          <div class="panel-h"><h2>Klan hazırlığı</h2><span class="sub" id="prep-sub"></span></div>
+          <div id="prep"></div>
+          <div class="mine">
+            <h3>Benim hazırlığım</h3>
+            <div class="checks" id="mine"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h2>Planlanan sınıf dağılımı</h2><span class="sub" id="cls-sub-home"></span></div>
+          <div class="stackbar" id="cls-bar-home"></div>
+          <div class="legend" id="cls-legend-home"></div>
+        </div>
+        </div>
+
+        <div class="s7 panel" data-when="post">
+          <div class="panel-h"><h2>Etkinlik türüne göre katılım</h2><span class="sub" id="type-sub-home"></span></div>
+          <div id="type-chart-home"></div>
+        </div>
+
+        <div class="s5 stack">
+          <div class="panel">
+            <div class="panel-h"><h2>Yaklaşanlar</h2><button type="button" class="btn" data-go="takvim">Takvim</button></div>
+            <ul class="list" id="upcoming"></ul>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h2>Sabitlenmiş duyuru</h2></div>
+            <div id="pinned"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ÜYELER ================= -->
+    <section data-tab="uyeler" aria-labelledby="t-uyeler">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Kadro</div>
+          <h1>Üyeler</h1>
+          <p data-when="pre">Açılıştan önce kimin hangi sınıfı açacağını ve hazırlık adımlarını buradan izleyin.</p>
+          <p data-when="post">Level, rütbe ve son etkinliklere katılım bir arada.</p>
+        </div>
+        <button type="button" class="btn primary officer-only" id="add-member"><svg><use href="#i-plus"/></svg>Üye ekle</button>
+      </div>
+      <div class="grid">
+        <div class="s12 panel roster-sum">
+          <div style="min-width:0">
+            <div class="panel-h"><h2>Sınıf dağılımı</h2><span class="sub" id="cls-sub"></span></div>
+            <div class="stackbar" id="cls-bar"></div>
+            <div class="legend" id="cls-legend"></div>
+          </div>
+          <div style="min-width:0">
+            <div class="panel-h"><h2>Rütbeler</h2></div>
+            <div class="ranks" id="ranks"></div>
+          </div>
+        </div>
+        <div class="s12 panel">
+          <div class="toolbar">
+            <label class="search" for="q"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="Karakter veya Discord adı ara" autocomplete="off"></label>
+            <div class="chips" id="cls-filter" role="group" aria-label="Sınıf filtresi"></div>
+            <select class="sel" id="rank-filter" aria-label="Rütbe filtresi"></select>
+            <select class="sel" id="status-filter" aria-label="Durum filtresi">
+              <option value="">Tüm durumlar</option><option value="aktif">Aktif</option><option value="izinli">İzinli</option><option value="pasif">Pasif</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Karakter</th><th>Sınıf</th><th>Rütbe</th>
+                <th data-when="post">Level</th>
+                <th data-when="pre">Hazırlık</th>
+                <th>Katılım</th><th>Durum</th>
+                <th class="officer-only"><span class="muted">Düzenle</span></th>
+              </tr></thead>
+              <tbody id="members"></tbody>
+            </table>
+          </div>
+          <div class="muted" style="font-size:13px;margin-top:10px" id="member-count"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ETKİNLİKLER ================= -->
+    <section data-tab="etkinlikler" aria-labelledby="t-etkinlikler">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Yoklama</div>
+          <h1>Etkinlikler ve katılım</h1>
+          <p>Yetkililer etkinlik sırasında katılımı işaretler; üyeler kendi geçmişini görür.</p>
+        </div>
+        <button type="button" class="btn primary officer-only" id="add-event"><svg><use href="#i-plus"/></svg>Etkinlik oluştur</button>
+      </div>
+      <div class="grid">
+        <div class="s7 panel" data-when="post">
+          <div class="panel-h"><h2>Etkinlik türüne göre katılım</h2><span class="sub" id="type-sub"></span></div>
+          <div id="type-chart"></div>
+        </div>
+        <div class="s5 panel" data-when="post">
+          <div class="panel-h"><h2>En istikrarlı üyeler</h2><span class="sub">Geçmiş etkinlikler</span></div>
+          <ol class="list top5" id="top5"></ol>
+        </div>
+        <div class="s12 callout" data-when="pre">Sunucu açılmadan önce yalnızca klan toplantıları yoklamaya tabi. CSW, BDW, Juraid ve diğer savaş etkinlikleri açılıştan sonra burada türlerine göre karşılaştırılacak.</div>
+        <div class="s12 ev-layout">
+          <div class="panel"><div id="ev-list"></div></div>
+          <div class="panel detail" id="ev-detail"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAKVİM ================= -->
+    <section data-tab="takvim" aria-labelledby="t-takvim">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Plan</div>
+          <h1>Takvim ve duyurular</h1>
+          <p>Resmi tarihler altın renkte. Duyurular istenirse klanın Discord kanalına da gönderilir.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="s12 panel">
+          <div class="panel-h">
+            <div class="cal-nav">
+              <button type="button" class="icon-btn" id="cal-prev" aria-label="Önceki ay"><svg><use href="#i-left"/></svg></button>
+              <h2 id="cal-title"></h2>
+              <button type="button" class="icon-btn" id="cal-next" aria-label="Sonraki ay"><svg><use href="#i-right"/></svg></button>
+            </div>
+            <button type="button" class="btn" id="cal-today">Bugün</button>
+          </div>
+          <div class="month-wrap"><div class="month" id="month"></div></div>
+          <div class="agenda" id="agenda"></div>
+        </div>
+        <div class="s5 panel" data-when="post">
+          <div class="panel-h"><h2>Haftalık düzen</h2><span class="sub">Örnek saatler</span></div>
+          <div class="table-wrap"><table class="sched" style="min-width:0"><thead><tr><th>Gün</th><th>Saat</th><th>Etkinlik</th></tr></thead><tbody id="sched"></tbody></table></div>
+        </div>
+        <div class="panel" id="ann-panel">
+          <div class="panel-h"><h2>Duyurular</h2><span class="sub">Sabitlenenler üstte</span></div>
+          <form class="form officer-only" id="ann-form" novalidate>
+            <div><label for="ann-title">Başlık</label><input type="text" id="ann-title" maxlength="80" placeholder="Örn. Pazar CSW kadrosu"></div>
+            <div><label for="ann-body">Duyuru</label><textarea id="ann-body" placeholder="Kısa ve net yazın. Saat verirken TSİ kullanın."></textarea></div>
+            <div class="row">
+              <div class="opts">
+                <label class="check" for="ann-pin" style="text-transform:none;letter-spacing:0;font:400 14px var(--font-body);color:var(--fg)"><input type="checkbox" id="ann-pin">Sabitle</label>
+                <label class="check" for="ann-discord" style="text-transform:none;letter-spacing:0;font:400 14px var(--font-body);color:var(--fg)"><input type="checkbox" id="ann-discord" checked>Discord'a da gönder</label>
+              </div>
+              <button class="btn primary" type="submit">Yayınla</button>
+            </div>
+            <div class="muted" id="ann-err" style="font-size:13px" hidden>Başlık ve duyuru metni gerekli.</div>
+          </form>
+          <div id="anns"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<div id="tip" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+(() => {
+  const TZ = 'Europe/Istanbul';
+  const OFFICIAL_URL = 'https://www.nttgame.com/knight/tr/newserveropen2026/';
+  const tr = s => Date.parse(s.length === 10 ? s + 'T00:00:00+03:00' : s + ':00+03:00');
+  const OPEN = tr('2026-11-12T16:00');
+  const SIM_POST = tr('2026-11-21T19:40');
+  const DAY = 86400000;
+  const LOADED = Date.now();
+
+  /* ---------- Sabitler ---------- */
+  const CLASSES = {
+    war: 'Warrior', rog: 'Rogue', mag: 'Mage', pri: 'Priest', kur: 'Kurian'
+  };
+  const RANKS = ['Lider', 'Asistan', 'Subay', 'Üye', 'Aday'];
+  const STATUS = { aktif: ['Aktif', 'good'], izinli: ['İzinli', 'warn'], pasif: ['Pasif', 'idle'] };
+  const MARK = { present: ['Katıldı', 'good'], late: ['Geç', 'warn'], excused: ['Mazeretli', 'idle'], absent: ['Yok', 'crit'] };
+  const TYPES = {
+    csw: ['CSW', 'Castle Siege War'], bdw: ['BDW', 'Border Defence War'], jr: ['Juraid', 'Juraid Mountain'],
+    chaos: ['Chaos', 'Chaos'], ft: ['FT', 'Forgotten Temple'], boss: ['Boss', 'Klan boss avı'],
+    meet: ['Toplantı', 'Klan toplantısı'], official: ['Resmi', 'NTTGame duyurusu']
+  };
+  const PHASES = [
+    { n: 1, title: '1. Ön kayıt', start: tr('2026-10-15'), end: tr('2026-10-29'), d: '15 – 29 Ekim', x: 'Ödüllü dönem. Telefon doğrulaması gerekli.' },
+    { n: 2, title: '2. Ön kayıt ve sunucu seçimi', start: tr('2026-10-29'), end: tr('2026-11-10'), d: '29 Ekim – 9 Kasım', x: 'Bitiş bazı kaynaklarda 12 Kasım.' },
+    { n: 3, title: 'Karakter oluşturma', start: tr('2026-11-10'), end: OPEN, d: '10 – 11 Kasım', x: 'Klan adı ve karakter adları erken alınmalı.' },
+    { n: 4, title: 'Sunucu açılışı', start: OPEN, end: OPEN + DAY, d: '12 Kasım, 16:00', x: 'Ardream ve Ronark Land Base yok; savaş Ronark Land’de.' }
+  ];
+  const PREP = [
+    { k: 0, label: 'Telefon doğrulama ve OTP', opens: null, hint: 'Yeni sunuculara OTP olmadan girilemiyor' },
+    { k: 1, label: 'Ön kayıt', opens: tr('2026-10-15'), hint: 'İlk dönem ödüllü' },
+    { k: 2, label: 'Sunucu seçimi', opens: tr('2026-10-29'), hint: 'Tüm klan aynı sunucuyu seçmeli' },
+    { k: 3, label: 'Karakter adı alındı', opens: tr('2026-11-10'), hint: 'Planlanan ad kapılmadan' }
+  ];
+
+  /* rel: katılım eğilimi (örnek veri üretmek için) */
+  const MEMBERS = [
+    { name: 'KaraBey', dc: 'karabey', cls: 'war', rank: 'Lider', lv: 76, rel: .96, st: 'aktif', prep: [1, 1, 1, 1] },
+    { name: 'Asena', dc: 'asena.ko', cls: 'pri', rank: 'Asistan', lv: 74, rel: .92, st: 'aktif', prep: [1, 1, 1, 1] },
+    { name: 'SessizOk', dc: 'sessizok', cls: 'rog', rank: 'Asistan', lv: 75, rel: .88, st: 'aktif', prep: [1, 1, 1, 0] },
+    { name: 'DemirYumruk', dc: 'demiryumruk', cls: 'war', rank: 'Subay', lv: 73, rel: .9, st: 'aktif', prep: [1, 1, 0, 0] },
+    { name: 'AlevBüyü', dc: 'alevbuyu', cls: 'mag', rank: 'Subay', lv: 72, rel: .84, st: 'aktif', prep: [1, 1, 1, 0] },
+    { name: 'ŞifaEli', dc: 'sifaeli', cls: 'pri', rank: 'Subay', lv: 71, rel: .86, st: 'aktif', prep: [1, 0, 0, 0] },
+    { name: 'Bozkurt', dc: 'bozkurt44', cls: 'war', rank: 'Üye', lv: 70, rel: .79, st: 'aktif', prep: [1, 1, 0, 0] },
+    { name: 'GeceKuşu', dc: 'gecekusu', cls: 'rog', rank: 'Üye', lv: 71, rel: .75, st: 'aktif', prep: [1, 0, 0, 0] },
+    { name: 'BuzKraliçe', dc: 'buzkralice', cls: 'mag', rank: 'Üye', lv: 69, rel: .81, st: 'aktif', prep: [1, 1, 0, 0] },
+    { name: 'Tufan', dc: 'tufan', cls: 'kur', rank: 'Üye', lv: 68, rel: .7, st: 'aktif', prep: [1, 0, 0, 0] },
+    { name: 'Kartal', dc: 'kartal.ko', cls: 'rog', rank: 'Üye', lv: 70, rel: .66, st: 'aktif', prep: [1, 0, 0, 0] },
+    { name: 'Yıldırım', dc: 'yildirim', cls: 'mag', rank: 'Üye', lv: 67, rel: .62, st: 'aktif', prep: [0, 0, 0, 0] },
+    { name: 'Bilge', dc: 'bilge', cls: 'pri', rank: 'Üye', lv: 66, rel: .77, st: 'aktif', prep: [0, 0, 0, 0] },
+    { name: 'KılıçUstası', dc: 'kilicustasi', cls: 'war', rank: 'Üye', lv: 69, rel: .58, st: 'aktif', prep: [0, 0, 0, 0] },
+    { name: 'Gölge', dc: 'golge', cls: 'rog', rank: 'Üye', lv: 64, rel: .38, st: 'pasif', prep: [0, 0, 0, 0] },
+    { name: 'Sancaktar', dc: 'sancaktar', cls: 'war', rank: 'Üye', lv: 65, rel: .52, st: 'izinli', prep: [0, 0, 0, 0] },
+    { name: 'Ayaz', dc: 'ayaz', cls: 'kur', rank: 'Aday', lv: 58, rel: .45, st: 'aktif', prep: [0, 0, 0, 0] },
+    { name: 'Nur', dc: 'nur.priest', cls: 'pri', rank: 'Aday', lv: 55, rel: .5, st: 'aktif', prep: [0, 0, 0, 0] }
+  ];
+
+  const PRE_EVENTS = [
+    { id: 'p1', type: 'meet', title: 'Klan kuruluş toplantısı', at: tr('2026-09-28T21:00'), desc: 'Discord ses kanalı. Rütbeler ve açılış hedefleri konuşuldu.' },
+    { id: 'p2', type: 'meet', title: 'Sınıf dağılımı görüşmesi', at: tr('2026-10-02T21:30'), desc: 'Kim hangi sınıfı açacak, hangi roller açıkta.' },
+    { id: 'p3', type: 'meet', title: 'OTP ve ön kayıt kontrolü', at: tr('2026-10-11T21:00'), desc: 'Herkes telefon doğrulaması ve OTP durumunu panelde işaretlesin.' },
+    { id: 'o1', type: 'official', title: '1. ön kayıt başlıyor', at: tr('2026-10-15'), allDay: true, desc: 'İlk ön kayıt dönemi ödüllü. 29 Ekim’e kadar sürer.' },
+    { id: 'p4', type: 'meet', title: 'Ön kayıt son çağrı', at: tr('2026-10-25T21:00'), desc: 'Ön kaydı yapmayanlar için hatırlatma.' },
+    { id: 'o2', type: 'official', title: '2. ön kayıt ve sunucu seçimi', at: tr('2026-10-29'), allDay: true, desc: 'Sunucu seçimi bu dönemde yapılır.' },
+    { id: 'p5', type: 'meet', title: 'Sunucu oylaması', at: tr('2026-11-01T21:00'), desc: 'Klanın gideceği sunucu oylanır; herkes aynı sunucuyu seçer.' },
+    { id: 'o3', type: 'official', title: 'Karakter oluşturma', at: tr('2026-11-10'), allDay: true, desc: 'Karakter adları bu iki günde alınır.' },
+    { id: 'p6', type: 'meet', title: 'Açılış toplanması', at: tr('2026-11-12T15:30'), desc: 'Discord ses kanalı, açılıştan 30 dakika önce.' },
+    { id: 'o4', type: 'official', title: 'Sunucu açılışı', at: OPEN, desc: 'Sunucular 16:00’da (TSİ) açılıyor.' }
+  ];
+  const WEEK = { 1: ['bdw', '21:00'], 2: ['jr', '21:30'], 3: ['chaos', '22:00'], 4: ['boss', '21:00'], 5: ['ft', '21:00'], 6: ['bdw', '21:00'], 0: ['csw', '20:30'] };
+  const DOW = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+  const POST_EVENTS = [PRE_EVENTS[8], PRE_EVENTS[9]];
+  for (let t = tr('2026-11-13'); t <= tr('2026-12-06'); t += DAY) {
+    const p = parts(t), w = WEEK[p.wd];
+    const ymd = `${p.y}-${pad(p.m)}-${pad(p.d)}`;
+    POST_EVENTS.push({ id: 'e' + ymd, type: w[0], title: TYPES[w[0]][1], at: tr(`${ymd}T${w[1]}`), desc: descFor(w[0]) });
+  }
+  function descFor(t) {
+    return {
+      csw: 'Haftalık kale kuşatması. Kadro bir gün önce duyurulur; herkes 20:15’te toplanır.',
+      bdw: 'Sınır savunma savaşı. Parti listesi Discord’da.',
+      jr: 'Juraid Mountain. 8 kişilik iki parti.',
+      chaos: 'Chaos dungeon. Katılım serbest, puanlar klan için.',
+      ft: 'Forgotten Temple. Priest’ler parti başına ikişer.',
+      boss: 'Klan boss avı. Drop’lar duyuruda paylaşılır.'
+    }[t];
+  }
+
+  const ANN = {
+    pre: [
+      { title: 'Açılış planı', by: 'KaraBey', at: tr('2026-10-03T19:10'), pin: true, dc: true, body: 'Bu hafta herkes telefon doğrulamasını ve OTP’yi açsın; yeni sunuculara OTP olmadan girilemiyor. Ön kayıt 15 Ekim’de başlıyor ve ilk dönem ödüllü.' },
+      { title: 'Sınıf dağılımı', by: 'Asena', at: tr('2026-10-02T23:05'), pin: false, dc: true, body: 'Şu an 5 Warrior, 4 Rogue, 3 Mage, 4 Priest, 2 Kurian var. Mage ve Kurian açığımız var; kararsız kalanlar kanala yazsın.' },
+      { title: 'Yeni sunucularda Ardream yok', by: 'SessizOk', at: tr('2026-10-01T18:40'), pin: false, dc: false, body: 'Ardream ve Ronark Land Base haritaları olmayacak, tüm savaş Ronark Land’de. Level planınızı buna göre yapın.' }
+    ],
+    post: [
+      { title: 'Pazar CSW kadrosu', by: 'KaraBey', at: tr('2026-11-20T22:15'), pin: true, dc: true, body: 'İlk iki parti belli, liste Discord’da. Herkes 20:15’te Ronark Land girişinde. Mazereti olan cumartesi akşamına kadar panelden bildirsin.' },
+      { title: 'Boss avı saati', by: 'DemirYumruk', at: tr('2026-11-18T12:30'), pin: false, dc: true, body: 'Perşembe boss avı 21:00’de kalıyor. Drop dağılımı avdan sonra duyurulacak.' },
+      { title: 'Juraid partileri', by: 'Asena', at: tr('2026-11-16T20:00'), pin: false, dc: false, body: 'Juraid için 8 kişilik iki parti kuruyoruz; Priest sayısı az, Bilge ve Nur ikinci partide.' }
+    ]
+  };
+
+  /* ---------- Yardımcılar ---------- */
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function parts(ms) {
+    const o = {};
+    new Intl.DateTimeFormat('en-GB', { timeZone: TZ, year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', weekday: 'short' })
+      .formatToParts(ms).forEach(p => o[p.type] = p.value);
+    return { y: +o.year, m: +o.month, d: +o.day, h: +o.hour, mi: +o.minute, wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(o.weekday) };
+  }
+  const F = (ms, opt) => new Intl.DateTimeFormat('tr-TR', { timeZone: TZ, ...opt }).format(ms);
+  const dayStart = ms => { const p = parts(ms); return tr(`${p.y}-${pad(p.m)}-${pad(p.d)}`); };
+  const hm = ms => F(ms, { hour: '2-digit', minute: '2-digit' });
+  const longDate = ms => F(ms, { day: 'numeric', month: 'long', weekday: 'long' });
+  function rel(ms) {
+    const dd = Math.round((dayStart(ms) - dayStart(now())) / DAY);
+    if (dd === 0) return 'bugün';
+    if (dd === 1) return 'yarın';
+    if (dd === -1) return 'dün';
+    return dd > 0 ? `${dd} gün sonra` : `${-dd} gün önce`;
+  }
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const icon = (id, cls = '') => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"/></svg>`;
+  const lower = s => s.toLocaleLowerCase('tr');
+  function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function rand(seed) { let t = (seed + 0x6D2B79F5) | 0; t = Math.imul(t ^ (t >>> 15), 1 | t); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
+
+  /* ---------- Durum ---------- */
+  const realNow = Date.now();
+  const state = {
+    phase: realNow < OPEN ? 'pre' : 'post',
+    role: 'officer',
+    tab: 'genel',
+    q: '', cls: '', rank: '', status: '',
+    sel: { pre: null, post: null },
+    month: null
+  };
+  function now() { return state.phase === 'pre' ? Date.now() : SIM_POST + (Date.now() - LOADED); }
+  const events = () => state.phase === 'pre' ? PRE_EVENTS : POST_EVENTS;
+  const me = () => MEMBERS.find(m => m.name === (state.role === 'officer' ? 'KaraBey' : 'GeceKuşu'));
+  const canMark = () => state.role === 'officer';
+
+  /* Örnek yoklama kayıtları (deterministik) */
+  const ATT = {};
+  function seedAttendance() {
+    const t0 = SIM_POST;
+    [...PRE_EVENTS, ...POST_EVENTS].forEach(ev => {
+      if (ev.type === 'official' || ATT[ev.id]) return;
+      const cutoff = POST_EVENTS.includes(ev) ? t0 : realNow;
+      if (ev.at > cutoff) return;
+      ATT[ev.id] = {};
+      MEMBERS.forEach(m => {
+        const r = rand(hash(ev.id + ':' + m.name));
+        const p = ev.type === 'meet' ? Math.min(.97, m.rel + .06) : m.rel;
+        ATT[ev.id][m.name] = r < p ? (r < p * .1 ? 'late' : 'present') : (r < p + (1 - p) * .35 ? 'excused' : 'absent');
+      });
+    });
+  }
+  seedAttendance();
+
+  const isPast = ev => ev.at <= now();
+  const tracked = ev => ev.type !== 'official';
+  function pastTracked() { return events().filter(ev => tracked(ev) && isPast(ev) && ATT[ev.id]); }
+  function memberRate(m) {
+    let n = 0, ok = 0;
+    pastTracked().forEach(ev => { const s = ATT[ev.id][m.name]; if (!s) return; n++; if (s === 'present' || s === 'late') ok++; });
+    return n ? { pct: Math.round(ok / n * 100), ok, n } : null;
+  }
+  function counts(evId) {
+    const c = { present: 0, late: 0, excused: 0, absent: 0, none: 0 };
+    MEMBERS.forEach(m => { const s = ATT[evId] && ATT[evId][m.name]; c[s || 'none']++; });
+    return c;
+  }
+
+  /* ---------- Tooltip ---------- */
+  const tip = document.getElementById('tip');
+  function showTip(el) {
+    tip.textContent = el.dataset.tip; tip.hidden = false;
+    const r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = r.left + r.width / 2 - tw / 2; x = Math.max(8, Math.min(x, innerWidth - tw - 8));
+    let y = r.top - th - 8; if (y < 8) y = r.bottom + 8;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  document.addEventListener('pointerover', e => { const el = e.target.closest('[data-tip]'); if (el) showTip(el); });
+  document.addEventListener('pointerout', e => { if (e.target.closest('[data-tip]')) tip.hidden = true; });
+  document.addEventListener('focusin', e => { const el = e.target.closest('[data-tip]'); if (el) showTip(el); });
+  document.addEventListener('focusout', () => { tip.hidden = true; });
+  addEventListener('scroll', () => { tip.hidden = true; }, { passive: true });
+
+  let toastT;
+  function toast(msg) {
+    const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200);
+  }
+
+  /* ---------- Genel bakış ---------- */
+  function heroTarget() {
+    if (state.phase === 'pre') return { at: OPEN, title: 'Sunucu açılışına', eyebrow: 'Yeni sunucu · NTTGame' };
+    const nx = events().find(ev => tracked(ev) && ev.at > now());
+    return { at: nx.at, title: `Sıradaki: ${nx.title}`, eyebrow: `${TYPES[nx.type][0]} · ${longDate(nx.at)}`, ev: nx };
+  }
+  function renderHome() {
+    const pre = state.phase === 'pre';
+    document.getElementById('home-eyebrow').textContent = pre ? 'Açılışa hazırlık' : 'Bu hafta · örnek tarih 21 Kasım';
+    document.getElementById('home-title').textContent = pre ? 'Yeni sunucuya klanca hazırız' : 'Klan durumu';
+    const h = heroTarget();
+    document.getElementById('hero-eyebrow').textContent = h.eyebrow;
+    document.getElementById('hero-title').textContent = h.title;
+    document.getElementById('hero-when').textContent = pre
+      ? `${F(OPEN, { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' })} · 16:00 TSİ`
+      : `${longDate(h.at)} · ${hm(h.at)} TSİ`;
+
+    const nextBox = document.getElementById('hero-next');
+    if (pre) {
+      const np = PHASES.find(p => p.start > now() && p.n < 4);
+      const cur = PHASES.find(p => p.start <= now() && now() < p.end);
+      nextBox.innerHTML = `
+        <div>
+          <div class="eyebrow">${cur && cur.n < 4 ? 'Şu anki aşama' : 'Sıradaki adım'}</div>
+          ${cur && cur.n < 4 ? `<h3>${cur.title}</h3><p>${cur.d}</p><div class="rel">Devam ediyor</div>`
+            : np ? `<h3>${np.title}</h3><p>${longDate(np.start)}</p><div class="rel">${rel(np.start)}</div>`
+            : `<h3>Sunucu açıldı</h3><p>Panel açılış sonrası görünüme geçebilir.</p>`}
+        </div>
+        <a href="${OFFICIAL_URL}" target="_blank" rel="noopener" class="btn">Resmi duyuru ${icon('i-out')}</a>`;
+    } else {
+      const after = events().filter(ev => tracked(ev) && ev.at > h.at)[0];
+      const last = pastTracked().slice(-1)[0];
+      const c = last && counts(last.id);
+      nextBox.innerHTML = `
+        <div>
+          <div class="eyebrow">Ondan sonra</div>
+          <h3>${after.title}</h3><p>${longDate(after.at)} · ${hm(after.at)}</p>
+        </div>
+        ${last ? `<div><div class="eyebrow">Son etkinlik</div><h3>${last.title}</h3><p>${c.present + c.late} / ${MEMBERS.length} katıldı</p></div>` : ''}`;
+    }
+
+    // Aşamalar
+    document.getElementById('phases').innerHTML = PHASES.map(p => {
+      const st = now() >= p.end ? 'done' : now() >= p.start ? 'current' : 'up';
+      const chip = st === 'done' ? '<span class="tag">Tamamlandı</span>' : st === 'current' ? '<span class="tag official">Şu an</span>' : `<span class="tag">${rel(p.start)}</span>`;
+      return `<li class="phase ${st}"><div class="n"><b>${p.n}</b>${chip}</div><h3>${p.title}</h3><div class="d">${p.d}</div><div class="x">${p.x}</div></li>`;
+    }).join('');
+
+    // Hazırlık
+    const active = MEMBERS.filter(m => m.st !== 'pasif');
+    document.getElementById('prep-sub').textContent = `${active.length} aktif ve izinli üye`;
+    document.getElementById('prep').innerHTML = PREP.map(it => {
+      const open = !it.opens || it.opens <= now();
+      const n = active.filter(m => m.prep[it.k]).length;
+      const right = open
+        ? `<div class="meter" role="img" aria-label="${n} / ${active.length}"><i style="width:${n / active.length * 100}%"></i></div><div class="prep-n num">${n}/${active.length}</div>`
+        : `<div class="locked" style="grid-column:span 2">${icon('i-lock')}${F(it.opens, { day: 'numeric', month: 'long' })}’da açılır</div>`;
+      return `<div class="prep-row"><div><h3>${it.label}</h3><p>${it.hint}</p></div>${right}</div>`;
+    }).join('');
+    const m = me();
+    document.getElementById('mine').innerHTML = PREP.map(it => {
+      const open = !it.opens || it.opens <= now();
+      return `<label class="check ${open ? '' : 'dis'}" for="mine-${it.k}"><input type="checkbox" id="mine-${it.k}" data-k="${it.k}" ${m.prep[it.k] && open ? 'checked' : ''} ${open ? '' : 'disabled'}>${it.label}${open ? '' : ` <span class="locked">${icon('i-lock')}</span>`}</label>`;
+    }).join('');
+
+    // Açılış sonrası kutular
+    if (!pre) {
+      const act = MEMBERS.filter(x => x.st === 'aktif').length;
+      const wk = pastTracked().filter(ev => ev.at > now() - 7 * DAY);
+      let ok = 0, n = 0; wk.forEach(ev => { const c = counts(ev.id); ok += c.present + c.late; n += MEMBERS.length - c.none; });
+      const p = parts(now()); const monday = dayStart(now()) - ((p.wd + 6) % 7) * DAY;
+      const thisWeek = events().filter(ev => tracked(ev) && ev.at >= monday && ev.at < monday + 7 * DAY).length;
+      const avgLv = Math.round(MEMBERS.reduce((a, x) => a + x.lv, 0) / MEMBERS.length);
+      document.getElementById('tiles').innerHTML = [
+        ['Aktif üye', `${act}<small> / ${MEMBERS.length}</small>`, '1 izinli, 1 pasif'],
+        ['Son 7 gün katılım', `%${Math.round(ok / n * 100)}`, `${wk.length} etkinlik, ${ok} katılım`],
+        ['Bu haftaki etkinlik', thisWeek, 'Pazartesi – Pazar'],
+        ['Ortalama level', avgLv, `En yüksek ${Math.max(...MEMBERS.map(x => x.lv))}`]
+      ].map(([l, v, s]) => `<div class="panel tile"><div class="eyebrow">${l}</div><div class="v num">${v}</div><div class="s">${s}</div></div>`).join('');
+    }
+    typeChart('type-chart-home', 'type-sub-home');
+    classDist('cls-bar-home', 'cls-legend-home', 'cls-sub-home');
+
+    // Yaklaşanlar
+    const up = events().filter(ev => ev.at >= dayStart(now()) && (ev.allDay ? true : ev.at > now())).slice(0, 5);
+    document.getElementById('upcoming').innerHTML = up.map(ev => `
+      <li class="item">
+        <div class="date"><b>${parts(ev.at).d}</b><span>${F(ev.at, { month: 'short' })}</span></div>
+        <div style="min-width:0"><h3>${esc(ev.title)}</h3><p>${ev.allDay ? 'Tüm gün' : hm(ev.at)} · ${rel(ev.at)}</p></div>
+        <span class="tag ${ev.type === 'official' ? 'official' : ''}">${TYPES[ev.type][0]}</span>
+      </li>`).join('') || '<li class="empty">Yaklaşan etkinlik yok.</li>';
+
+    const pin = ANN[state.phase].find(a => a.pin) || ANN[state.phase][0];
+    document.getElementById('pinned').innerHTML = annHTML(pin);
+  }
+
+  function typeChart(id, subId) {
+    const host = document.getElementById(id);
+    if (state.phase === 'pre') { host.innerHTML = ''; return; }
+    const rows = ['csw', 'bdw', 'jr', 'chaos', 'ft', 'boss'].map(t => {
+      const evs = pastTracked().filter(ev => ev.type === t);
+      let ok = 0, n = 0; evs.forEach(ev => { const c = counts(ev.id); ok += c.present + c.late; n += MEMBERS.length - c.none; });
+      return { t, evs: evs.length, ok, n, pct: n ? Math.round(ok / n * 100) : 0 };
+    });
+    document.getElementById(subId).textContent = `${pastTracked().length} geçmiş etkinlik`;
+    host.innerHTML = `<div class="bars">${rows.map(r => `
+      <div class="bar-row hitrow" tabindex="0" data-tip="${TYPES[r.t][1]}: ${r.evs} etkinlik, ${r.ok} / ${r.n} katılım (%${r.pct})">
+        <div class="lab">${TYPES[r.t][0]}<small>${r.evs} etkinlik</small></div>
+        <div class="track"><i style="width:${r.pct}%"></i></div>
+        <div class="val num">%${r.pct}</div>
+      </div>`).join('')}</div>
+      <div class="axis" aria-hidden="true"><span></span><div><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div><span></span></div>`;
+  }
+
+  function annHTML(a) {
+    return `<div class="ann">
+      <h3>${a.pin ? icon('i-pin') : ''}${esc(a.title)}</h3>
+      <p>${esc(a.body)}</p>
+      <div class="meta"><span>${esc(a.by)} · ${F(a.at, { day: 'numeric', month: 'long' })} ${hm(a.at)}</span>${a.dc ? '<span class="tag">Discord’a gönderildi</span>' : ''}</div>
+    </div>`;
+  }
+
+  function classDist(barId, legendId, subId) {
+    const total = MEMBERS.length;
+    const byCls = Object.keys(CLASSES).map(k => [k, MEMBERS.filter(m => m.cls === k).length]);
+    document.getElementById(subId).textContent = `${total} karakter`;
+    document.getElementById(barId).innerHTML = byCls.map(([k, n]) =>
+      `<span class="c-${k}" style="flex:${n}" data-tip="${CLASSES[k]}: ${n} üye (%${Math.round(n / total * 100)})" tabindex="0">${n}</span>`).join('');
+    document.getElementById(legendId).innerHTML = byCls.map(([k, n]) =>
+      `<span class="cls"><i class="c-${k}"></i><b>${CLASSES[k]}</b><span>${n}</span></span>`).join('');
+  }
+
+  /* ---------- Üyeler ---------- */
+  function renderMembers() {
+    const total = MEMBERS.length;
+    const byCls = Object.keys(CLASSES).map(k => [k, MEMBERS.filter(m => m.cls === k).length]);
+    classDist('cls-bar', 'cls-legend', 'cls-sub');
+    document.getElementById('ranks').innerHTML = RANKS.map(r =>
+      `<div class="${r === 'Lider' || r === 'Asistan' ? 'lead' : ''}"><b class="num">${MEMBERS.filter(m => m.rank === r).length}</b><span>${r}</span></div>`).join('');
+
+    const cf = document.getElementById('cls-filter');
+    cf.innerHTML = [['', 'Tümü'], ...Object.entries(CLASSES)].map(([k, l]) =>
+      `<button type="button" class="chip" data-cls="${k}" aria-pressed="${state.cls === k}">${k ? `<i class="c-${k}"></i>` : ''}${l}</button>`).join('');
+    const rf = document.getElementById('rank-filter');
+    if (!rf.options.length) rf.innerHTML = '<option value="">Tüm rütbeler</option>' + RANKS.map(r => `<option>${r}</option>`).join('');
+
+    const q = lower(state.q.trim());
+    const rows = MEMBERS
+      .filter(m => (!q || lower(m.name).includes(q) || lower(m.dc).includes(q)) && (!state.cls || m.cls === state.cls) && (!state.rank || m.rank === state.rank) && (!state.status || m.st === state.status))
+      .sort((a, b) => RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank) || b.lv - a.lv);
+    document.getElementById('members').innerHTML = rows.map(m => {
+      const r = memberRate(m);
+      const pips = PREP.map(it => {
+        const open = !it.opens || it.opens <= now();
+        const cls = !open ? '' : m.prep[it.k] ? 'on' : 'off';
+        const tipTxt = `${it.label}: ${!open ? F(it.opens, { day: 'numeric', month: 'long' }) + '’da açılır' : m.prep[it.k] ? 'tamam' : 'yapılmadı'}`;
+        return `<span class="pip ${cls}" data-tip="${tipTxt}" tabindex="0" aria-label="${tipTxt}">${icon(!open ? 'i-lock' : m.prep[it.k] ? 'i-check' : 'i-x')}</span>`;
+      }).join('');
+      const [stl, stc] = STATUS[m.st];
+      return `<tr>
+        <td class="name"><b>${esc(m.name)}</b><span>@${esc(m.dc)}</span></td>
+        <td><span class="cls"><i class="c-${m.cls}"></i>${CLASSES[m.cls]}</span></td>
+        <td class="${m.rank === 'Lider' || m.rank === 'Asistan' ? 'rank-lead' : ''}">${m.rank}</td>
+        <td data-when="post" class="num">${m.lv}</td>
+        <td data-when="pre"><div class="pips">${pips}</div></td>
+        <td>${r ? `<div class="att" data-tip="${r.ok} / ${r.n} etkinlik" tabindex="0"><div class="meter"><i style="width:${r.pct}%"></i></div><span class="num">%${r.pct}</span></div>` : '<span class="muted">—</span>'}</td>
+        <td><span class="pill ${stc}">${stl}</span></td>
+        <td class="officer-only"><button type="button" class="icon-btn" aria-label="${esc(m.name)} düzenle" data-edit="${esc(m.name)}">${icon('i-edit')}</button></td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="8" class="empty">Bu filtrelerle eşleşen üye yok.</td></tr>`;
+    document.getElementById('member-count').textContent = `${total} üyeden ${rows.length} tanesi gösteriliyor`;
+  }
+
+  /* ---------- Etkinlikler ---------- */
+  function renderEvents() {
+    const evs = events();
+    const list = evs.filter(tracked);
+    const up = list.filter(ev => !isPast(ev)).slice(0, 4);
+    const past = list.filter(isPast).reverse();
+    if (!state.sel[state.phase] || !evs.find(e => e.id === state.sel[state.phase])) state.sel[state.phase] = (past[0] || up[0]).id;
+    const sel = evs.find(e => e.id === state.sel[state.phase]);
+    const itemHTML = ev => {
+      const c = isPast(ev) && ATT[ev.id] && counts(ev.id);
+      const p = parts(ev.at);
+      return `<button type="button" class="ev-item" data-ev="${ev.id}" aria-current="${ev.id === sel.id}">
+        <div class="date"><b>${p.d}</b><span>${F(ev.at, { month: 'short' })}</span></div>
+        <div style="min-width:0"><h3>${esc(ev.title)}</h3><p>${F(ev.at, { weekday: 'short' })} ${hm(ev.at)} · ${TYPES[ev.type][0]}</p></div>
+        <span class="cnt num">${c ? `${c.present + c.late}/${MEMBERS.length}` : `<span class="muted" style="font-weight:500">${rel(ev.at)}</span>`}</span>
+      </button>`;
+    };
+    document.getElementById('ev-list').innerHTML =
+      (up.length ? `<div class="ev-group">Yaklaşan</div>${up.map(itemHTML).join('')}` : '') +
+      `<div class="ev-group">Geçmiş</div>${past.map(itemHTML).join('') || '<div class="empty">Henüz geçmiş etkinlik yok.</div>'}`;
+
+    const d = document.getElementById('ev-detail');
+    const head = `<span class="tag">${TYPES[sel.type][0]}</span>
+      <h2>${esc(sel.title)}</h2>
+      <div class="when2">${longDate(sel.at)} · ${hm(sel.at)} TSİ · ${rel(sel.at)}</div>
+      <p class="desc">${esc(sel.desc || '')}</p>`;
+    if (!isPast(sel) || !ATT[sel.id]) {
+      d.innerHTML = head + `<div class="callout" style="margin-top:16px">Yoklama etkinlik saatinde açılır. ${canMark() ? 'Kadroyu Discord’a duyurmak için Takvim ve duyurular sekmesini kullanın.' : 'Katılamayacaksanız yetkililere haber verin.'}</div>`;
+      return;
+    }
+    const c = counts(sel.id);
+    d.innerHTML = head + `
+      <div class="summary">
+        <span class="pill good">Katıldı ${c.present}</span><span class="pill warn">Geç ${c.late}</span>
+        <span class="pill idle">Mazeretli ${c.excused}</span><span class="pill crit">Yok ${c.absent}</span>
+        ${c.none ? `<span class="pill idle">İşaretlenmedi ${c.none}</span>` : ''}
+      </div>
+      <div class="bulk officer-only">
+        <button type="button" class="btn" data-bulk="all">Herkesi katıldı yap</button>
+        <button type="button" class="btn" data-bulk="rest">Boşları yok yap</button>
+      </div>
+      <ul class="roster">${MEMBERS.map(m => {
+        const s = ATT[sel.id][m.name];
+        const right = canMark()
+          ? `<div class="mark" role="group" aria-label="${esc(m.name)} katılımı">${Object.entries(MARK).map(([k, [l]]) =>
+              `<button type="button" data-s="${k}" data-m="${esc(m.name)}" aria-pressed="${s === k}">${l}</button>`).join('')}</div>`
+          : s ? `<span class="pill ${MARK[s][1]}">${MARK[s][0]}</span>` : '<span class="muted">—</span>';
+        return `<li><div class="who"><span class="cls"><i class="c-${m.cls}"></i></span><b>${esc(m.name)}</b><span class="muted" style="font-size:13px">${CLASSES[m.cls]} · ${m.rank}</span></div>${right}</li>`;
+      }).join('')}</ul>`;
+
+    typeChart('type-chart', 'type-sub');
+
+    // İstikrar listesi
+    const ranked = MEMBERS.map(m => ({ m, r: memberRate(m) })).filter(x => x.r).sort((a, b) => b.r.pct - a.r.pct || b.m.rel - a.m.rel).slice(0, 5);
+    document.getElementById('top5').innerHTML = ranked.map((x, i) => `
+      <li><span class="rk">${i + 1}</span>
+        <span class="who" style="display:flex;gap:8px;align-items:center;min-width:0"><span class="cls"><i class="c-${x.m.cls}"></i></span><b style="font-weight:600">${esc(x.m.name)}</b><span class="muted" style="font-size:13px">${CLASSES[x.m.cls]}</span></span>
+        <span class="num" style="font:600 15px var(--font-data)">%${x.r.pct} <span class="muted" style="font-weight:500">${x.r.ok}/${x.r.n}</span></span></li>`).join('');
+  }
+
+  /* ---------- Takvim ---------- */
+  function renderCalendar() {
+    if (!state.month) { const p = parts(now()); state.month = { y: p.y, m: p.m }; }
+    const { y, m } = state.month;
+    const first = tr(`${y}-${pad(m)}-01`);
+    document.getElementById('cal-title').textContent = F(first, { month: 'long', year: 'numeric' });
+    const start = first - ((parts(first).wd + 6) % 7) * DAY;
+    const today = dayStart(now());
+    const evs = events();
+    const byDay = {};
+    evs.forEach(ev => { const k = dayStart(ev.at); (byDay[k] = byDay[k] || []).push(ev); });
+    const chip = ev => `<button type="button" class="ev ${ev.type === 'official' ? 'official' : ''}" data-open="${ev.id}"><span class="t">${ev.allDay ? 'Gün boyu' : hm(ev.at)}</span>${esc(ev.type === 'official' || ev.type === 'meet' ? ev.title : TYPES[ev.type][0])}</button>`;
+    let html = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map(d => `<div class="dow">${d}</div>`).join('');
+    const weeks = Math.ceil(((first - start) / DAY + new Date(Date.UTC(y, m, 0)).getUTCDate()) / 7);
+    for (let i = 0; i < weeks * 7; i++) {
+      const t = start + i * DAY, p = parts(t);
+      const list = byDay[t] || [];
+      html += `<div class="day ${p.m !== m ? 'out' : ''} ${t === today ? 'today' : ''}"><span class="dn num">${p.d}</span>${list.map(chip).join('')}</div>`;
+    }
+    document.getElementById('month').innerHTML = html;
+
+    const days = Object.keys(byDay).map(Number).filter(t => parts(t).m === m && parts(t).y === y).sort((a, b) => a - b);
+    document.getElementById('agenda').innerHTML = days.map(t => `
+      <div class="ag-day ${t === today ? 'today' : ''}"><h3>${longDate(t)}</h3>${byDay[t].map(chip).join('')}</div>`).join('')
+      || '<div class="empty">Bu ay etkinlik yok.</div>';
+
+    document.getElementById('sched').innerHTML = [1, 2, 3, 4, 5, 6, 0].map(d =>
+      `<tr><td>${DOW[d]}</td><td class="num">${WEEK[d][1]}</td><td>${TYPES[WEEK[d][0]][1]}</td></tr>`).join('');
+
+    const panel = document.getElementById('ann-panel');
+    panel.className = `panel ${state.phase === 'pre' ? 's12' : 's7'}`;
+    const list = [...ANN[state.phase]].sort((a, b) => (b.pin - a.pin) || (b.at - a.at));
+    document.getElementById('anns').innerHTML = list.map(annHTML).join('');
+  }
+
+  /* ---------- Çatı ---------- */
+  function renderShell() {
+    document.body.classList.toggle('phase-pre', state.phase === 'pre');
+    document.body.classList.toggle('phase-post', state.phase === 'post');
+    document.body.classList.toggle('role-member', state.role === 'member');
+    document.querySelectorAll('[data-phase]').forEach(b => b.setAttribute('aria-pressed', b.dataset.phase === state.phase));
+    document.querySelectorAll('[data-role]').forEach(b => b.setAttribute('aria-pressed', b.dataset.role === state.role));
+    document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.go === state.tab));
+    document.querySelectorAll('section[data-tab]').forEach(s => s.classList.toggle('on', s.dataset.tab === state.tab));
+    const m = me();
+    document.getElementById('me').innerHTML = `<span class="avatar">${m.name.slice(0, 2).toLocaleUpperCase('tr')}</span><span><b>${esc(m.name)}</b> <span>${m.rank}</span></span>`;
+  }
+  function render() { renderShell(); renderHome(); renderMembers(); renderEvents(); renderCalendar(); tick(); }
+
+  function tick() {
+    const h = heroTarget();
+    let ms = Math.max(0, h.at - now());
+    const d = Math.floor(ms / DAY); ms -= d * DAY;
+    const hh = Math.floor(ms / 3600000); ms -= hh * 3600000;
+    const mm = Math.floor(ms / 60000); ms -= mm * 60000;
+    const ss = Math.floor(ms / 1000);
+    document.getElementById('cd-d').textContent = pad(d);
+    document.getElementById('cd-h').textContent = pad(hh);
+    document.getElementById('cd-m').textContent = pad(mm);
+    document.getElementById('cd-s').textContent = pad(ss);
+    if (state.phase === 'post' && h.at <= now()) renderHome();
+  }
+  setInterval(tick, 1000);
+
+  /* ---------- Olaylar ---------- */
+  function go(tab) {
+    state.tab = tab;
+    try { history.replaceState(null, '', '#' + tab); } catch (e) {}
+    renderShell(); window.scrollTo({ top: 0 });
+  }
+  document.addEventListener('click', e => {
+    const t = e.target;
+    const goEl = t.closest('[data-go]'); if (goEl) { go(goEl.dataset.go); return; }
+    const ph = t.closest('[data-phase]'); if (ph) { state.phase = ph.dataset.phase; state.month = null; render(); return; }
+    const rl = t.closest('[data-role]'); if (rl) { state.role = rl.dataset.role; render(); return; }
+    const cf = t.closest('[data-cls]'); if (cf) { state.cls = cf.dataset.cls; renderMembers(); return; }
+    const ev = t.closest('[data-ev]'); if (ev) { state.sel[state.phase] = ev.dataset.ev; renderEvents(); return; }
+    const op = t.closest('[data-open]');
+    if (op) {
+      const target = events().find(x => x.id === op.dataset.open);
+      if (target && tracked(target)) { state.sel[state.phase] = target.id; renderEvents(); go('etkinlikler'); }
+      else if (target) toast(`${target.title}: ${longDate(target.at)}`);
+      return;
+    }
+    const mk = t.closest('.mark button');
+    if (mk) {
+      const id = state.sel[state.phase];
+      ATT[id][mk.dataset.m] = mk.dataset.s;
+      renderEvents(); renderMembers(); renderHome();
+      const again = document.querySelector(`.mark button[data-m="${CSS.escape(mk.dataset.m)}"][data-s="${mk.dataset.s}"]`);
+      if (again) again.focus();
+      return;
+    }
+    const bk = t.closest('[data-bulk]');
+    if (bk) {
+      const id = state.sel[state.phase];
+      MEMBERS.forEach(m => { if (bk.dataset.bulk === 'all' || !ATT[id][m.name]) ATT[id][m.name] = bk.dataset.bulk === 'all' ? 'present' : (ATT[id][m.name] || 'absent'); });
+      renderEvents(); renderMembers(); renderHome(); toast('Yoklama güncellendi');
+      return;
+    }
+    if (t.closest('#cal-prev') || t.closest('#cal-next')) {
+      const dir = t.closest('#cal-prev') ? -1 : 1;
+      let { y, m } = state.month; m += dir; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; }
+      state.month = { y, m }; renderCalendar(); return;
+    }
+    if (t.closest('#cal-today')) { state.month = null; renderCalendar(); return; }
+    if (t.closest('[data-edit]')) { toast('Prototip: düzenleme formu uygulamada açılacak'); return; }
+    if (t.closest('#add-member')) { toast('Prototip: üye ekleme formu uygulamada açılacak'); return; }
+    if (t.closest('#add-event')) { toast('Prototip: etkinlik oluşturma formu uygulamada açılacak'); return; }
+  });
+  document.addEventListener('change', e => {
+    const t = e.target;
+    if (t.matches('#mine input')) { me().prep[+t.dataset.k] = t.checked ? 1 : 0; renderHome(); renderMembers(); return; }
+    if (t.id === 'rank-filter') { state.rank = t.value; renderMembers(); }
+    if (t.id === 'status-filter') { state.status = t.value; renderMembers(); }
+  });
+  document.getElementById('q').addEventListener('input', e => { state.q = e.target.value; renderMembers(); });
+  document.getElementById('ann-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const ti = document.getElementById('ann-title'), bo = document.getElementById('ann-body');
+    const err = document.getElementById('ann-err');
+    if (!ti.value.trim() || !bo.value.trim()) { err.hidden = false; return; }
+    err.hidden = true;
+    const dc = document.getElementById('ann-discord').checked;
+    ANN[state.phase].unshift({ title: ti.value.trim(), body: bo.value.trim(), by: me().name, at: now(), pin: document.getElementById('ann-pin').checked, dc });
+    ti.value = ''; bo.value = '';
+    renderCalendar(); renderHome();
+    toast(dc ? 'Duyuru yayınlandı. Uygulamada Discord kanalına da gidecek.' : 'Duyuru yayınlandı');
+  });
+
+  const h0 = (location.hash || '').slice(1);
+  if (['genel', 'uyeler', 'etkinlikler', 'takvim'].includes(h0)) state.tab = h0;
+  render();
+})();
+</script>
