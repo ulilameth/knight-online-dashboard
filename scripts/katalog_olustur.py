@@ -1,6 +1,7 @@
 """KO Bugda verisinden prototipin okuduğu küçük katalogu üretir.
 
 Girdi:  data/esyalar/kobugda/{esyalar,istatistikler,kategoriler}.json
+        data/esyalar/kobugda/set_bonuslari.json (scripts/kobugda_setler.py ile indirilir)
         data/esyalar/kobugda/api/*.json (isteğe bağlı: kobugda.com/api/items yanıtları, tarayıcıdan kaydedilir;
         eski veride istatistiği olmayan takı ve cospre eşyalarını tamamlar)
 Çıktı:  design/katalog.json
@@ -62,6 +63,18 @@ API_CAT = {
 }
 API_HANDED = {"WEAPON_SWORD": "Sword", "WEAPON_AXE": "Axe", "WEAPON_CLUB": "Club", "WEAPON_SPEAR": "Spear"}
 API_COSPRE = {"WINGS", "TATTOO", "EMBLEM", "PATHOS", "VALKYRIE_HELM", "VALKYRIE_PAULDRON"}
+# Set bonusu: KrowazFlagId 5'er bitlik gruplara bölünür; grup = set ailesi, gruptaki bit = parça
+# (kask 1, zırh 2, pantolon 4, bot 8, eldiven 16). Aile -> set_bonuslari.json'daki tablo eki.
+# 6. aile (Draki Legion) eski KO Bugda'da hesaplanmıyor; bonusu bilinmiyor.
+SET_AILE = ["KROWAZ", "BASIC", "SECRET", "HOLY_KNIGHT", "ROSETTA"]
+SET_AILE_ADI = {"KROWAZ": "Krowaz", "BASIC": "Mythril ailesi", "SECRET": "Secret", "HOLY_KNIGHT": "Holy Knight", "ROSETTA": "Rosetta"}
+# Set bonusu satırı alanları (prototip FEATS sütunlarına bu sırayla eklenir)
+SET_ALAN = ["str", "health", "dex", "int", "magicpower", "hp", "mp", "ac",
+            "resfire", "resglacier", "reslighting", "respoison", "resdark", "resmagic"]
+# Parça adlarından çıkan set adı yetersizse
+SET_ADI = {"147,148,149,150,151": "Mage Cloth/Cotton", "454,455,456,457,458": "Mage Leather/Linen",
+           "152,153,154,155,156": "Fabric (Priest)", "403,404,405,406,407": "Holy Knight Assassin",
+           "674,675,676,677,678": "Rogue Plate"}
 API_CLASS = [("canUseWarrior", "war"), ("canUseRogue", "rog"), ("canUseMage", "mag"), ("canUsePriest", "pri"), ("canUseKurian", "kur")]
 
 
@@ -87,6 +100,47 @@ def effect_text(v):
     if not m:
         return v.strip()
     return f"{'Saldırırken' if m[1] == 'Attack' else 'Hasar alırken'} %{m[2]} ihtimalle: {m[3]}"
+
+
+def set_name(key, names):
+    """Parça adlarının ortak başı (ya da sonu): "Krowaz Warrior Boots" ... -> "Krowaz Warrior"."""
+    if key in SET_ADI:
+        return SET_ADI[key]
+    words = [n.split() for n in names]
+    def common(lists):
+        out = []
+        for t in zip(*lists):
+            if any(x != t[0] for x in t):
+                break
+            out.append(t[0])
+        return out
+    pre, suf = common(words), common([w[::-1] for w in words])[::-1]
+    if pre and len(pre) >= len(suf):
+        return " ".join(pre)
+    name = " ".join(suf)
+    for lead in ("of the ", "of "):
+        if name.startswith(lead):
+            name = name[len(lead):]
+    return name or names[0]
+
+
+def set_family(it):
+    flag = it.get("KrowazFlagId")
+    if not flag:
+        return None
+    fam = (flag.bit_length() - 1) // 5
+    return [SET_AILE[fam], flag >> (5 * fam)] if fam < len(SET_AILE) else None
+
+
+def set_bonus_tables():
+    path = os.path.join(SRC, "set_bonuslari.json")
+    if not os.path.exists(path):
+        return {}
+    out = {}
+    for name, rows in json.load(open(path, encoding="utf-8"))["tablolar"].items():
+        out[name] = {mask: [r["bonus"].get(f, 0) for f in SET_ALAN] for mask, r in rows.items()
+                     if any(r["bonus"].get(f, 0) for f in SET_ALAN)}
+    return out
 
 
 def trim(row):
@@ -165,6 +219,7 @@ def main():
             "g": grade_of(it, cat["IsCospre"]),
             "set": it["SetIdentifiers"] or None,
             **({"ef": effects[it["Identifier"]]} if it["Identifier"] in effects else {}),
+            **({"sb": sb} if (sb := set_family(it)) else {}),
         })
 
     stat_out = {str(k): [v[gr] for gr in sorted(v)] for k, v in by_item.items()}
@@ -199,10 +254,23 @@ def main():
         added += 1
     if api:
         print(f"API: {len(api)} eşya okundu, {filled} eşyanın derecesi tamamlandı, {added} yeni eşya eklendi")
+    # Setler: aynı SetIdentifiers'ı taşıyan 5 parça (kask, zırh, pantolon, eldiven, bot)
+    groups = {}
+    for x in out_items:
+        if x.get("set"):
+            groups.setdefault(x["set"], []).append(x)
+    setler = []
+    for key, parts in groups.items():
+        fams = {x["sb"][0] for x in parts if x.get("sb")}
+        fam = fams.pop() if len(fams) == 1 else None
+        setler.append({"k": key, "n": set_name(key, [x["n"] for x in parts]), "p": [x["id"] for x in parts],
+                       **({"a": fam, "an": SET_AILE_ADI[fam]} if fam else {})})
     json.dump({"kaynak": "KO Bugda (old.kobugda.com)", "alanlar": ["derece"] + STAT_FIELDS,
-               "esyalar": out_items, "dereceler": stat_out},
+               "esyalar": out_items, "dereceler": stat_out, "setler": setler,
+               "set_alanlari": SET_ALAN, "set_bonuslari": set_bonus_tables()},
               open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    print(f"{len(out_items)} eşya, {len(stat_out)} eşyada derece verisi -> {OUT}")
+    print(f"{len(out_items)} eşya, {len(stat_out)} eşyada derece verisi, {len(setler)} set "
+          f"({sum(1 for x in setler if 'a' in x)} tanesi bonuslu) -> {OUT}")
     if unknown:
         print("eşlenmeyen yuva tipleri:", unknown)
 
