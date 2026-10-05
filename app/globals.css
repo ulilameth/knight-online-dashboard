@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/* Renk ve yazı token'ları design/tokens.css'ten (yazı tipleri next/font değişkenleriyle); token değişince ikisi birlikte güncellenir */
+:root {
+  color-scheme: dark;
+
+  /* 1. Zeminler */
+  --bg-primary: #0f0e0d;   /* Kömür Karası: sayfa zemini */
+  --bg-card:    #191715;   /* Dövme Demir: kart, panel, tablo zemini */
+  --bg-hover:   #232019;   /* Örs Gölgesi: hover, seçili satır, kart içi kutu, input zemini */
+
+  /* 2b. Vurgu: altın ve bronz (ödül, loot) */
+  --accent:         #c9a14a;                 /* Eski Altın: ödül/loot, öne çıkan sayılar, ilerleme çubuğu, bağlantı, odak halkası */
+  --accent-hover:   #e2bf6b;                 /* Ganimet Altını: altın öğelerin hover ve parlak hali */
+  --accent-bronze:  #b07a40;                 /* Bronz: ikincil vurgu; ikon, çizgi, 18px üstü metin */
+  --accent-soft:    rgba(201, 161, 74, 0.14);/* Altın Tozu: "Resmi" etiketi, seçili liste öğesi zemini */
+  --text-on-accent: #1a1408;                 /* Mürekkep Karası: altın zemin üstündeki metin */
+
+  /* 3. Metin */
+  --text-heading: #f1e8d4; /* Parşömen Beyazı: başlıklar, önemli değerler, buton metni */
+  --text-body:    #d3c8b2; /* Eski Parşömen: gövde metni, tablo hücreleri */
+  --text-muted:   #9c9282; /* Solgun Mürekkep: ikincil bilgi, tarih, etiket, placeholder */
+
+  /* 4. Sistem durumları (her zaman ikon + etiketle, renk tek başına anlam taşımaz) */
+  --success:      #6cba6e;                  /* Şifa Otu: kaydedildi, tamamlandı, katıldı */
+  --success-soft: rgba(108, 186, 110, 0.14);
+  --warning:      #ee9a3c;                  /* Meşale: dikkat, geç kaldı, süre doluyor */
+  --warning-soft: rgba(238, 154, 60, 0.14);
+  --error:        #e5584f;                  /* Ejder Kanı: hata, başarısız işlem, gelmedi */
+  --error-soft:   rgba(229, 88, 79, 0.14);
+  --info:         #56b6d0;                  /* Mana Işığı: bilgi notu, ipucu, resmi duyuru bağlantısı */
+  --info-soft:    rgba(86, 182, 208, 0.14);
+
+  /* 5. Oyuncu durumları (nokta + ikon + etiket) */
+  --player-online:  #4cc98a; /* Yaşam Işığı: çevrimiçi */
+  --player-offline: #726b62; /* Kül: çevrimdışı; yalnız nokta/ikon, yazısı --text-muted */
+  --player-combat:  #f0663f; /* Savaş Alevi: savaşta (CSW, BDW, Juraid...), çapraz kılıç ikonu */
+  --player-afk:     #a593ea; /* Uyku Büyüsü: AFK, hilal ikonu */
+
+  /* 6. Rütbeler (madenler: altın > gümüş > bronz > demir) */
+  --rank-leader:    #e7c46e; /* Taç Altını: klan lideri */
+  --rank-assistant: #c9ced6; /* Gümüş Zırh: yardımcı (asistan) */
+  --rank-officer:   #cf9258; /* Bronz Nişan: subay */
+  --rank-member:    #a69d8f; /* Demir: üye */
+  --rank-candidate: #958b7d; /* Paslı Demir: aday (ek) */
+
+  /* 7. Grafik serisi: bu sırayla kullanılır, renk körlüğü testli. İlk beşi sınıf renkleri */
+  --chart-1: #3f88dc; /* Mana Mavisi: Warrior */
+  --chart-2: #d9622d; /* Ateş Turuncusu: Rogue */
+  --chart-3: #1fa077; /* Zümrüt: Mage */
+  --chart-4: #c48410; /* Kehribar: Priest */
+  --chart-5: #d35a84; /* Gül Kurusu: Kurian / Porutu */
+  --chart-6: #8a7fe3; /* Ametist: altıncı seri ya da "diğer" */
+  --chart-grid: #2c2823;
+  --text-on-chart: #0f0e0d; /* grafik dolgusu içindeki sayı */
+
+  /* 8. Kenarlık ve ayırıcı */
+  --border-subtle:  #2c2823;       /* Pas Çizgisi: kart içi ayırıcı, tablo satır çizgisi, grafik ızgarası */
+  --border-default: #3a352e;       /* Zırh Kenarı: kart ve panel kenarı */
+  --border-input:   #766d60;       /* Örs Kenarı: input, select, ikincil buton kenarı (kart üstünde 3:1) */
+  --border-focus:   var(--accent); /* odak halkası */
+
+  /* Gölge */
+  --shadow-card: 0 1px 0 rgba(241, 232, 212, 0.03) inset, 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  /* Yazı (Google Fonts) */
+  --font-display: var(--font-cinzel), "Cinzel", "Times New Roman", serif;               /* klan adı, sayfa başlıkları, geri sayım */
+  --font-ui:      var(--font-barlow-condensed), "Barlow Condensed", "Arial Narrow", sans-serif;   /* kart başlıkları, etiketler, sayılar, butonlar */
+  --font-body:    var(--font-barlow), "Barlow", system-ui, -apple-system, sans-serif;   /* gövde metni */
+}
+
+/* 2a. Klan kimliği: Karus (varsayılan) */
+:root,
+:root[data-irk="karus"] {
+  --brand:         #7a1b28;                 /* Kan Bordosu: birincil buton, arma zemini, üst bant */
+  --brand-hover:   #94263a;                 /* Şarap Bordosu: birincil buton hover */
+  --brand-text:    #e0707a;                 /* Karus Kızılı: koyu zeminde marka renkli metin/ikon, aktif sekme çizgisi */
+  --brand-soft:    rgba(122, 27, 40, 0.32); /* Bordo Sis: marka renkli zemin vurgusu */
+  --text-on-brand: #f1e8d4;
+}
+
+/* 2a. Klan kimliği: El Morad */
+:root[data-irk="el-morad"] {
+  --brand:         #1d3a74;                 /* Kraliyet Laciverti */
+  --brand-hover:   #274c93;                 /* Gece Mavisi */
+  --brand-text:    #82a8ea;                 /* El Morad Mavisi */
+  --brand-soft:    rgba(29, 58, 116, 0.38); /* Lacivert Sis */
+  --text-on-brand: #f1e8d4;
+}
+
+/* Tailwind sınıfları: bg-kart, text-baslik, border-cizgi, font-ui ... */
+@theme inline {
+  --color-zemin: var(--bg-primary);
+  --color-kart: var(--bg-card);
+  --color-kutu: var(--bg-hover);
+  --color-baslik: var(--text-heading);
+  --color-metin: var(--text-body);
+  --color-soluk: var(--text-muted);
+  --color-altin: var(--accent);
+  --color-altin-parlak: var(--accent-hover);
+  --color-altin-sis: var(--accent-soft);
+  --color-marka: var(--brand);
+  --color-marka-hover: var(--brand-hover);
+  --color-marka-yazi: var(--brand-text);
+  --color-marka-sis: var(--brand-soft);
+  --color-basari: var(--success);
+  --color-basari-sis: var(--success-soft);
+  --color-uyari: var(--warning);
+  --color-hata: var(--error);
+  --color-hata-sis: var(--error-soft);
+  --color-bilgi: var(--info);
+  --color-cizgi: var(--border-default);
+  --color-cizgi-ince: var(--border-subtle);
+  --color-girdi: var(--border-input);
+  --color-lider: var(--rank-leader);
+  --color-asistan: var(--rank-assistant);
+  --color-subay: var(--rank-officer);
+  --color-uye: var(--rank-member);
+  --color-aday: var(--rank-candidate);
+  --color-warrior: var(--chart-1);
+  --color-rogue: var(--chart-2);
+  --color-mage: var(--chart-3);
+  --color-priest: var(--chart-4);
+  --color-kurian: var(--chart-5);
+  --font-display: var(--font-cinzel), "Times New Roman", serif;
+  --font-ui: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  --font-body: var(--font-barlow), system-ui, sans-serif;
+}
+
+html {
+  background: var(--bg-primary);
+}
+body {
+  min-height: 100dvh;
+  background: var(--bg-primary);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}

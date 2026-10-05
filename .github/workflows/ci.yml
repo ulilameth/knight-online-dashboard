@@ -1,0 +1,39 @@
+# Her push ve PR'da: lint, tip denetimi, testler (veritabanı testleri gerçek Postgres'te), DB tipleri güncel mi, derleme.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - name: Veritabanı tipleri migration ile uyumlu
+        run: |
+          npm run db:tipler
+          git diff --exit-code lib/database.types.ts || { echo "::error::lib/database.types.ts eski; npm run db:tipler çalıştırıp commit et"; exit 1; }
+      - run: npm run build

@@ -82,7 +82,7 @@ Davet kodu olmadan yeni hesap açılmaz; ayrı bir "onay bekleniyor" durumu yok.
 
 ### Giriş: nick + şifre
 
-- Supabase Auth'un e-posta/şifre yöntemi kullanılır. Her üyeye kullanıcının hiç görmediği bir iç e-posta atanır (`<profil-id>@uye.l4bel`). Giriş formu nick'i bu adrese çevirip `signInWithPassword` çağırır; nick büyük/küçük harf duyarsız eşleşir.
+- Supabase Auth'un e-posta/şifre yöntemi kullanılır. Her üyeye kullanıcının hiç görmediği bir iç e-posta atanır (`<profil-id>@uye.l4bel.invalid`; `.invalid` gerçek olmayan alan adları için ayrılmış). Sunucu nick'ten bu adresi `giris_eposta()` ile bulup `signInWithPassword` çağırır; nick büyük/küçük harf duyarsız eşleşir. Deneme sınırı nick başına `deneme_asildi/kaydet/temizle()` ile veritabanında tutulur.
 - Şifre en az 8 karakter. Aynı nick için 15 dakikada 5 yanlış denemeden sonra bekleme.
 - **Şifre sıfırlama:** e-posta olmadığı için yetkili, Ayarlar › Üyeler'den o üyeye tek kullanımlık **sıfırlama kodu** (24 saat geçerli) üretir; üye `/sifre-sifirla` sayfasında nick + kod + yeni şifre girer. Kod da davet kodu gibi hash'lenerek saklanır.
 - Üye şifresini Profilim'den değiştirir (eski şifre + yeni şifre).
@@ -94,7 +94,7 @@ Yetkililer Ayarlar › Davet kodları'ndan kod üretir ve TeamSpeak'te (L4B) ya 
 | Adım | Ekran | Sunucu tarafında ne olur |
 |---|---|---|
 | 1 | **Davet kodu**: kodu yaz, "Devam et" | Kod doğrulanır (aktif mi, süresi dolmuş mu, kullanım sınırı dolmuş mu). Geçerliyse 15 dakikalık imzalı, `httpOnly` bir çerez yazılır. Hata mesajı tek tip: "Kod geçersiz ya da süresi dolmuş" (hangi koşulun tuttuğu söylenmez) |
-| 2 | **Hesabını oluştur**: nick, şifre, şifre tekrar | Çerezdeki kod yeniden doğrulanır; nick benzersizliği kontrol edilir; `davet_kullan()` kullanım sayısını satır kilidiyle artırır; Supabase kullanıcısı (iç e-posta + şifre) ve kodun rütbesiyle (Üye ya da Aday) `uye` yetkili profil açılır; kullanım kaydı yazılır |
+| 2 | **Hesabını oluştur**: nick, şifre, şifre tekrar | Supabase kullanıcısı (iç e-posta + şifre) admin API ile açılır; `kayit_olustur(kod, kullanıcı, nick)` kodu satır kilidiyle yeniden doğrular ve kullanır, nick benzersizliğini denetler, `uye` yetkili profili, hazırlık satırını ve kodun rütbesiyle (Üye ya da Aday) karakteri açar, kullanım kaydını yazar. Yetkililerin önceden eklediği hesapsız karakter aynı nick'le kayıt olunca hesaba bağlanır ve rütbesi korunur. Veritabanı adımı başarısız olursa açılan kullanıcı silinir |
 | 3 | **Karakterin**: sınıf, TeamSpeak nick (isteğe bağlı); level açılıştan sonra | `characters` satırı tamamlanır |
 | 4 | **Hoş geldin**: TeamSpeak adresi (L4B), sıradaki hazırlık adımları, "Panele git" | |
 
@@ -218,14 +218,15 @@ events              id, tur → event_types, baslik, baslangic, bitis?, aciklama
 recurring_schedules id, tur, baslik, gun (0-6), saat, sure_dk, aktif     -- haftalık düzen
 attendance          event_id + character_id (pk), durum, isaretleyen, updated_at
 announcements       id, baslik, govde, sabit, ts_gonderildi_at?, yazar, created_at
-clan_settings       tek satır: klan_adi, yedek_ad?, monogram, irk (karus | el_morad), sunucu_adi?, ts_adres, level_siniri (80 | 83), reb_siniri (0-10)
-invite_codes        id, kod_hash (unique), son_dort, rutbe (uye | aday), max_kullanim, kullanim, bitis, aktif, not, olusturan, created_at
+clan_settings       tek satır: klan_adi, yedek_ad?, monogram, irk (karus | el_morad), sunucu_adi?, ts_adres, acilis_at (sunucu açılışı; öncesinde level girilmez), level_siniri (80 | 83), reb_siniri (0-10)
+invite_codes        id, kod_hash (unique), son_dort, rutbe (uye | aday), max_kullanim, kullanim, bitis, aktif, aciklama, olusturan, created_at
 invite_redemptions  id, code_id, profile_id, created_at
 password_resets     id, profile_id, kod_hash, bitis, kullanildi_at?, olusturan, created_at
 builds              id, character_id?, ad, sinif, irk_turu, level, reb, statlar jsonb {str,hp,dex,int,mp}, skiller int[4] (3 ağaç + master), ekipman jsonb {yuva: {item_id, arti}}, ap_girdileri jsonb, sablon bool, olusturan, updated_at   -- karakterin kayıtlı build'i Üyeler'de görünür; characters.ekipman_gorunur = gizli ise RLS yalnızca sahibine açar
-items               id, dis_id? (ör. KO Bugda ID), ad, kategori, yuva, el_tipi, tek_elli bool, siniflar text[] (warrior | rogue | mage | priest | kurian; boş = hepsi), gerekli_level, gerekli_str, gerekli_hp, gerekli_dex, gerekli_int, gerekli_mp, derece (normal | magic | rare | unique | set), set_id?, gorsel_yolu? (kendi depomuzdaki görsel), kaynak_gorsel_url? (yalnızca kayıt, gösterilmez), not, kaynak, ekleyen, updated_at
-item_stats          item_id + arti (0-10) (pk), ap, diger jsonb       -- artı seviyesine göre değerler
-item_sets           id, ad, bonuslar jsonb
+items               id (KO Bugda kimliği; elle eklenenler 1.000.000+), ad ({ad}: sahibinin nick'i), kategori, yuvalar text[], siniflar sinif[] (boş = hepsi), derece (normal | set | unique | rare | draki | cospre), set_anahtari?, set_parcasi jsonb?, etki?, gorsel?, kaynak, updated_at
+item_stats          item_id + arti (0-31) (pk), degerler jsonb       -- artı seviyesine göre değerler (AttackPower, BonusDexterity, ...)
+item_sets           anahtar (pk; parça kimlikleri), ad, aile?, parcalar int[], bonus_tablosu jsonb? (kobugda.com/sets)
+item_set_bonuses    tablo + maske (pk), bonus jsonb                    -- eski KO Bugda aile tabloları
 game_rules          anahtar (pk), deger jsonb, dogrulandi bool, kaynak?   -- stat_per_level, reb_bonus_stat, stat_cap, skill_start_level, skill_per_level, master_level, sinif_baslangic_statlari
 class_trees         sinif, sira (1-4), ad                              -- ör. mage: Flame, Glacier, Lightning, Master
 race_stats          irk_turu (pk), taraf (karus | el_morad), siniflar text[], str, hp, dex, int, mp, dogrulandi bool
@@ -245,9 +246,11 @@ Terim: arayüzde karakter adı her yerde **Nick** olarak geçer (tablo başlığ
 RLS kuralları (özet):
 - Okuma: `uye` ve üstü her tabloyu okur (`invite_codes` ve `invite_redemptions` hariç).
 - Yazma: `characters`, `events`, `attendance`, `announcements`, `recurring_schedules` → `yetkili` ve üstü.
-- Üyenin kendi karakteri: doğrudan tablo yazma yok; `profil_guncelle(sinif, level, reb)` fonksiyonu (SECURITY DEFINER) yalnızca `profile_id = auth.uid()` olan satırın bu alanlarını değiştirir, `level_siniri` ve `reb_siniri`'ni (reb yalnızca level 83'te) doğrular ve `character_changes`'e yazar. `profiles.ts_nick` üyenin kendisi tarafından yazılabilir.
+- Üyenin kendi karakteri: doğrudan tablo yazma yok; `profil_guncelle(sinif, level, reb, ekipman_gorunur)` fonksiyonu (SECURITY DEFINER) yalnızca `profile_id = auth.uid()` olan satırın bu alanlarını değiştirir, `level_siniri` ve `reb_siniri`'ni (reb yalnızca level 83'te) doğrular ve `character_changes`'e yazar. `profiles.ts_nick` üyenin kendisi tarafından yazılabilir.
 - `hazirlik` → herkes yalnızca kendi satırını yazar.
-- `invite_codes`, `invite_redemptions` → yalnızca `yetkili` ve üstü okur/yazar. Doğrulama ve kullanma `davet_dogrula(kod)` ve `davet_kullan(kod)` fonksiyonlarıyla, istemciye kod listesi hiç gitmez.
+- `invite_codes`, `invite_redemptions` → yalnızca `yetkili` ve üstü okur/yazar. Kod üretme `davet_olustur()` (yetkili; tam kod yalnızca o an döner), doğrulama ve kullanma `davet_dogrula(kod)` ve `kayit_olustur(kod, kullanıcı, nick)` fonksiyonlarıyla (yalnızca service role); istemciye kod listesi hiç gitmez. Kodun tuzu istemciye kapalı `private` şemasında.
+- Diğer fonksiyonlar: `giris_eposta(nick)`, `sifirlama_kodu_kullan(nick, kod)`, `deneme_asildi/kaydet/temizle(anahtar)` yalnızca service role; `sifirlama_kodu_olustur(karakter)` yetkili (yetkili yalnızca Üye'nin, yönetici herkesin kodunu üretir); `yetki_ver(profil, yetki)` yönetici (son yönetici düşürülemez). Karakter değişiklikleri tetikleyiciyle `character_changes`'e yazılır.
+- `builds` → şablonlar herkese; kayıtlı build sahibine, `characters.ekipman_gorunur = 'klan'` ise tüm üyelere. Gizli build'i yetkililer de görmez.
 - `password_resets` → yalnızca `yetkili` ve üstü üretir; kullanma sunucu tarafında service role ile.
 - `profiles.yetki`, `milestones`, `clan_settings` → yalnızca `yonetici`.
 
@@ -294,7 +297,16 @@ Faz 1  ┌─ A: Üyeler + Profilim  ┐
 Faz 2  Entegrasyon ve yayın   ──── 1 oturum
 ```
 
-### Faz 0: Temel altyapı (1 oturum)
+### Faz 0: Temel altyapı (1 oturum) · tamamlandı
+
+Durum (5 Ekim 2026): teslim edildi. Plandan farklar:
+- Veri katmanında her alan için **Supabase uygulaması da yazıldı** (yalnızca arayüz + demo değil); Faz 1 oturumları ekran ve Server Action yazar, `lib/data/*.ts`'e yalnızca eksik sorgu eklerse dokunur.
+- Giriş, kayıt (4 adım) ve şifre sıfırlama sayfaları sade halleriyle çalışıyor: `app/(hesap)/giris`, `app/(hesap)/kayit/**`, `app/(hesap)/sifre-sifirla`. Oturum D bunları tasarıma göre düzenler.
+- `components/ui/`: Panel, Button/LinkButton, Tag, Alan (etiketli girdi), FormMesaji. Pill, ClassChip, Segmented, DateBlock, Meter, Tooltip, Toast gereken oturumda eklenir (ortak dosya kuralı geçerli).
+- Testler: `supabase/tests/sema.test.ts` (23 senaryo, gerçek Postgres'te RLS ve fonksiyonlar), `lib/**/*.test.ts` (giriş/kayıt mantığı, demo adaptörlerinin aynı kuralları uygulaması, TSİ zaman).
+- `lib/database.types.ts`, `scripts/db-tipleri.mjs` ile migration'dan üretilir; CI güncelliğini denetler.
+- İlk yönetici: `scripts/ilk-yonetici.sql`.
+
 
 Teslim edilecekler:
 1. Next.js 16 + TS + Tailwind 4 + ESLint iskeleti, `npm run lint | typecheck | test | build` komutları.
@@ -310,14 +322,14 @@ Teslim edilecekler:
 
 ### Faz 1: Paralel oturumlar
 
-Her oturum Faz 0'ın birleştiği `main` dalından başlar, kendi dalında çalışır ve PR açar. **Yalnızca kendi klasörlerine yazar.** Ortak dosyada değişiklik gerekiyorsa (ör. `components/ui`) PR açıklamasında belirtir, kendisi değiştirmez; ihtiyaç Faz 2'de toplanır.
+Her oturum Faz 0'ın birleştiği varsayılan daldan başlar, kendi dalında çalışır ve PR açar. **Yalnızca kendi klasörlerine yazar.** Ortak dosyada değişiklik gerekiyorsa (ör. `components/ui`) PR açıklamasında belirtir, kendisi değiştirmez; ihtiyaç Faz 2'de toplanır.
 
 | Oturum | Dal | Sahip olduğu dosyalar | Kabul kriterleri |
 |---|---|---|---|
 | **A: Üyeler + Profilim** | `feat/uyeler` | `app/(panel)/uyeler/**`, `app/(panel)/profil/**`, `components/uyeler/**`, `lib/data/members.ts` (supabase adaptörü) | Filtre + arama, sınıf dağılımı, rütbe özeti, hazırlık sütunu (açılış öncesi) / level sütunu (sonrası), karakter ekle-düzenle formu (Server Action + doğrulama), karakter detayında katılım geçmişi ve değişiklik kaydı; Profilim: kilitli nick, TS nick, sınıf, level (açılış öncesi kapalı, yönetici sınırına kadar), reb (yalnızca 83'te, reb sınırına kadar, "83+N" gösterimi), şifre değiştirme, kaydedince üye listesine yansıma, başkasının profilini değiştirememe testi |
 | **B: Etkinlik + yoklama** | `feat/etkinlikler` | `app/(panel)/etkinlikler/**`, `components/etkinlikler/**`, `lib/data/events.ts`, `lib/data/attendance.ts` | Yaklaşan/geçmiş listesi, etkinlik oluştur-düzenle, yoklama ekranı (tek tıkla işaretleme, iyimser güncelleme, toplu işlemler), tür bazında katılım grafiği, en istikrarlı 5 üye, üyeler için salt okunur görünüm |
 | **C: Takvim + duyurular** | `feat/takvim-duyurular` | `app/(panel)/takvim/**`, `app/(panel)/duyurular/**`, `components/takvim/**`, `components/duyurular/**`, `lib/data/announcements.ts`, `lib/data/schedule.ts`, `lib/teamspeak/**` | Aylık takvim + telefonda ajanda, haftalık düzen düzenleme ve "bu haftanın etkinliklerini oluştur", duyuru yaz/sabitle/sil, TeamSpeak WebQuery ile gönderim (yapılandırılmamışsa kutucuk gizli; hata durumunda kullanıcıya açık mesaj), "Metni kopyala" düğmesi, WebQuery birim testi (fetch mock) |
-| **D: Genel bakış + ayarlar + kayıt** | `feat/genel-ayarlar` | `app/(panel)/page.tsx`, `app/(panel)/ayarlar/**`, `app/kayit/**`, `app/giris/**`, `app/sifre-sifirla/**`, `components/genel/**`, `components/kayit/**`, `lib/data/milestones.ts`, `lib/data/prep.ts`, `lib/data/settings.ts`, `lib/data/invites.ts` | Geri sayım (istemci bileşeni, saniyelik), aşama zaman çizelgesi, klan hazırlığı + "benim hazırlığım" (açılıştan sonra "L4BEL'e katıldım" adımı eklenir), açılış sonrası özet kutuları; Giriş (nick + şifre), Kayıt: 4 adımlı akış (kod, hesap, karakter, hoş geldin), tek tip hata mesajı, deneme sınırı, şifre sıfırlama; ana sayfada TeamSpeak kartı (L4B, kopyala); Ayarlar: açılış tarihleri, klan adı/ırk, TS adresi, level sınırı seçimi, yetki verme, davet kodu ve sıfırlama kodu üret/listele/iptal |
+| **D: Genel bakış + ayarlar + kayıt** | `feat/genel-ayarlar` | `app/(panel)/page.tsx`, `app/(panel)/ayarlar/**`, `app/(hesap)/**`, `components/hesap/**`, `components/genel/**`, `components/kayit/**`, `lib/data/milestones.ts`, `lib/data/prep.ts`, `lib/data/settings.ts`, `lib/data/invites.ts` | Geri sayım (istemci bileşeni, saniyelik), aşama zaman çizelgesi, klan hazırlığı + "benim hazırlığım" (açılıştan sonra "L4BEL'e katıldım" adımı eklenir), açılış sonrası özet kutuları; Giriş (nick + şifre), Kayıt: 4 adımlı akış (kod, hesap, karakter, hoş geldin), tek tip hata mesajı, deneme sınırı, şifre sıfırlama; ana sayfada TeamSpeak kartı (L4B, kopyala); Ayarlar: açılış tarihleri, klan adı/ırk, TS adresi, level sınırı seçimi, yetki verme, davet kodu ve sıfırlama kodu üret/listele/iptal |
 | **E: Karakter tasarımı** | `feat/karakter` | `app/(panel)/karakter/**`, `app/(panel)/esyalar/**`, `app/(panel)/ayarlar/esyalar/**`, `components/karakter/**`, `lib/data/builds.ts`, `lib/data/items.ts`, `lib/rules/**` | Sınıf, level ve reb seçimi; stat dağıtımı (5 stat, kalan puan, 255 sınırı başlangıç statları girilince); skill dağıtımı (3 ağaç + master; ağaç başına level sınırı, master level − 60 en fazla 23); stat ve skill için elle yazılabilir kutular; level düşünce fazla puan uyarısı ve kaydetmenin kapanması; ekipman yuvaları (19 yuva: 13 ekipman + 6 cospre, katalogdan, derece seçimli); tek tıkla set takma ve parça kombinasyonuna göre set bonusu (`set_bonuslari` tablosu); kaydedilen build'in Üyeler listesinde Ekipman sütunu ve penceresi, profilde Klana göster / Gizli seçimi (RLS ile); yetkili şablonları (oluştur, sınıfa göre listele, üyenin planına yükle); tüm sayılar `game_rules` ve `class_trees` tablolarından, kodda sabit yok; puan hesabı için birim testleri; eşya seçici (yalnızca build'in sınıfı, arama, level filtresi, derece, uyumsuzluk uyarısı); Eşyalar sayfası (`app/(panel)/esyalar/**`: sınıf sekmeleri, yuva grubu ve derece filtresi, detay ve build'e takma); otomatik hesap paneli (AP, savunma, can, mana, direnç; eşya ve takı bonusları, hesap tipi sınıf ve silahtan, WES/Wolf/ek stat/ek %; referans hesapla karşılaştırmalı birim testi); Ayarlar › Eşya kataloğu (ekle, JSON/CSV içe aktar, görsel yükle); KO Bugda bağlantısı |
 
 Ortak kurallar:

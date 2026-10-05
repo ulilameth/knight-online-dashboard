@@ -1,9 +1,57 @@
 # L4BEL Klan Paneli
 
-L4BEL klanının Knight Online yeni sunucuları (12 Kasım 2026) için kullanacağı klan içi panel: açılış geri sayımı, üye listesi ve roller, etkinlik katılım takibi, takvim ve duyurular.
+L4BEL klanının Knight Online yeni sunucuları (12 Kasım 2026) için kullanacağı klan içi panel: açılış geri sayımı, üye listesi ve roller, etkinlik katılım takibi, takvim ve duyurular, karakter tasarımı.
 
 - Plan: [`docs/PLAN.md`](docs/PLAN.md)
-- Tasarım prototipi: [`design/prototype.html`](design/prototype.html) (tarayıcıda doğrudan açılır)
-- Prototipin web sitesi: GitHub Pages, [`.github/workflows/pages.yml`](.github/workflows/pages.yml). Settings → Pages → Source: GitHub Actions seçilince https://ulilameth.github.io/knight-online-dashboard/ adresinde yayınlanır (site herkese açıktır; giriş ekranı yalnızca örnek)
+- Tasarım prototipi: [`design/prototype.html`](design/prototype.html) (tarayıcıda doğrudan açılır). Yayını: https://ulilameth.github.io/knight-online-dashboard/ ([`.github/workflows/pages.yml`](.github/workflows/pages.yml); site herkese açıktır, giriş ekranı yalnızca örnek)
 
-Uygulama kodu henüz yok; plan Faz 0 ile başlıyor.
+## Uygulama
+
+Next.js 16 (App Router, Server Actions) + TypeScript + Tailwind 4, veri ve giriş Supabase (Postgres + Auth + RLS). Durum: **Faz 0 tamam** (altyapı, veritabanı, veri katmanı, giriş ve kayıt); ekranların çoğu Faz 1'de.
+
+### Yerel çalıştırma (demo modu)
+
+Supabase gerekmez; örnek klan verisiyle bellekte çalışır.
+
+```bash
+npm install
+npm run dev          # http://localhost:3000
+```
+
+Demo hesapları (şifre `demo1234`): **KaraBey** (yönetici), **DemirYumruk** (yetkili), **GeceKuşu** (üye). Kayıt için davet kodu `L4BEL-DEMO-2026`. Açılış sonrası ekranları görmek için `.env.local`'a `DEMO_SIMDI=2026-11-21T19:40`.
+
+### Komutlar
+
+| Komut | Ne yapar |
+|---|---|
+| `npm run dev` | Geliştirme sunucusu |
+| `npm run lint` / `npm run typecheck` | ESLint, TypeScript |
+| `npm test` | Vitest. `DATABASE_URL` verilirse veritabanı testleri de gerçek Postgres'te çalışır |
+| `npm run db:tipler` | `lib/database.types.ts`'i migration'dan üretir (`DATABASE_URL` gerekir) |
+| `npm run build` | Üretim derlemesi |
+
+Veritabanı testleri için yerel Postgres: `DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres npm test`. Testler geçici bir veritabanı açar, `supabase/tests/supabase-stub.sql` (Supabase'in rolleri ve `auth.uid()` taklidi) ve migration'ı uygular, sonra siler. CI'da aynısı Postgres 16 servisiyle çalışır.
+
+### Ortam değişkenleri
+
+[`.env.example`](.env.example)'a bak. `DATA_SOURCE=supabase` için `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (gizli, yalnızca sunucuda) ve `KAYIT_IMZA_ANAHTARI` (en az 32 karakter rastgele) gerekir.
+
+### Supabase kurulumu
+
+1. supabase.com'da proje aç. Authentication › Providers › Email: **Confirm email kapalı** (iç e-postalar gerçek değil).
+2. SQL Editor'da [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)'i çalıştır (ya da Supabase CLI ile `supabase db push`).
+3. İlk yönetici: [`scripts/ilk-yonetici.sql`](scripts/ilk-yonetici.sql)'deki adımlar (kurucu davet kodu üret, `/kayit`'ten kaydol, kendini yönetici yap).
+4. Vercel'de repoyu bağla, ortam değişkenlerini gir, `DATA_SOURCE=supabase`.
+
+### Yapı
+
+| Yol | İçerik |
+|---|---|
+| `supabase/migrations/` | Şema, RLS kuralları, kayıt/giriş/davet/sıfırlama fonksiyonları, başlangıç verisi |
+| `supabase/tests/` | Veritabanı testleri (yetki kuralları) |
+| `lib/data/` | Veri katmanı: her alan için arayüz + demo + Supabase uygulaması; giriş noktası `veri()` |
+| `lib/giris.ts`, `lib/auth*.ts`, `lib/actions/auth.ts` | Nick + şifreyle giriş, davet koduyla kayıt, şifre sıfırlama, oturum |
+| `lib/demo/` | Demo verisi ve bellekteki depo |
+| `lib/time.ts` | TSİ biçimlendirme, göreli zaman, açılış |
+| `app/(panel)/` | Giriş gerektiren sayfalar; `app/(hesap)/` giriş, kayıt, şifre sıfırlama |
+| `proxy.ts` | Oturum yenileme ve oturumsuz istekleri `/giris`'e yönlendirme |
