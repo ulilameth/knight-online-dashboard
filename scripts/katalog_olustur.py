@@ -2,8 +2,8 @@
 
 Girdi:  data/esyalar/kobugda/{esyalar,istatistikler,kategoriler}.json
         data/esyalar/kobugda/set_bonuslari.json (scripts/kobugda_setler.py ile indirilir)
-        data/esyalar/kobugda/api/*.json (isteğe bağlı: kobugda.com/api/items yanıtları, tarayıcıdan kaydedilir;
-        eski veride istatistiği olmayan takı ve cospre eşyalarını tamamlar)
+        data/esyalar/kobugda/api/*.json (isteğe bağlı: kobugda.com/api/items ve /api/sets yanıtları, tarayıcıdan
+        kaydedilir; eski veride istatistiği olmayan takı ve cospre eşyalarını tamamlar, set bonuslarını günceller)
 Çıktı:  design/katalog.json
 
 Çalıştırma: python3 scripts/katalog_olustur.py
@@ -75,6 +75,12 @@ SET_ALAN = ["str", "health", "dex", "int", "magicpower", "hp", "mp", "ac",
 SET_ADI = {"147,148,149,150,151": "Mage Cloth/Cotton", "454,455,456,457,458": "Mage Leather/Linen",
            "152,153,154,155,156": "Fabric (Priest)", "403,404,405,406,407": "Holy Knight Assassin",
            "674,675,676,677,678": "Rogue Plate"}
+# kobugda.com/api/sets: set başına sınıf ve parça kombinasyonu (piecesRequired, bitleri yukarıdaki gibi) -> bonus.
+# Alanlar SET_ALAN sırasında.
+API_SET_FIELDS = ["bonusStr", "bonusHealth", "bonusDex", "bonusInt", "bonusMagicPower", "bonusHp", "bonusMp", "bonusAc",
+                  "resistFlame", "resistGlacier", "resistLightning", "resistPoison", "resistDark", "resistMagic"]
+API_SET_CLASS = {"WARRIOR": "war", "ROGUE": "rog", "MAGE": "mag", "PRIEST": "pri", "KURIAN": "kur", "PORTU": "kur"}
+SET_PREFIX = {"war": "WARRIOR", "rog": "ROGUE", "mag": "MAGE", "pri": "PRIEST", "kur": "KURIAN"}
 API_CLASS = [("canUseWarrior", "war"), ("canUseRogue", "rog"), ("canUseMage", "mag"), ("canUsePriest", "pri"), ("canUseKurian", "kur")]
 
 
@@ -149,18 +155,68 @@ def trim(row):
     return row
 
 
-def api_items():
-    """data/esyalar/kobugda/api/*.json içindeki API yanıtlarını okur (liste, {data: [...]} ya da {data: {data: [...]}})."""
-    out = {}
+def api_entries():
+    """data/esyalar/kobugda/api/*.json içindeki API yanıtlarının kayıtları (liste, {data: [...]}, {sets: [...]} ya da
+    {data: {data: [...]}})."""
     for path in sorted(glob.glob(os.path.join(SRC, "api", "*.json"))):
         d = json.load(open(path, encoding="utf-8"))
         while isinstance(d, dict):
-            d = d.get("data", [])
-        for it in d:
-            key = it.get("legacyId") or it.get("id")
-            if key is not None:
-                out[key] = it
+            d = d.get("data", d.get("sets", []))
+        yield from (x for x in d if isinstance(x, dict))
+
+
+def is_api_set(x):
+    return "bonuses" in x and "category" not in x
+
+
+def api_items():
+    out = {}
+    for it in api_entries():
+        key = it.get("legacyId") or it.get("id")
+        if key is not None and not is_api_set(it):
+            out[key] = it
     return out
+
+
+def api_sets(setler, out_items, old_tables):
+    """kobugda.com/api/sets kayıtlarını katalogdaki setlere bağlar: setin "bt" alanı sınıf -> {parça biti: bonus satırı}.
+    Eşleştirme parça eşyasının legacyId'si, yoksa adıyla yapılır."""
+    sets = [x for x in api_entries() if is_api_set(x)]
+    if not sets:
+        return
+    by_id = {i: s for s in setler for i in s["p"]}
+    by_name = {x["n"].lower(): by_id[x["id"]] for x in out_items if x["id"] in by_id}
+    matched, unmatched, same, diff = 0, [], 0, []
+    for a in sets:
+        cls = API_SET_CLASS.get(str(a.get("characterClass", "")).upper())
+        hits = []
+        for p in a.get("parts") or []:
+            item = p.get("item") or {}
+            s = by_id.get(item.get("legacyId") or p.get("legacyId")) or by_name.get(str(item.get("name", "")).lower())
+            if s:
+                hits.append(s)
+        if not cls or not hits:
+            unmatched.append(a.get("name", "?"))
+            continue
+        s = max(hits, key=hits.count)
+        table = {str(b.get("piecesRequired") or 0): [b.get(f) or 0 for f in API_SET_FIELDS] for b in a.get("bonuses") or []}
+        table = {m: r for m, r in table.items() if m != "0" and any(r)}
+        if not table:
+            continue
+        s.setdefault("bt", {}).setdefault(cls, {}).update(table)
+        matched += 1
+        old = s.get("a") and old_tables.get(f"{SET_PREFIX[cls]}_{s['a']}", {}).get("31")
+        if old and "31" in table:
+            if old == table["31"]:
+                same += 1
+            else:
+                diff.append(f"{a.get('name')} ({cls})")
+    print(f"API setleri: {len(sets)} set okundu, {matched} tanesi kataloğa bağlandı"
+          + (f"; tam set bonusu eski tabloyla {same} sette aynı, {len(diff)} sette farklı" if same or diff else ""))
+    if diff:
+        print("  farklı:", ", ".join(diff[:12]) + (" …" if len(diff) > 12 else ""))
+    if unmatched:
+        print(f"  katalogda karşılığı olmayan {len(unmatched)} set:", ", ".join(unmatched[:12]) + (" …" if len(unmatched) > 12 else ""))
 
 
 def api_rows(it):
@@ -265,12 +321,16 @@ def main():
         fam = fams.pop() if len(fams) == 1 else None
         setler.append({"k": key, "n": set_name(key, [x["n"] for x in parts]), "p": [x["id"] for x in parts],
                        **({"a": fam, "an": SET_AILE_ADI[fam]} if fam else {})})
+    old_tables = set_bonus_tables()
+    api_sets(setler, out_items, old_tables)
+    set_src = ("kobugda.com setleri, eksikler eski KO Bugda" if any("bt" in x for x in setler)
+               else "Eski KO Bugda tabloları · Draki Legion yok")
     json.dump({"kaynak": "KO Bugda (old.kobugda.com)", "alanlar": ["derece"] + STAT_FIELDS,
                "esyalar": out_items, "dereceler": stat_out, "setler": setler,
-               "set_alanlari": SET_ALAN, "set_bonuslari": set_bonus_tables()},
+               "set_alanlari": SET_ALAN, "set_bonuslari": old_tables, "set_kaynak": set_src},
               open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print(f"{len(out_items)} eşya, {len(stat_out)} eşyada derece verisi, {len(setler)} set "
-          f"({sum(1 for x in setler if 'a' in x)} tanesi bonuslu) -> {OUT}")
+          f"({sum(1 for x in setler if 'a' in x or 'bt' in x)} tanesi bonuslu) -> {OUT}")
     if unknown:
         print("eşlenmeyen yuva tipleri:", unknown)
 

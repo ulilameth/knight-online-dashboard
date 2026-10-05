@@ -1503,6 +1503,7 @@ section[data-tab].on{display:block}
     { k: 'Kurian başlangıç statları', v: 'Porutu ile aynı (KO Bugda)', ok: true },
     { k: 'AP, HP, MP, savunma formülü', v: 'KO Bugda gelişmiş', ok: false },
     { k: 'Eşya verisi', v: 'KO Bugda · 770 eşya', ok: true },
+    { k: 'Set bonusları', v: () => SET_SRC, ok: true },
     { k: 'Takı ve cospre bonusları', v: 'Veri bekleniyor', ok: false }
   ];
   const STAT_PER_LV = 3, STAT_PER_LV_60 = 5, REB_STAT = 2, SKILL_START = 10, SKILL_PER_LV = 2, MASTER_LV = 60, MASTER_MAX = 23, CREATE_BONUS = 10, STAT_CAP = 255;
@@ -1530,7 +1531,7 @@ section[data-tab].on{display:block}
   /* Eşya kataloğu: design/katalog.json, scripts/katalog_olustur.py ile data/esyalar/kobugda/ verisinden üretilir.
      Derece satırı: [derece, AP, savunma, gerekli level, gerekli STR, HP, DEX, INT, MP, bonus STR, HP, DEX, INT, MP,
      sonra FEATS'teki bonuslar (can, mana, savunma, hasar %, element hasarı, direnç ...)] */
-  let ITEMS = [], GRADE_ROWS = {}, IMG_DATA = null, catalogState = 'yükleniyor', SETS = [], SET_BONUS = {};
+  let ITEMS = [], GRADE_ROWS = {}, IMG_DATA = null, catalogState = 'yükleniyor', SETS = [], SET_BONUS = {}, SET_SRC = 'Eski KO Bugda tabloları · Draki Legion yok';
   const IMG_BASE = /\/design\//.test(location.pathname) ? '../data/esyalar/kobugda/gorseller/' : 'gorseller/';
   const REQ = [['str', 4, 'STR'], ['hp', 5, 'HP'], ['dex', 6, 'DEX'], ['int', 7, 'INT'], ['mp', 8, 'MP']];
   const itemById = id => ITEMS.find(x => x.id === id);
@@ -1557,17 +1558,24 @@ section[data-tab].on{display:block}
     [33, 'Kılıç sav.', 'Kılıca karşı savunma'], [34, 'Hançer sav.', 'Hançere karşı savunma'], [35, 'Topuz sav.', 'Topuza karşı savunma'], [36, 'Balta sav.', 'Baltaya karşı savunma'],
     [37, 'Mızrak sav.', 'Mızrağa karşı savunma'], [38, 'Ok sav.', 'Oka karşı savunma'], [39, 'Jamadar sav.', 'Jamadara karşı savunma']
   ];
-  /* Setler: 5 parça (kask, zırh, pantolon, eldiven, bot). Set bonusu old.kobugda tablolarından: takılı parçaların
-     bit toplamı (kask 1, zırh 2, pantolon 4, bot 8, eldiven 16) o kombinasyonun satırını seçer. */
+  /* Setler: 5 parça (kask, zırh, pantolon, eldiven, bot). Takılı parçaların bit toplamı (kask 1, zırh 2, pantolon 4,
+     bot 8, eldiven 16) bonus satırını seçer. Setin kendi tablosu (st.bt, kobugda.com/api/sets) varsa o kullanılır:
+     takılı parçaların kapsadığı en büyük kombinasyon, KO Bugda'daki gibi. Yoksa eski KO Bugda aile tablosu (tam eşleşme). */
   const SET_ORDER = ['kask', 'zirh', 'pantolon', 'eldiven', 'bot'];
   const bySetSlot = (a, b) => SET_ORDER.indexOf(a.slots[0]) - SET_ORDER.indexOf(b.slots[0]);
   const SET_COLS = [9, 10, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];  /* katalog.json set_alanlari → FEATS sütunu */
   const SET_PREFIX = { war: 'WARRIOR', rog: 'ROGUE', mag: 'MAGE', pri: 'PRIEST', kur: 'WARRIOR' };
   const PIECE_NAME = { 1: 'kask', 2: 'zırh', 4: 'pantolon', 8: 'bot', 16: 'eldiven' };
+  const PIECE_BIT = { kask: 1, zirh: 2, pantolon: 4, bot: 8, eldiven: 16 };
   const setOf = it => it && it.set ? SETS.find(x => x.k === it.set) : null;
   /* Kurian, Warrior'ın kullanamadığı (Portu) parçalarda kendi tablosunu, diğerlerinde Warrior'ınkini kullanır (eski KO Bugda) */
   const setTable = (cls, it) => cls === 'kur' && !it.cls.includes('war') && SET_BONUS['KURIAN_' + it.sb[0]] ? 'KURIAN_' + it.sb[0] : SET_PREFIX[cls] + '_' + it.sb[0];
-  const setRow = (cls, st, mask) => { const it = st.parts.find(x => x.sb); return it ? (SET_BONUS[setTable(cls, it)] || {})[mask] || null : null; };
+  const ownTable = (cls, st) => st && st.bt ? st.bt[cls] || (cls === 'kur' ? st.bt.war : null) || null : null;
+  const pickRow = (tbl, mask) => { let best = 0; for (const m in tbl) if (+m && (mask & m) == m && +m > best) best = +m; return best ? tbl[best] : null; };
+  const setRow = (cls, st, mask) => {
+    const own = ownTable(cls, st); if (own) return pickRow(own, mask);
+    const it = st.parts.find(x => x.sb); return it ? (SET_BONUS[setTable(cls, it)] || {})[mask] || null : null;
+  };
   const setBonusText = (row, max = 6) => {
     if (!row) return '';
     const res = row.slice(8), out = [];
@@ -1587,8 +1595,9 @@ section[data-tab].on{display:block}
   };
   fetch('katalog.json').then(r => r.ok ? r.json() : Promise.reject(new Error(String(r.status)))).then(d => {
     ITEMS = d.esyalar.map(x => ({ id: 'kb' + x.id, kid: String(x.id), n: x.n, k: x.k, slots: x.s, cls: x.c, img: x.i, g: x.g, ef: x.ef || '', set: x.set || '', sb: x.sb || null }));
-    SETS = (d.setler || []).map(x => ({ k: x.k, n: x.n, a: x.a || '', an: x.an || '', parts: x.p.map(id => itemById('kb' + id)).filter(Boolean).sort(bySetSlot) }));
+    SETS = (d.setler || []).map(x => ({ k: x.k, n: x.n, a: x.a || (x.bt ? 'set' : ''), an: x.an || (x.bt ? 'Set' : ''), bt: x.bt || null, parts: x.p.map(id => itemById('kb' + id)).filter(Boolean).sort(bySetSlot) }));
     SET_BONUS = d.set_bonuslari || {};
+    SET_SRC = d.set_kaynak || SET_SRC;
     /* Satır sonundaki sıfırlar dosyada atıldı; hesaplar sabit uzunluk bekler */
     GRADE_ROWS = Object.fromEntries(Object.entries(d.dereceler).map(([k, rows]) => [k, rows.map(r => r.concat(Array(Math.max(0, NF - r.length)).fill(0)))]));
     catalogState = 'hazır';
@@ -1813,15 +1822,15 @@ section[data-tab].on{display:block}
       for (let k = 1; k < NF; k++) if (k < 3 || k > 8) s[k] += r[k] || 0;
       if (i > 1) apFlat += r[1] || 0;
     });
-    /* Set bonusu: aynı set tablosundaki takılı parçaların bitleri toplanır */
+    /* Set bonusu: aynı tablodaki takılı parçaların bitleri toplanır (setin kendi tablosu, yoksa eski aile tablosu) */
     const act = {}, ss = Array(NF).fill(0);
     SET_ORDER.forEach(t => {
-      const i = SLOT_TYPES.indexOf(t), g = b.gear[i], it = g && itemById(g.id);
-      if (!it || !it.sb) return;
-      const key = setTable(b.cls, it), a = act[key] || (act[key] = { mask: 0, n: 0, st: setOf(it) });
-      a.mask |= it.sb[1]; a.n++;
+      const i = SLOT_TYPES.indexOf(t), g = b.gear[i], it = g && itemById(g.id), st = it && setOf(it), own = ownTable(b.cls, st);
+      if (!it || !(own || it.sb)) return;
+      const key = own ? 'set:' + st.k : setTable(b.cls, it), a = act[key] || (act[key] = { mask: 0, n: 0, st, own });
+      a.mask |= PIECE_BIT[t]; a.n++;
     });
-    const sets = Object.entries(act).map(([key, a]) => ({ ...a, row: (SET_BONUS[key] || {})[a.mask] || null }));
+    const sets = Object.entries(act).map(([key, a]) => ({ ...a, row: a.own ? pickRow(a.own, a.mask) : (SET_BONUS[key] || {})[a.mask] || null }));
     sets.forEach(x => { if (x.row) SET_COLS.forEach((c, j) => { s[c] += x.row[j]; ss[c] += x.row[j]; }); });
     return { s, ss, apFlat, n, sets };
   }
@@ -1974,7 +1983,7 @@ section[data-tab].on{display:block}
       : `Ağaç sınırı aşıldı: ${overTrees.join(', ')}.`;
     document.getElementById('b-save').disabled = !err.hidden;
     renderCalc();
-    document.getElementById('b-rules').innerHTML = RULES.map(r => `<li><span>${r.k}</span><span class="tag ${r.ok ? 'official' : ''}">${r.v}${r.ok ? '' : ' · doğrulanacak'}</span></li>`).join('');
+    document.getElementById('b-rules').innerHTML = RULES.map(r => `<li><span>${r.k}</span><span class="tag ${r.ok ? 'official' : ''}">${typeof r.v === 'function' ? r.v() : r.v}${r.ok ? '' : ' · doğrulanacak'}</span></li>`).join('');
   }
 
   function render() { renderShell(); renderHome(); renderMembers(); renderEvents(); renderCalendar(); renderBuild(); renderItems(); renderProfile(); tick(); }

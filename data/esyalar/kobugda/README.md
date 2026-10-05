@@ -21,5 +21,11 @@ Takı ve cospre bonusları (eksik veri):
   konursa `scripts/katalog_olustur.py` onları kataloğa birleştirir (`legacyId` = buradaki `Identifier`). Örnek adres:
   `https://kobugda.com/api/items?category=RING&limit=200&includeSets=true`
   (kategoriler: RING, EARRING, NECKLACE, BELT, WINGS, TATTOO, EMBLEM, PATHOS, VALKYRIE_HELM, VALKYRIE_PAULDRON).
+- Set bonusları (kobugda.com/sets): sayfa veriyi `https://kobugda.com/api/sets?limit=200` adresinden çekiyor; adres
+  doğrudan isteğe kapalı (403). Tarayıcıda https://kobugda.com/sets açılıp F12 → Ağ (Network) → sayfa yenilenip
+  `sets?limit=200` isteğinin yanıtı (Response) kopyalanır ve bu klasöre `api/setler.json` olarak kaydedilirse
+  `scripts/katalog_olustur.py` setleri parça adlarından kataloğa bağlar. Setin kendi tablosu eski aile tablosunun
+  (`set_bonuslari.json`) önüne geçer; Draki Legion gibi eski veride bonusu olmayan setler de bonus kazanır. Betik,
+  tam set bonusu eski tablodan farklı çıkan setleri ve katalogda karşılığı olmayanları yazdırır.
 - `Curse` alanı sayı değil, silahın olasılıklı etkisi ("Attack Hour 1% probability before Deadman's Call"); katalogda
   eşyanın `ef` alanına Türkçe olarak yazılır.
