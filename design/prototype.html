@@ -457,6 +457,24 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .pk-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;font-size:13px}
 .gear-slot select{height:38px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface-2);padding:0 8px;font-size:14px;color:var(--fg);min-width:0}
 .b-share{display:flex;flex-direction:column;gap:8px}
+.b-vis{margin:0;font-size:14px;color:var(--fg-2)}
+.b-vis a{color:var(--brand-text);font-weight:600}
+.eq-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:4px 10px 4px 4px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);text-align:left}
+.eq-btn:hover{border-color:var(--input-line)}
+.eq-btn .ico{width:34px;height:34px;border-radius:8px}
+.eq-btn .ico img{width:28px;height:28px}
+.eq-btn span{display:flex;flex-direction:column;line-height:1.25}
+.eq-btn b{font:600 13.5px/1.25 var(--font-data)}
+.eq-btn small{font-size:12px;color:var(--muted);white-space:nowrap}
+.eq-none{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13.5px;white-space:nowrap}
+.eq-none svg{width:15px;height:15px}
+.mb-meta{margin:0 0 14px;color:var(--fg-2);font-size:14px}
+.mb-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.mb-stats div{padding:8px 10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.mb-stats b{display:block;font:700 18px/1.2 var(--font-data)}
+.mb-stats span{font-size:12px;color:var(--muted)}
+.mb-statline{margin:0 0 4px;font:500 13.5px/1.5 var(--font-data);color:var(--fg-2)}
+@media (max-width:640px){.mb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .crit-note{margin:12px 0 0;padding:9px 12px;border-radius:8px;background:var(--crit-soft);color:var(--fg);font-size:14px}
 .rules li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding-block:8px;border-bottom:1px solid var(--line-subtle);font-size:14px}
 .rules li:last-child{border-bottom:0}
@@ -672,6 +690,7 @@ section[data-tab].on{display:block}
                 <th>Nick</th><th>Sınıf</th><th>Rütbe</th>
                 <th data-when="post">Level</th>
                 <th data-when="pre">Hazırlık</th>
+                <th>Ekipman</th>
                 <th>Katılım</th><th>Durum</th>
                 <th class="officer-only"><span class="muted">Düzenle</span></th>
               </tr></thead>
@@ -837,10 +856,7 @@ section[data-tab].on{display:block}
         <div class="s4 stack">
           <div class="panel">
             <div class="panel-h"><h2>Kaydet ve paylaş</h2></div>
-            <div class="b-share" role="radiogroup" aria-label="Kimler görsün">
-              <label class="check" for="b-sh-k"><input type="radio" name="b-share" id="b-sh-k" value="klan" checked>Klan görsün</label>
-              <label class="check" for="b-sh-y"><input type="radio" name="b-share" id="b-sh-y" value="yetkili">Yalnızca ben ve yetkililer</label>
-            </div>
+            <p class="b-vis" id="b-vis"></p>
             <p class="crit-note" id="b-err" hidden></p>
             <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
               <button type="button" class="btn primary" id="b-save" style="min-height:44px;padding-inline:18px">Build’i kaydet</button>
@@ -918,6 +934,12 @@ section[data-tab].on{display:block}
               <button type="button" data-reb="1" aria-label="Reb artır">+</button>
             </div>
             <p class="muted" id="pf-level-hint" style="font-size:13px;margin:8px 0 0"></p>
+            <div class="pf-label" id="pf-show-label">Ekipmanım üye listesinde</div>
+            <div class="b-share" role="radiogroup" aria-labelledby="pf-show-label">
+              <label class="check" for="pf-show-k"><input type="radio" name="pf-show" id="pf-show-k" value="klan">Klana göster</label>
+              <label class="check" for="pf-show-g"><input type="radio" name="pf-show" id="pf-show-g" value="gizli">Gizli</label>
+            </div>
+            <p class="muted" style="font-size:13px;margin:8px 0 0">Karakter tasarımında kaydettiğin build’in eşyaları ve statları. Gizli seçersen yalnızca sen görürsün.</p>
             <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:20px">
               <button class="btn primary" type="submit" style="min-height:44px;padding-inline:20px">Kaydet</button>
               <button class="btn" type="button" id="pf-pass" style="min-height:44px">Şifremi değiştir</button>
@@ -931,6 +953,7 @@ section[data-tab].on{display:block}
             <li><span>Sınıf, level, reb</span><span class="tag official">Sen</span></li>
             <li><span>TeamSpeak nick, şifre</span><span class="tag official">Sen</span></li>
             <li><span>Hazırlık adımları</span><span class="tag official">Sen</span></li>
+            <li><span>Ekipmanın kimlere görünür</span><span class="tag official">Sen</span></li>
             <li><span>Nick, rütbe, durum</span><span class="tag">Yetkililer</span></li>
             <li><span>Sunucu level sınırı</span><span class="tag">Yönetici</span></li>
           </ul>
@@ -943,6 +966,12 @@ section[data-tab].on{display:block}
       </div>
     </section>
   </main>
+</div>
+<div class="picker-back" id="mb" hidden>
+  <div class="picker" role="dialog" aria-modal="true" aria-labelledby="mb-title" style="width:min(760px,100%)">
+    <div class="pk-head"><h2 id="mb-title">Ekipman</h2><button type="button" class="icon-btn" id="mb-close" aria-label="Kapat"><svg><use href="#i-x"/></svg></button></div>
+    <div id="mb-body" style="overflow:auto;min-height:0"></div>
+  </div>
 </div>
 <div class="picker-back" id="item-detail" hidden>
   <div class="picker" role="dialog" aria-modal="true" aria-labelledby="id-title" style="width:min(820px,100%)">
@@ -1020,6 +1049,17 @@ section[data-tab].on{display:block}
     { name: 'Ayaz', ts: 'ayaz', cls: 'kur', rank: 'Aday', lv: 58, rel: .45, st: 'aktif', prep: [0, 0, 0, 0] },
     { name: 'Nur', ts: 'nur.priest', cls: 'pri', rank: 'Aday', lv: 55, rel: .5, st: 'aktif', prep: [0, 0, 0, 0] }
   ];
+  /* Örnek kayıtlı build'ler (Üyeler › Ekipman). show: 'klan' herkes görür, 'gizli' yalnızca sahibi */
+  const sampleGear = slots => Object.fromEntries(Object.entries(slots).map(([i, id]) => [i, { id: 'kb' + id, up: 7 }]));
+  [['KaraBey', { str: 180, hp: 87 }, { 0: 262, 2: 126, 3: 128, 4: 127, 5: 125, 6: 124 }, 'klan', '2026-10-03T21:10'],
+   ['SessizOk', { str: 60, hp: 22, dex: 180 }, { 0: 263, 2: 323, 3: 325, 4: 324, 5: 322, 6: 321 }, 'klan', '2026-10-04T19:45'],
+   ['AlevBüyü', { int: 185, mp: 62 }, { 0: 549, 2: 333, 3: 335, 4: 334, 5: 332, 6: 331 }, 'klan', '2026-10-02T22:30'],
+   ['Asena', { str: 150, hp: 50, mp: 57 }, { 2: 328, 3: 330, 4: 329, 5: 327, 6: 326 }, 'gizli', '2026-10-01T20:05']
+  ].forEach(([name, st, slots, show, at]) => {
+    const m = MEMBERS.find(x => x.name === name);
+    m.show = show;
+    m.build = { owner: name, race: '', cls: m.cls, lv: m.lv, reb: m.reb || 0, st: { str: 0, hp: 0, dex: 0, int: 0, mp: 0, ...st }, sk: [0, 0, 0, 0], gear: sampleGear(slots), at: tr(at) };
+  });
 
   const PRE_EVENTS = [
     { id: 'p1', type: 'meet', title: 'Klan kuruluş toplantısı', at: tr('2026-09-28T21:00'), desc: 'TeamSpeak (L4B). Rütbeler ve açılış hedefleri konuşuldu.' },
@@ -1332,11 +1372,12 @@ section[data-tab].on{display:block}
         <td ${rankAttr(m.rank)}>${m.rank}</td>
         <td data-when="post" class="num">${lvText(m)}</td>
         <td data-when="pre"><div class="pips">${pips}</div></td>
+        <td>${gearCell(m)}</td>
         <td>${r ? `<div class="att" data-tip="${r.ok} / ${r.n} etkinlik" tabindex="0"><div class="meter"><i style="width:${r.pct}%"></i></div><span class="num">%${r.pct}</span></div>` : '<span class="muted">—</span>'}</td>
         <td><span class="pill ${stc}">${stl}</span></td>
         <td class="officer-only"><button type="button" class="icon-btn" aria-label="${esc(m.name)} düzenle" data-edit="${esc(m.name)}">${icon('i-edit')}</button></td>
       </tr>`;
-    }).join('') || `<tr><td colspan="8" class="empty">Bu filtrelerle eşleşen üye yok.</td></tr>`;
+    }).join('') || `<tr><td colspan="9" class="empty">Bu filtrelerle eşleşen üye yok.</td></tr>`;
     document.getElementById('member-count').textContent = `${total} üyeden ${rows.length} tanesi gösteriliyor`;
   }
 
@@ -1449,13 +1490,15 @@ section[data-tab].on{display:block}
     document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.go === state.tab));
     document.querySelectorAll('section[data-tab]').forEach(s => s.classList.toggle('on', s.dataset.tab === state.tab));
     const m = me();
+    applyOwnerName();
     document.getElementById('me').innerHTML = `<span class="avatar">${m.name.slice(0, 2).toLocaleUpperCase('tr')}</span><span><b>${esc(m.name)}</b> <span style="color:var(${RANKVAR[m.rank]})">${m.rank}</span></span>`;
   }
   /* ---------- Profilim ---------- */
   function renderProfile() {
     const m = me();
-    if (!state.pf || state.pf.name !== m.name) state.pf = { name: m.name, cls: m.cls, lv: m.lv, reb: m.reb || 0, ts: m.ts, saved: m.saved || null };
+    if (!state.pf || state.pf.name !== m.name) state.pf = { name: m.name, cls: m.cls, lv: m.lv, reb: m.reb || 0, ts: m.ts, show: m.show || 'klan', saved: m.saved || null };
     document.getElementById('pf-ts').value = state.pf.ts;
+    document.getElementById(state.pf.show === 'gizli' ? 'pf-show-g' : 'pf-show-k').checked = true;
     const pre = state.phase === 'pre';
     document.getElementById('pf-nick').value = m.name;
     document.getElementById('pf-sub').innerHTML = `TS: ${esc(m.ts)} · <span style="color:var(${RANKVAR[m.rank]});font-weight:600">${m.rank}</span>`;
@@ -1568,6 +1611,8 @@ section[data-tab].on{display:block}
   const PIECE_NAME = { 1: 'kask', 2: 'zırh', 4: 'pantolon', 8: 'bot', 16: 'eldiven' };
   const PIECE_BIT = { kask: 1, zirh: 2, pantolon: 4, bot: 8, eldiven: 16 };
   const setOf = it => it && it.set ? SETS.find(x => x.k === it.set) : null;
+  /* Sahibinin nick'ini taşıyan unique silahlar: katalogdaki {ad} giriş yapan üyenin nick'iyle dolar */
+  const applyOwnerName = () => { const ad = me().name; ITEMS.forEach(it => { if (it.tpl) it.n = it.tpl.replace(/\{ad\}/g, ad); }); };
   /* Kurian, Warrior'ın kullanamadığı (Portu) parçalarda kendi tablosunu, diğerlerinde Warrior'ınkini kullanır (eski KO Bugda) */
   const setTable = (cls, it) => cls === 'kur' && !it.cls.includes('war') && SET_BONUS['KURIAN_' + it.sb[0]] ? 'KURIAN_' + it.sb[0] : SET_PREFIX[cls] + '_' + it.sb[0];
   const ownTable = (cls, st) => st && st.bt ? st.bt[cls] || (cls === 'kur' ? st.bt.war : null) || null : null;
@@ -1594,8 +1639,9 @@ section[data-tab].on{display:block}
     return [part(1, 'AP'), part(2, 'Savunma'), a[3] ? `Lv ${a[3]}` : ''].filter(Boolean).join(' · ');
   };
   fetch('katalog.json').then(r => r.ok ? r.json() : Promise.reject(new Error(String(r.status)))).then(d => {
-    ITEMS = d.esyalar.map(x => ({ id: 'kb' + x.id, kid: String(x.id), n: x.n, k: x.k, slots: x.s, cls: x.c, img: x.i, g: x.g, ef: x.ef || '', set: x.set || '', sb: x.sb || null }));
+    ITEMS = d.esyalar.map(x => ({ id: 'kb' + x.id, kid: String(x.id), n: x.n, tpl: x.n.includes('{ad}') ? x.n : '', k: x.k, slots: x.s, cls: x.c, img: x.i, g: x.g, ef: x.ef || '', set: x.set || '', sb: x.sb || null }));
     SETS = (d.setler || []).map(x => ({ k: x.k, n: x.n, a: x.a || (x.bt ? 'set' : ''), an: x.an || (x.bt ? 'Set' : ''), bt: x.bt || null, parts: x.p.map(id => itemById('kb' + id)).filter(Boolean).sort(bySetSlot) }));
+    applyOwnerName();
     SET_BONUS = d.set_bonuslari || {};
     SET_SRC = d.set_kaynak || SET_SRC;
     /* Satır sonundaki sıfırlar dosyada atıldı; hesaplar sabit uzunluk bekler */
@@ -1604,7 +1650,7 @@ section[data-tab].on{display:block}
     /* Yayınlanan sürümde görseller tek dosyada (gorseller.json); repoda ayrı PNG'ler kullanılır */
     fetch('gorseller.json').then(r => r.ok ? r.json() : null).then(m => { if (m) { IMG_DATA = m; if (state.build) renderBuild(); if (!document.getElementById('picker').hidden) renderPicker(); } }).catch(() => {});
     if (state.build) renderBuild();
-    renderItems();
+    renderItems(); renderMembers();
     if (!document.getElementById('picker').hidden) renderPicker();
   }).catch(() => { catalogState = 'hata'; if (!document.getElementById('picker').hidden) renderPicker(); });
   function renderSetPicker() {
@@ -1733,7 +1779,7 @@ section[data-tab].on{display:block}
     document.getElementById('id-body').innerHTML = `
       <div class="id-head">${icoHTML(it.slots[0], it)}<div>
         <div class="gr" style="font:600 13px/1.3 var(--font-data);color:var(${GRADES[it.g][1]})">${GRADES[it.g][0]}</div>
-        <div style="color:var(--fg-2)">${esc(it.k)} · ${clsText(it)}</div>
+        <div style="color:var(--fg-2)">${esc(it.k)} · ${clsText(it)}${it.tpl ? ' · adı sahibinin nick’i' : ''}</div>
         <div class="muted" style="font-size:13px">${rangeText(it)}</div>${it.ef ? `<div style="font-size:13.5px;color:var(--good);margin-top:2px">Özel etki · ${esc(it.ef)}</div>` : ''}</div></div>
       ${(st => st ? `<div class="id-set">
         <div class="set-top"><div><b>Set: ${esc(st.n)}</b><span class="meta">${st.parts.length} parça</span></div>${st.a ? `<span class="tag official">${esc(st.an)} bonusu</span>` : ''}</div>
@@ -1752,6 +1798,52 @@ section[data-tab].on{display:block}
   function closeItemDetail() {
     document.getElementById('item-detail').hidden = true;
     const back = document.querySelector(`[data-icitem="${state.detail}"]`);
+    if (back) back.focus();
+  }
+
+  /* ---------- Üye ekipmanı: kaydedilen build (Karakter tasarımı › Build'i kaydet) ---------- */
+  const NO_BUFF = { wes: false, wolf: false, xst: 0, xpc: 0 };
+  const ownerName = (it, name) => it.tpl ? it.tpl.replace(/\{ad\}/g, name) : it.n;
+  /* Kayıtlı ırk bu tarafta (Karus / El Morad) yoksa sınıfın ilk ırkı */
+  const viewBuild = m => ({ ...m.build, race: raceOptions(m.build.cls).some(r => r.id === m.build.race) ? m.build.race : raceOptions(m.build.cls)[0].id });
+  const canSeeBuild = m => m.build && (m.show !== 'gizli' || m.name === me().name);
+  function gearCell(m) {
+    const mine = m.name === me().name;
+    if (!m.build) return `<span class="eq-none">${mine ? 'Build kaydetmedin' : '—'}</span>`;
+    if (!canSeeBuild(m)) return `<span class="eq-none">${icon('i-lock')}Gizli</span>`;
+    const b = viewBuild(m), d = derived(b, NO_BUFF), w = b.gear[0] && itemById(b.gear[0].id);
+    const set = d.G.sets.find(x => x.st), n = Object.keys(b.gear).filter(i => itemById(b.gear[i].id)).length;
+    const sub = [set ? `${set.st.n} ${set.n}/5` : `${n} eşya`, m.show === 'gizli' ? 'gizli' : ''].filter(Boolean).join(' · ');
+    return `<button type="button" class="eq-btn" data-mbuild="${esc(m.name)}" aria-label="${esc(m.name)}: ekipmanı gör">${icoHTML('silah', w)}<span><b>AP ${d.ap}</b><small>${esc(sub)}</small></span></button>`;
+  }
+  function openMemberBuild(name) {
+    const m = MEMBERS.find(x => x.name === name);
+    if (!m || !canSeeBuild(m)) return;
+    const b = viewBuild(m), d = derived(b, NO_BUFF), race = RACES.find(r => r.id === b.race);
+    const lv = b.lv === 83 && b.reb ? `83+${b.reb}` : b.lv;
+    const setNote = d.G.sets.filter(x => x.st).map(x => `${esc(x.st.n)} ${x.n}/5${x.row ? ' · bonus aktif' : ''}`).join(' · ');
+    const sections = GEAR_SECTIONS.map(([h, , idx]) => {
+      const worn = idx.filter(i => b.gear[i] && itemById(b.gear[i].id));
+      if (!worn.length) return '';
+      return `<div class="gear-h"><h3 class="calc-h">${h}${h === 'Zırh seti' && setNote ? ` <small>${setNote}</small>` : ''}</h3></div>
+        <div class="gear">${worn.map(i => { const g = b.gear[i], it = itemById(g.id); return `<button type="button" class="slot-btn" data-icitem="${it.id}">
+          ${icoHTML(SLOT_TYPES[i], it)}<span class="sl"><small>${SLOTS[i]}</small><b>${esc(ownerName(it, m.name))}</b><em>+${g.up}${statText(it, g.up) ? ' · ' + statText(it, g.up) : ''}</em></span></button>`; }).join('')}</div>`;
+    }).join('');
+    document.getElementById('mb-title').textContent = `${m.name} · Ekipman`;
+    document.getElementById('mb-body').innerHTML = `
+      <p class="mb-meta">${CLASSES[b.cls]} · ${race ? race.n : ''} · Level ${lv} · ${F(m.build.at, { day: 'numeric', month: 'long' })} ${hm(m.build.at)} kaydedildi${m.show === 'gizli' ? ' · <b>Gizli</b>, yalnızca sen görüyorsun' : ''}</p>
+      <div class="mb-stats"><div><b>${d.ap}</b><span>Saldırı (AP)</span></div><div><b>${d.hp}</b><span>Can (HP)</span></div><div><b>${d.mp}</b><span>Mana (MP)</span></div><div><b>${d.ac}</b><span>Savunma</span></div></div>
+      <p class="mb-statline">${STATS.map(([k, l]) => `${l} ${d.tot[k]}`).join(' · ')} <span class="muted">(eşya ve set dahil, buff yok)</span></p>
+      ${b.sk.some(Boolean) ? `<p class="mb-statline">Skill: ${b.sk.join(' / ')}</p>` : ''}
+      ${sections || '<p class="muted">Takılı eşya yok.</p>'}
+      ${m.name === me().name ? '<div class="id-actions"><button type="button" class="btn" data-go="karakter">Karakter tasarımında düzenle</button></div>' : ''}`;
+    document.getElementById('mb').hidden = false;
+    state.mb = name;
+    document.getElementById('mb-close').focus();
+  }
+  function closeMemberBuild() {
+    document.getElementById('mb').hidden = true;
+    const back = document.querySelector(`[data-mbuild="${state.mb}"]`);
     if (back) back.focus();
   }
   function openPicker(i) {
@@ -1835,8 +1927,8 @@ section[data-tab].on{display:block}
     return { s, ss, apFlat, n, sets };
   }
   /* KO Bugda gelişmiş hesaplayıcının mantığı: hesap tipi sınıftan ve takılı silahtan çıkar */
-  function derived(b) {
-    const G = gearSum(b), ch = buildTotals(b), x = state.ap;
+  function derived(b, x = state.ap) {
+    const G = gearSum(b), ch = buildTotals(b);
     const tot = Object.fromEntries(STATS.map(([k], j) => [k, ch[k] + G.s[9 + j]]));
     const cc = CC[b.cls], lv = Math.min(b.lv, 83);
     const W = i => { const g = b.gear[i], it = g && itemById(g.id); return it ? { it, r: rowAt(it, g.up) } : null; };
@@ -1910,7 +2002,7 @@ section[data-tab].on{display:block}
   }
   function renderBuildInner() {
     const m = me();
-    if (!state.build || state.build.owner !== m.name) state.build = { owner: m.name, ...newBuild(m) };
+    if (!state.build || state.build.owner !== m.name) state.build = m.build ? { ...structuredClone(m.build), owner: m.name } : { owner: m.name, ...newBuild(m) };
     const b = state.build;
     if (!raceOptions(b.cls).some(r => r.id === b.race)) b.race = raceOptions(b.cls)[0].id;
     if (b.lv < 83) b.reb = 0;
@@ -1982,6 +2074,7 @@ section[data-tab].on{display:block}
       ? `Dağıtılan puan bu level için fazla: ${Math.max(0, -P.stLeft)} stat, ${Math.max(0, -P.skLeft)} skill düşür.${overTrees.length ? ` Ağaç sınırı: ${overTrees.join(', ')}.` : ''}`
       : `Ağaç sınırı aşıldı: ${overTrees.join(', ')}.`;
     document.getElementById('b-save').disabled = !err.hidden;
+    document.getElementById('b-vis').innerHTML = `Üye listesinde: <b>${m.show === 'gizli' ? 'Gizli' : 'Klana açık'}</b> · <a href="#profil" data-go="profil">Profilden değiştir</a><br>${m.build ? `Son kayıt: ${F(m.build.at, { day: 'numeric', month: 'long' })} ${hm(m.build.at)}` : 'Henüz kaydetmedin'}`;
     renderCalc();
     document.getElementById('b-rules').innerHTML = RULES.map(r => `<li><span>${r.k}</span><span class="tag ${r.ok ? 'official' : ''}">${typeof r.v === 'function' ? r.v() : r.v}${r.ok ? '' : ' · doğrulanacak'}</span></li>`).join('');
   }
@@ -2011,7 +2104,7 @@ section[data-tab].on{display:block}
   }
   document.addEventListener('click', e => {
     const t = e.target;
-    const goEl = t.closest('[data-go]'); if (goEl) { go(goEl.dataset.go); return; }
+    const goEl = t.closest('[data-go]'); if (goEl) { document.getElementById('mb').hidden = true; go(goEl.dataset.go); return; }
     const ph = t.closest('[data-phase]'); if (ph) { state.phase = ph.dataset.phase; state.month = null; render(); return; }
     const rl = t.closest('[data-role]'); if (rl) { state.role = rl.dataset.role; render(); return; }
     const ik = t.closest('button[data-irk]'); if (ik) { state.irk = ik.dataset.irk; render(); return; }
@@ -2040,7 +2133,15 @@ section[data-tab].on{display:block}
     const skb = t.closest('[data-sk]'); if (skb) { const b = state.build, P = pools(b); const d = +skb.dataset.d, i = +skb.dataset.sk; if (d < 0 ? b.sk[i] > 0 : P.skLeft > 0 && b.sk[i] < skCap(b, i)) b.sk[i] += d; renderBuild(); return; }
     const blv = t.closest('[data-blv]'); if (blv) { state.build.lv = Math.max(1, Math.min(83, state.build.lv + (+blv.dataset.blv))); renderBuild(); return; }
     const brb = t.closest('[data-breb]'); if (brb) { state.build.reb = Math.max(0, Math.min(REB_MAX, state.build.reb + (+brb.dataset.breb))); renderBuild(); return; }
-    if (t.closest('#b-save')) { const b = state.build; toast(`Build kaydedildi: ${CLASSES[b.cls]}, level ${b.lv === 83 && b.reb ? '83+' + b.reb : b.lv}. ${document.getElementById('b-sh-k').checked ? 'Klan görebilir.' : 'Yalnızca sen ve yetkililer görebilir.'}`); return; }
+    if (t.closest('#b-save')) {
+      const m = me(), b = state.build;
+      m.build = { ...structuredClone(b), at: now() };
+      renderBuild(); renderMembers();
+      toast(`Build kaydedildi: ${CLASSES[b.cls]}, level ${b.lv === 83 && b.reb ? '83+' + b.reb : b.lv}. ${m.show === 'gizli' ? 'Ekipmanın gizli; yalnızca sen görürsün.' : 'Üye listesinde klan görebilir.'}`);
+      return;
+    }
+    const mbb = t.closest('[data-mbuild]'); if (mbb) { openMemberBuild(mbb.dataset.mbuild); return; }
+    if (t.closest('#mb-close') || t.id === 'mb') { closeMemberBuild(); return; }
     if (t.closest('#b-tpl')) { toast('Prototip: şablon adı sorulacak ve klan şablonlarına eklenecek'); return; }
     if (t.closest('#b-reset')) { const m = me(); state.build = { owner: m.name, ...newBuild(m), cls: state.build.cls }; renderBuild(); toast('Dağıtım sıfırlandı'); return; }
     const pc = t.closest('[data-pfcls]'); if (pc) { state.pf.cls = pc.dataset.pfcls; renderProfile(); return; }
@@ -2171,10 +2272,12 @@ section[data-tab].on{display:block}
     if (e.key !== 'Escape') return;
     if (!document.getElementById('picker').hidden) closePicker();
     else if (!document.getElementById('item-detail').hidden) closeItemDetail();
+    else if (!document.getElementById('mb').hidden) closeMemberBuild();
   });
   document.getElementById('ic-q').addEventListener('input', e => { state.ic.q = e.target.value; renderItems(); });
   document.getElementById('ic-grade').addEventListener('change', e => { state.ic.grade = e.target.value; renderItems(); });
   document.getElementById('pf-ts').addEventListener('input', e => { state.pf.ts = e.target.value; });
+  document.querySelectorAll('input[name="pf-show"]').forEach(el => el.addEventListener('change', e => { state.pf.show = e.target.value; }));
   document.getElementById('pf-level').addEventListener('input', e => { const v = parseInt(e.target.value, 10); if (v) { state.pf.lv = Math.max(1, Math.min(state.levelCap, v)); renderProfile(); } });
   document.getElementById('pf-reb').addEventListener('input', e => { const v = parseInt(e.target.value, 10); state.pf.reb = Math.max(0, Math.min(state.rebCap, v || 0)); });
   document.getElementById('cap-sel').addEventListener('change', e => {
@@ -2188,6 +2291,7 @@ section[data-tab].on{display:block}
     const m = me();
     m.cls = state.pf.cls;
     m.ts = (state.pf.ts || '').trim() || m.ts;
+    m.show = state.pf.show;
     if (state.phase === 'post') { m.lv = state.pf.lv; m.reb = state.pf.reb || 0; }
     m.saved = state.pf.saved = now();
     renderProfile(); renderMembers(); renderHome(); renderEvents();

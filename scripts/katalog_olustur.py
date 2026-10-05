@@ -81,6 +81,9 @@ API_SET_FIELDS = ["bonusStr", "bonusHealth", "bonusDex", "bonusInt", "bonusMagic
                   "resistFlame", "resistGlacier", "resistLightning", "resistPoison", "resistDark", "resistMagic"]
 API_SET_CLASS = {"WARRIOR": "war", "ROGUE": "rog", "MAGE": "mag", "PRIEST": "pri", "KURIAN": "kur", "PORTU": "kur"}
 SET_PREFIX = {"war": "WARRIOR", "rog": "ROGUE", "mag": "MAGE", "pri": "PRIEST", "kur": "KURIAN"}
+# Sahibinin nick'ini taşıyan unique silahlar ("KOBugda's Azagai", "Dagger of KOBugda"): KO Bugda kendi adını yazmış;
+# katalogda yer tutucu olur, panel kullanıcının nick'iyle doldurur.
+SAHIP = "{ad}"
 API_CLASS = [("canUseWarrior", "war"), ("canUseRogue", "rog"), ("canUseMage", "mag"), ("canUsePriest", "pri"), ("canUseKurian", "kur")]
 
 
@@ -106,6 +109,10 @@ def effect_text(v):
     if not m:
         return v.strip()
     return f"{'Saldırırken' if m[1] == 'Attack' else 'Hasar alırken'} %{m[2]} ihtimalle: {m[3]}"
+
+
+def item_name(name):
+    return re.sub(r"KOBugda", SAHIP, name, flags=re.I)
 
 
 def set_name(key, names):
@@ -267,7 +274,7 @@ def main():
             continue
         out_items.append({
             "id": it["Identifier"],
-            "n": it["Name"],
+            "n": item_name(it["Name"]),
             "k": cat["Name"],
             "s": slots,
             "c": SINIF_DUZELTME.get(cat["Name"]) or [code for flag, code in CLASS_FLAGS if it[flag]],
@@ -300,7 +307,7 @@ def main():
             continue
         key = key if isinstance(key, int) else f"api-{key}"
         out_items.append({
-            "id": key, "n": it.get("name", "?"), "k": cat_name, "s": slots,
+            "id": key, "n": item_name(it.get("name", "?")), "k": cat_name, "s": slots,
             "c": SINIF_DUZELTME.get(cat_name) or [code for flag, code in API_CLASS if it.get(flag)],
             "i": None, "g": "cospre" if it.get("category") in API_COSPRE else "normal", "set": None,
             **({"ef": ef} if ef else {}),
