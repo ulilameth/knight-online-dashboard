@@ -302,6 +302,6 @@ Klan adı netleşti: **L4BEL**.
 3. Irk: Karus mu El Morad mı? (Sınıf adları ve renk vurgusu buna göre)
 4. Rütbe adları prototipteki gibi mi kalsın (Lider, Asistan, Subay, Üye, Aday)?
 5. Davet kodları varsayılan olarak kaç gün geçerli olsun, kaç kişi kullanabilsin? (Öneri: 7 gün, 25 kullanım)
-7. TeamSpeak sunucusunda (L4B) yönetici erişiminiz var mı? Varsa duyurular TS'e otomatik gönderilebilir, ileride kim TS'te bağlı ya da AFK panelde görünebilir.
 6. Haftalık etkinlik saatleri sunucu açılınca belli olacak; prototipteki saatler örnek.
+7. TeamSpeak sunucusunda (L4B) yönetici erişiminiz var mı? Varsa duyurular TS'e otomatik gönderilebilir, ileride kim TS'te bağlı ya da AFK panelde görünebilir.
 8. Karakter tasarımı kuralları: level başına skill puanı (2 mi?), sınıfların başlangıç statları ve Kurian/Porutu skill ağaçlarının adları. Klandan deneyimli biri doğrulayabilir mi?
