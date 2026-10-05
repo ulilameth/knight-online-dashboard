@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Knight Online Klan Paneli</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -374,6 +375,8 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .picker-back{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.62);display:grid;place-items:center;padding:16px}
 .picker{width:min(560px,100%);max-height:min(660px,calc(100vh - 32px));display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .picker .search{flex:none;height:42px;max-width:none}
+.pk-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 12px;font-size:13px}
+.ico img{width:36px;height:36px;display:block}
 .pk-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .pk-head h2{margin:0;font:700 22px/1.1 var(--font-display)}
 .pk-list{overflow:auto;min-height:120px;flex:1;display:flex;flex-direction:column;gap:4px;margin-inline:-6px;padding-inline:6px}
@@ -427,6 +430,9 @@ section[data-tab].on{display:block}
   <symbol id="s-kupe" viewBox="0 0 24 24"><path d="M12 3v5"/><circle cx="12" cy="10" r="2"/><path d="M12 12l-3 5a3 3 0 0 0 6 0z"/></symbol>
   <symbol id="s-yuzuk" viewBox="0 0 24 24"><circle cx="12" cy="14.5" r="6"/><path d="M9.5 5.5L12 3l2.5 2.5L12 8z"/></symbol>
   <symbol id="s-kemer" viewBox="0 0 24 24"><path d="M3 9h18v6H3zM9 8h6v8H9zM12 11v2"/></symbol>
+  <symbol id="s-kanat" viewBox="0 0 24 24"><path d="M12 9C10 5.5 6 4.5 3 5.5c1 3 3 4.8 6 5.6-2 1-3 2.8-3 4.9 3 0 5-1.8 6-4 1 2.2 3 4 6 4 0-2.1-1-3.9-3-4.9 3-.8 5-2.6 6-5.6-3-1-7 0-9 3.5z"/></symbol>
+  <symbol id="s-dovme" viewBox="0 0 24 24"><path d="M12 3c3 4 6 6.2 6 10a6 6 0 0 1-12 0c0-3.8 3-6 6-10z"/><path d="M12 10v7M9.5 13.5h5"/></symbol>
+  <symbol id="s-amblem" viewBox="0 0 24 24"><circle cx="12" cy="9.5" r="6"/><path d="M8.5 14.5L7 21l5-2.5 5 2.5-1.5-6.5"/></symbol>
   <symbol id="i-out" viewBox="0 0 16 16"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2L7.5 8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
@@ -731,7 +737,7 @@ section[data-tab].on{display:block}
               <div class="ap-val num" id="ap-val">0</div>
               <div class="ap-meta" id="ap-meta"></div>
               <div class="ap-tags" id="ap-tags"></div>
-              <p class="muted" style="font-size:13px;margin:auto 0 0">Level ve stat yukarıdaki build’den gelir (başlangıç + dağıtılan). Stat alanını elle değiştirirsen öyle kalır.</p>
+              <p class="muted" style="font-size:13px;margin:auto 0 0">Level, stat ve silah AP’si build’den gelir (takılı silahın seçili derecesi). Bir alanı elle değiştirirsen öyle kalır.</p>
             </div>
           </div>
         </div>
@@ -833,9 +839,9 @@ section[data-tab].on{display:block}
   <div class="picker" role="dialog" aria-modal="true" aria-labelledby="pk-title">
     <div class="pk-head"><h2 id="pk-title">Eşya seç</h2><button type="button" class="icon-btn" id="pk-close" aria-label="Kapat"><svg><use href="#i-x"/></svg></button></div>
     <label class="search" for="pk-q" style="max-width:none"><svg><use href="#i-search"/></svg><input id="pk-q" type="search" placeholder="Eşya ara" autocomplete="off"></label>
-    <label class="check" for="pk-fit"><input type="checkbox" id="pk-fit" checked>Yalnızca sınıfıma ve levelime uygun olanlar</label>
+    <div class="pk-bar"><label class="check" for="pk-fit"><input type="checkbox" id="pk-fit" checked>Yalnızca sınıfıma ve levelime uygun olanlar</label><span class="muted" id="pk-count"></span></div>
     <div class="pk-list" id="pk-list" role="listbox" aria-labelledby="pk-title"></div>
-    <div class="pk-foot"><button type="button" class="btn" id="pk-clear">Yuvayı boşalt</button><span class="muted">Cospre eşyaları KO Bugda listesinden; diğerleri örnek. İkonlar panelin kendi çizimi.</span></div>
+    <div class="pk-foot"><button type="button" class="btn" id="pk-clear">Yuvayı boşalt</button><span class="muted">Kaynak: KO Bugda · 770 eşya. Eşya görselleri oyuna aittir.</span></div>
   </div>
 </div>
 <div id="tip" hidden></div>
@@ -1376,7 +1382,8 @@ section[data-tab].on{display:block}
     { k: 'Oluşturmada bonus stat', v: '10', ok: true },
     { k: 'Irk başlangıç statları', v: '8 ırk', ok: true },
     { k: 'Kurian başlangıç statları', v: 'Porutu ile aynı', ok: false },
-    { k: 'AP formülü ve katsayıları', v: 'KO Bugda', ok: false }
+    { k: 'AP formülü ve katsayıları', v: 'KO Bugda', ok: false },
+    { k: 'Eşya verisi', v: 'KO Bugda · 770 eşya', ok: true }
   ];
   const STAT_PER_LV = 3, REB_STAT = 2, SKILL_START = 10, SKILL_PER_LV = 2, MASTER_LV = 60, CREATE_BONUS = 10, STAT_CAP = 255;
   /* Irk başlangıç statları (toplam her ırkta 290). Kurian değerleri Porutu ile aynı varsayıldı: doğrulanacak */
@@ -1394,46 +1401,52 @@ section[data-tab].on{display:block}
   const raceOptions = cls => RACES.filter(r => r.side === state.irk && r.cls.includes(cls));
   const STATS = [['str', 'STR', 'Güç'], ['hp', 'HP', 'Sağlık'], ['dex', 'DEX', 'Çeviklik'], ['int', 'INT', 'Zeka'], ['mp', 'MP', 'Büyü gücü']];
   const TREES = { war: ['Attack', 'Defense', 'Passion'], rog: ['Archery', 'Assassin', 'Explore'], mag: ['Flame', 'Glacier', 'Lightning'], pri: ['Heal', 'Buff', 'Debuff'], kur: ['1. ağaç', '2. ağaç', '3. ağaç'] };
-  const GRADES = { normal: ['Normal', '--rank-member'], magic: ['Magic', '--c-war'], rare: ['Rare', '--c-pri'], unique: ['Unique', '--c-six'], set: ['Set', '--c-mag'], cospre: ['Cospre', '--c-kur'] };
-  const SLOT_TYPES = ['silah', 'ikinci', 'kask', 'zirh', 'pantolon', 'eldiven', 'bot', 'pelerin', 'kolye', 'kupe', 'kupe', 'yuzuk', 'yuzuk', 'kemer', 'cospre_kask', 'cospre_zirh'];
-  /* ÖRNEK katalog: adlar uydurmadır; gerçek eşyaları yetkililer ekler ya da CSV ile içe aktarır */
-  const ITEMS = [];
-  const addItem = (n, t, g, cls, lv) => ITEMS.push({ id: 'it' + ITEMS.length, n, t, g, cls, lv, src: 'örnek' });
-  [['Demir Kılıç', 'normal', ['war'], 10], ['Savaşçı Baltası', 'rare', ['war'], 60], ['Gölge Hançeri', 'rare', ['rog'], 60], ['Avcı Yayı', 'unique', ['rog'], 70],
-   ['Alev Asası', 'rare', ['mag'], 60], ['Buz Asası', 'unique', ['mag'], 75], ['Şifa Topuzu', 'magic', ['pri'], 40], ['Kutsal Topuz', 'unique', ['pri'], 75], ['Pençe Mızrağı', 'rare', ['kur'], 60]]
-    .forEach(([n, g, c, l]) => addItem(n, 'silah', g, c, l));
-  [['Ahşap Kalkan', 'normal', ['war', 'pri', 'kur'], 10], ['Kale Kalkanı', 'rare', ['war', 'pri', 'kur'], 60], ['Yedek Hançer', 'magic', ['rog'], 40]]
-    .forEach(([n, g, c, l]) => addItem(n, 'ikinci', g, c, l));
-  const PIECE = { kask: 'Miğferi', zirh: 'Zırhı', pantolon: 'Pantolonu', eldiven: 'Eldiveni', bot: 'Botu' };
-  Object.entries(PIECE).forEach(([t, nm]) => {
-    addItem(`Deri ${nm}`, t, 'normal', [], 1);
-    addItem(`Zincir ${nm}`, t, 'magic', [], 30);
-    [['Plaka', ['war', 'kur']], ['Gölge', ['rog']], ['Bilge', ['mag']], ['Kutsal', ['pri']]].forEach(([set, c]) => addItem(`${set} ${nm}`, t, 'set', c, 70));
-  });
-  [['Klan Pelerini', 'pelerin', 'normal', 1], ['Savaş Pelerini', 'pelerin', 'magic', 50], ['Gümüş Kolye', 'kolye', 'magic', 30], ['Ejder Kolyesi', 'kolye', 'unique', 70],
-   ['Bakır Küpe', 'kupe', 'normal', 10], ['Yakut Küpe', 'kupe', 'rare', 60], ['Mana Küpesi', 'kupe', 'unique', 70],
-   ['Demir Yüzük', 'yuzuk', 'normal', 10], ['Güç Yüzüğü', 'yuzuk', 'rare', 60], ['Bilgelik Yüzüğü', 'yuzuk', 'unique', 70],
-   ['Deri Kemer', 'kemer', 'normal', 10], ['Savaşçı Kemeri', 'kemer', 'rare', 60]]
-    .forEach(([n, t, g, l]) => addItem(n, t, g, [], l));
-  /* Cospre eşyaları: data/esyalar/kobugda-wings.csv (KO Bugda, WINGS kategorisi). Slot 11 → başlık, 12 → zırh.
-     CSV'de sınıf/level şartı yok; KO Bugda API örneğinde bu eşyalar tüm sınıflara açık ve level şartsız. */
-  const KOB_SLOT = { 11: 'cospre_kask', 12: 'cospre_zirh' };
-  [["cmm8e91oe00j0jgq9kf17tewv", "Bahamut Armor - DEF", 12], ["cmm8e91se00l9jgq9sw4gpxp1", "Bahamut Armor - DEF+DMG", 12], ["cmm8e91om00j4jgq9rpopv1pd", "Bahamut Armor - EXP", 12], ["cmm8e90xy003tjgq9ddr6b7s7", "Bahamut Armor - HP", 12], ["cmm8e91s400l3jgq9i3x25y5v", "Bahamut Armor - HP+DMG", 12], ["cmm8e91oi00j2jgq9d7xnfzhh", "Bahamut Armor - NOAH", 12], ["cmm8e91oc00izjgq9pf5wl51b", "Bahamut Helmet - DEF", 11], ["cmm8e91sc00l8jgq9exr7b9iy", "Bahamut Helmet - DEF+DMG", 11], ["cmm8e91ok00j3jgq9x1mgjpxd", "Bahamut Helmet - EXP", 11], ["cmm8e90xs003qjgq9x4zcpbjv", "Bahamut Helmet - HP", 11], ["cmm8e91s300l2jgq9cdq3t047", "Bahamut Helmet - HP+DMG", 11], ["cmm8e91og00j1jgq90ipe0qt4", "Bahamut Helmet - NOAH", 11], ["cmm8e91oq00j6jgq9cb7q12bf", "Gryphon Armor - DEF", 12], ["cmm8e91sh00lbjgq90ti7yswp", "Gryphon Armor - DEF+DMG", 12], ["cmm8e91ox00jajgq9a28yfrrr", "Gryphon Armor - EXP", 12], ["cmm8e90xz003ujgq9j9zd0i9g", "Gryphon Armor - HP", 12], ["cmm8e91s800l5jgq982qkqkv5", "Gryphon Armor - HP+DMG", 12], ["cmm8e91ot00j8jgq98f04h7p7", "Gryphon Armor - NOAH", 12], ["cmm8e91oo00j5jgq9bo91mz9e", "Gryphon Helmet - DEF", 11], ["cmm8e91sg00lajgq9eckz9t5u", "Gryphon Helmet - DEF+DMG", 11], ["cmm8e91ov00j9jgq9bv7du25c", "Gryphon Helmet - EXP", 11], ["cmm8e90xu003rjgq9wwqzxnz7", "Gryphon Helmet - HP", 11], ["cmm8e91s600l4jgq9mu3s8e4x", "Gryphon Helmet - HP+DMG", 11], ["cmm8e91or00j7jgq9ohyx0vq1", "Gryphon Helmet - NOAH", 11], ["cmm8e91p100jcjgq9f9124qx3", "Valkyrie Armor - DEF", 12], ["cmm8e91sl00ldjgq9plurxj3i", "Valkyrie Armor - DEF+DMG", 12], ["cmm8e91p900jgjgq9ezu7xmb5", "Valkyrie Armor - EXP", 12], ["cmm8e90xw003sjgq98dmq0l45", "Valkyrie Armor - HP", 12], ["cmm8e91sa00l7jgq9m34v2c6z", "Valkyrie Armor - HP+DMG", 12], ["cmm8e91p500jejgq9530r6mm5", "Valkyrie Armor - NOAH", 12], ["cmm8e91oz00jbjgq9667icft1", "Valkyrie Helmet - DEF", 11], ["cmm8e91sj00lcjgq9v5c3nuu5", "Valkyrie Helmet - DEF+DMG", 11], ["cmm8e91p700jfjgq95fhbbzgn", "Valkyrie Helmet - EXP", 11], ["cmm8e90xq003pjgq9klorvioa", "Valkyrie Helmet - HP", 11], ["cmm8e91s900l6jgq9zyo2l23l", "Valkyrie Helmet - HP+DMG", 11], ["cmm8e91p300jdjgq9sxsgu4zc", "Valkyrie Helmet - NOAH", 11]].forEach(([x, n, sl]) => ITEMS.push({ id: 'kb-' + x, n, t: KOB_SLOT[sl], g: 'cospre', cls: [], lv: 0, src: 'KO Bugda' }));
+  const GRADES = { normal: ['Normal', '--rank-member'], set: ['Set', '--c-mag'], unique: ['Unique', '--c-six'], rare: ['Rare', '--c-pri'], draki: ['Draki', '--c-rog'], cospre: ['Cospre', '--c-kur'] };
+  const SLOT_TYPES = ['silah', 'ikinci', 'kask', 'zirh', 'pantolon', 'eldiven', 'bot', 'kolye', 'kupe', 'kupe', 'yuzuk', 'yuzuk', 'kemer', 'cospre_kask', 'cospre_zirh', 'cospre_eldiven', 'kanat', 'dovme', 'amblem'];
+  /* Eşya kataloğu: design/katalog.json, scripts/katalog_olustur.py ile data/esyalar/kobugda/ verisinden üretilir.
+     Derece satırı: [derece, AP, savunma, gerekli level, STR, HP, DEX, INT, MP, bonus STR, HP, DEX, INT, MP] */
+  let ITEMS = [], GRADE_ROWS = {}, catalogState = 'yükleniyor';
+  const IMG_BASE = /\/design\//.test(location.pathname) ? '../data/esyalar/kobugda/gorseller/' : 'gorseller/';
+  const REQ = [['str', 4, 'STR'], ['hp', 5, 'HP'], ['dex', 6, 'DEX'], ['int', 7, 'INT'], ['mp', 8, 'MP']];
   const itemById = id => ITEMS.find(x => x.id === id);
-  const fits = (it, b) => (!it.cls.length || it.cls.includes(b.cls)) && it.lv <= b.lv;
-  const icoHTML = (t, g) => `<span class="ico ${g ? '' : 'empty'}" ${g ? `style="color:var(${GRADES[g][1]})"` : ''}><svg class="ic" aria-hidden="true"><use href="#s-${t.replace('cospre_', '')}"/></svg></span>`;
-  const reqText = it => `${it.lv ? `Lv ${it.lv}` : 'Level şartı yok'}${it.cls.length ? ' · ' + it.cls.map(c => CLASSES[c]).join(', ') : ' · Tüm sınıflar'} · ${it.src}`;
+  const gradesOf = it => GRADE_ROWS[it.kid] || [];
+  const rowAt = (it, gr) => gradesOf(it).find(r => r[0] === gr) || gradesOf(it)[0] || null;
+  const reqLevel = (it, gr) => { const r = rowAt(it, gr); return r ? r[3] : 0; };
+  const fits = (it, b, gr) => (!it.cls.length || it.cls.includes(b.cls)) && reqLevel(it, gr) <= b.lv;
+  const buildTotals = b => { const race = RACES.find(r => r.id === b.race); return Object.fromEntries(STATS.map(([k]) => [k, race.st[k] + b.st[k]])); };
+  const unmet = (it, gr, b) => { const r = rowAt(it, gr); if (!r) return []; const tot = buildTotals(b); return REQ.filter(([k, idx]) => r[idx] && tot[k] < r[idx]).map(([k, idx, ab]) => `${ab} ${r[idx]} (sende ${tot[k]})`); };
+  const icoHTML = (t, it) => it
+    ? `<span class="ico" style="color:var(${GRADES[it.g][1]})"><img src="${IMG_BASE}${it.img}.png" alt="" width="36" height="36" loading="lazy"></span>`
+    : `<span class="ico empty"><svg class="ic" aria-hidden="true"><use href="#s-${t.replace('cospre_', '')}"/></svg></span>`;
+  const clsText = it => it.cls.length && it.cls.length < 5 ? it.cls.map(c => CLASSES[c]).join(', ') : 'Tüm sınıflar';
+  const statText = (it, gr) => { const r = rowAt(it, gr); if (!r) return ''; return [r[1] ? `AP ${r[1]}` : '', r[2] ? `Savunma ${r[2]}` : '', r[3] ? `Lv ${r[3]}` : ''].filter(Boolean).join(' · '); };
+  const rangeText = it => {
+    const g = gradesOf(it); if (!g.length) return 'Derece verisi yok';
+    const a = g[0], z = g[g.length - 1];
+    const part = (i, lab) => a[i] || z[i] ? `${lab} ${a[i]}${z[i] !== a[i] ? '–' + z[i] : ''}` : '';
+    return [part(1, 'AP'), part(2, 'Savunma'), a[3] ? `Lv ${a[3]}` : ''].filter(Boolean).join(' · ');
+  };
+  fetch('katalog.json').then(r => r.ok ? r.json() : Promise.reject(new Error(String(r.status)))).then(d => {
+    ITEMS = d.esyalar.map(x => ({ id: 'kb' + x.id, kid: String(x.id), n: x.n, k: x.k, slots: x.s, cls: x.c, img: x.i, g: x.g }));
+    GRADE_ROWS = d.dereceler;
+    catalogState = 'hazır';
+    if (state.build) renderBuild();
+    if (!document.getElementById('picker').hidden) renderPicker();
+  }).catch(() => { catalogState = 'hata'; if (!document.getElementById('picker').hidden) renderPicker(); });
   function renderPicker() {
     const b = state.build, i = state.pick, t = SLOT_TYPES[i];
     document.getElementById('pk-title').textContent = `${SLOTS[i]} seç`;
+    const box = document.getElementById('pk-list');
+    if (catalogState !== 'hazır') { box.innerHTML = `<div class="empty">${catalogState === 'hata' ? 'Eşya kataloğu yüklenemedi.' : 'Eşya kataloğu yükleniyor…'}</div>`; return; }
     const q = lower(document.getElementById('pk-q').value.trim());
     const fit = document.getElementById('pk-fit').checked;
     const cur = b.gear[i] && b.gear[i].id;
-    const list = ITEMS.filter(it => it.t === t && (!fit || fits(it, b)) && (!q || lower(it.n).includes(q)));
-    document.getElementById('pk-list').innerHTML = list.map(it => `
+    const list = ITEMS.filter(it => it.slots.includes(t) && (!fit || fits(it, b)) && (!q || lower(it.n).includes(q) || lower(it.k).includes(q)));
+    document.getElementById('pk-count').textContent = `${list.length} eşya`;
+    box.innerHTML = list.slice(0, 250).map(it => `
       <button type="button" class="pk-item" role="option" data-item="${it.id}" aria-selected="${it.id === cur}">
-        ${icoHTML(it.t, it.g)}
-        <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${reqText(it)}</span></span>
+        ${icoHTML(t, it)}
+        <span style="min-width:0"><b>${esc(it.n)}</b><span class="meta">${esc(it.k)} · ${clsText(it)} · ${rangeText(it)}</span></span>
         <span class="grade" style="color:var(${GRADES[it.g][1]})">${GRADES[it.g][0]}</span>
       </button>`).join('') || '<div class="empty">Bu yuvaya uygun eşya yok. Filtreyi kapatmayı dene.</div>';
   }
@@ -1488,7 +1501,7 @@ section[data-tab].on{display:block}
     if (a.wes) ap += 1;
     return { ap: Number.isFinite(ap) ? ap : 0, k, tier, leftOn, baseAP, total, pct, lv, statLabel: a.type === 'PRIEST' && a.sub === 'int' ? 'INT' : T.stat };
   }
-  const SLOTS = ['Silah', 'İkinci el', 'Kask', 'Zırh', 'Pantolon', 'Eldiven', 'Bot', 'Pelerin', 'Kolye', 'Küpe 1', 'Küpe 2', 'Yüzük 1', 'Yüzük 2', 'Kemer', 'Cospre başlık', 'Cospre zırh'];
+  const SLOTS = ['Silah', 'İkinci el', 'Kask', 'Zırh', 'Pantolon', 'Eldiven', 'Bot', 'Kolye', 'Küpe 1', 'Küpe 2', 'Yüzük 1', 'Yüzük 2', 'Kemer', 'Cospre başlık', 'Cospre zırh', 'Cospre eldiven', 'Kanat', 'Dövme', 'Amblem'];
   const newBuild = m => ({ race: '', cls: m.cls, lv: Math.max(1, m.lv || 1), reb: m.reb || 0, st: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, sk: [0, 0, 0, 0], gear: {} });
   const pools = b => {
     const stTot = CREATE_BONUS + STAT_PER_LV * (b.lv - 1) + REB_STAT * (b.lv === 83 ? b.reb : 0);
@@ -1516,11 +1529,17 @@ section[data-tab].on{display:block}
     document.getElementById('ap-bo-label').textContent = `${sl} (eşya bonusu)`;
   }
   function apAutoStat() {
-    if (!state.ap || state.ap.stManual) return;
+    if (!state.ap) return;
     const b = state.build, race = RACES.find(r => r.id === b.race);
-    const key = { STR: 'str', DEX: 'dex', INT: 'int' }[state.ap.type === 'PRIEST' && state.ap.sub === 'int' ? 'INT' : AP_TYPES[state.ap.type].stat];
-    state.ap.st = race.st[key] + b.st[key];
-    document.getElementById('ap-st').value = state.ap.st;
+    if (!state.ap.stManual) {
+      const key = { STR: 'str', DEX: 'dex', INT: 'int' }[state.ap.type === 'PRIEST' && state.ap.sub === 'int' ? 'INT' : AP_TYPES[state.ap.type].stat];
+      state.ap.st = race.st[key] + b.st[key];
+      document.getElementById('ap-st').value = state.ap.st;
+    }
+    /* Takılı silahların seçili derecedeki AP'si */
+    const weaponAP = slot => { const g = b.gear[slot], it = g && itemById(g.id), r = it && rowAt(it, g.up); return r && r[1] ? r[1] : 0; };
+    if (!state.ap.rManual) { state.ap.r = weaponAP(0); document.getElementById('ap-r').value = state.ap.r || ''; }
+    if (!state.ap.lManual) { state.ap.l = weaponAP(1); document.getElementById('ap-l').value = state.ap.l || ''; }
   }
   function apRender() {
     const b = state.build, res = apCalc(state.ap, b.lv), T = AP_TYPES[state.ap.type];
@@ -1579,13 +1598,16 @@ section[data-tab].on{display:block}
       : 'Skill puanı level 10’da başlar; master ağacı level 60’ta açılır.';
     document.getElementById('b-gear').innerHTML = SLOTS.map((sl, i) => {
       const g = b.gear[i] || {}, it = g.id && itemById(g.id);
-      const warn = it && !fits(it, b);
+      const grades = it ? gradesOf(it) : [];
+      const bad = it && !fits(it, b, g.up);
+      const miss = it ? unmet(it, g.up, b) : [];
+      const info = it ? (bad ? 'Sınıfına ya da levelına uygun değil' : miss.length ? `Gerekli: ${miss.join(', ')}` : [GRADES[it.g][0], statText(it, g.up) || esc(it.k)].join(' · ')) : '';
       return `<div class="gear-slot">
         <button type="button" class="slot-btn" data-pick="${i}" aria-label="${sl}: ${it ? esc(it.n) : 'boş'}. Eşya seç">
-          ${icoHTML(SLOT_TYPES[i], it ? it.g : '')}
-          <span class="sl"><small>${sl}</small><b>${it ? esc(it.n) : 'Seç'}</b>${it ? `<em class="${warn ? 'bad' : ''}">${warn ? 'Sınıfına ya da levelına uygun değil' : `${GRADES[it.g][0]} · ${reqText(it)}`}</em>` : ''}</span>
+          ${icoHTML(SLOT_TYPES[i], it)}
+          <span class="sl"><small>${sl}</small><b>${it ? esc(it.n) : 'Seç'}</b>${it ? `<em class="${bad || miss.length ? 'bad' : ''}">${info}</em>` : ''}</span>
         </button>
-        <select data-gup="${i}" aria-label="${sl} artı seviyesi" ${it ? '' : 'disabled'}>${Array.from({ length: 11 }, (_, n) => `<option value="${n}" ${n === (g.up || 0) ? 'selected' : ''}>+${n}</option>`).join('')}</select>
+        <select data-gup="${i}" aria-label="${sl} derecesi" ${grades.length ? '' : 'disabled'}>${grades.length ? grades.map(r => `<option value="${r[0]}" ${r[0] === g.up ? 'selected' : ''}>+${r[0]}</option>`).join('') : '<option>—</option>'}</select>
       </div>`;
     }).join('');
     const err = document.getElementById('b-err');
@@ -1636,7 +1658,7 @@ section[data-tab].on{display:block}
     const cf = t.closest('[data-cls]'); if (cf) { state.cls = cf.dataset.cls; renderMembers(); return; }
     const pk = t.closest('[data-pick]'); if (pk) { openPicker(+pk.dataset.pick); return; }
     const pit = t.closest('[data-item]');
-    if (pit) { const it = itemById(pit.dataset.item), i = state.pick; state.build.gear[i] = { id: it.id, up: (state.build.gear[i] && state.build.gear[i].up) || 0 }; closePicker(); renderBuild(); document.querySelector(`[data-pick="${i}"]`).focus(); toast(`${it.n} takıldı`); return; }
+    if (pit) { const it = itemById(pit.dataset.item), i = state.pick, prev = state.build.gear[i] && state.build.gear[i].up, gs = gradesOf(it); state.build.gear[i] = { id: it.id, up: gs.some(r => r[0] === prev) ? prev : (gs[0] ? gs[0][0] : 0) }; closePicker(); renderBuild(); document.querySelector(`[data-pick="${i}"]`).focus(); toast(`${it.n} takıldı`); return; }
     if (t.closest('#pk-clear')) { delete state.build.gear[state.pick]; closePicker(); renderBuild(); return; }
     if (t.closest('#pk-close') || t.id === 'picker') { closePicker(); return; }
     const stb = t.closest('[data-st]'); if (stb) { const b = state.build, P = pools(b); const d = +stb.dataset.d; if (d < 0 ? b.st[stb.dataset.st] > 0 : P.stLeft > 0) b.st[stb.dataset.st] += d; renderBuild(); return; }
@@ -1706,12 +1728,14 @@ section[data-tab].on{display:block}
   };
   document.getElementById('b-lv').addEventListener('input', setBuildNum('lv', 83, 1));
   document.getElementById('b-reb').addEventListener('input', setBuildNum('reb', REB_MAX, 0));
-  document.getElementById('b-gear').addEventListener('change', e => { const i = e.target.dataset.gup; if (i === undefined || !state.build.gear[i]) return; state.build.gear[i].up = +e.target.value; });
+  document.getElementById('b-gear').addEventListener('change', e => { const i = e.target.dataset.gup; if (i === undefined || !state.build.gear[i]) return; state.build.gear[i].up = +e.target.value; renderBuild(); });
   document.getElementById('pk-q').addEventListener('input', renderPicker);
   document.getElementById('ap-form').addEventListener('input', e => {
     if (e.target.tagName === 'SELECT') return;
     const n = id => Math.max(0, parseInt(document.getElementById(id).value, 10) || 0);
     if (e.target.id === 'ap-st') state.ap.stManual = true;
+    if (e.target.id === 'ap-r') state.ap.rManual = true;
+    if (e.target.id === 'ap-l') state.ap.lManual = true;
     Object.assign(state.ap, { r: n('ap-r'), l: n('ap-l'), st: n('ap-st'), bo: n('ap-bo'), pc: n('ap-pc'), wes: document.getElementById('ap-wes').checked, wolf: document.getElementById('ap-wolf').checked });
     apRender();
   });
