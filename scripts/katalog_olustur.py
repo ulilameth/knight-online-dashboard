@@ -20,6 +20,9 @@ SLOT = {
     "Wings": "kanat", "Tattoo": "dovme", "Emblem": "amblem",
 }
 CLASS_FLAGS = [("CanUseWarrior", "war"), ("CanUseRogue", "rog"), ("CanUseMage", "mag"), ("CanUsePriest", "pri"), ("CanUseKurian", "kur")]
+# KO Bugda'nın sınıf bayrağı yanlış görünen kategoriler: kategori -> doğru sınıflar.
+# "Priest Weapon / Mace" kaynakta Warrior, Mage ve Kurian için de açık geliyor; oyunda yalnızca Priest kullanır.
+SINIF_DUZELTME = {"Priest Weapon / Mace": ["pri"]}
 # Derece satırındaki alanlar (sıra önemli; prototip bu sırayla okur)
 STAT_FIELDS = ["AttackPower", "Defense", "RequiredLevel", "RequiredStrength", "RequiredHealth", "RequiredDexterity",
                "RequiredIntelligence", "RequiredMagicPower", "BonusStrength", "BonusHealth", "BonusDexterity",
@@ -66,7 +69,7 @@ def main():
             "n": it["Name"],
             "k": cat["Name"],
             "s": slots,
-            "c": [code for flag, code in CLASS_FLAGS if it[flag]],
+            "c": SINIF_DUZELTME.get(cat["Name"]) or [code for flag, code in CLASS_FLAGS if it[flag]],
             "i": it["ItemImageId"],
             "g": grade_of(it, cat["IsCospre"]),
             "set": it["SetIdentifiers"] or None,
