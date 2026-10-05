@@ -1405,7 +1405,7 @@ section[data-tab].on{display:block}
   const SLOT_TYPES = ['silah', 'ikinci', 'kask', 'zirh', 'pantolon', 'eldiven', 'bot', 'kolye', 'kupe', 'kupe', 'yuzuk', 'yuzuk', 'kemer', 'cospre_kask', 'cospre_zirh', 'cospre_eldiven', 'kanat', 'dovme', 'amblem'];
   /* Eşya kataloğu: design/katalog.json, scripts/katalog_olustur.py ile data/esyalar/kobugda/ verisinden üretilir.
      Derece satırı: [derece, AP, savunma, gerekli level, STR, HP, DEX, INT, MP, bonus STR, HP, DEX, INT, MP] */
-  let ITEMS = [], GRADE_ROWS = {}, catalogState = 'yükleniyor';
+  let ITEMS = [], GRADE_ROWS = {}, IMG_DATA = null, catalogState = 'yükleniyor';
   const IMG_BASE = /\/design\//.test(location.pathname) ? '../data/esyalar/kobugda/gorseller/' : 'gorseller/';
   const REQ = [['str', 4, 'STR'], ['hp', 5, 'HP'], ['dex', 6, 'DEX'], ['int', 7, 'INT'], ['mp', 8, 'MP']];
   const itemById = id => ITEMS.find(x => x.id === id);
@@ -1416,7 +1416,7 @@ section[data-tab].on{display:block}
   const buildTotals = b => { const race = RACES.find(r => r.id === b.race); return Object.fromEntries(STATS.map(([k]) => [k, race.st[k] + b.st[k]])); };
   const unmet = (it, gr, b) => { const r = rowAt(it, gr); if (!r) return []; const tot = buildTotals(b); return REQ.filter(([k, idx]) => r[idx] && tot[k] < r[idx]).map(([k, idx, ab]) => `${ab} ${r[idx]} (sende ${tot[k]})`); };
   const icoHTML = (t, it) => it
-    ? `<span class="ico" style="color:var(${GRADES[it.g][1]})"><img src="${IMG_BASE}${it.img}.png" alt="" width="36" height="36" loading="lazy"></span>`
+    ? `<span class="ico" style="color:var(${GRADES[it.g][1]})"><img src="${IMG_DATA && IMG_DATA[it.img] ? IMG_DATA[it.img] : IMG_BASE + it.img + '.png'}" alt="" width="36" height="36" loading="lazy"></span>`
     : `<span class="ico empty"><svg class="ic" aria-hidden="true"><use href="#s-${t.replace('cospre_', '')}"/></svg></span>`;
   const clsText = it => it.cls.length && it.cls.length < 5 ? it.cls.map(c => CLASSES[c]).join(', ') : 'Tüm sınıflar';
   const statText = (it, gr) => { const r = rowAt(it, gr); if (!r) return ''; return [r[1] ? `AP ${r[1]}` : '', r[2] ? `Savunma ${r[2]}` : '', r[3] ? `Lv ${r[3]}` : ''].filter(Boolean).join(' · '); };
@@ -1430,6 +1430,8 @@ section[data-tab].on{display:block}
     ITEMS = d.esyalar.map(x => ({ id: 'kb' + x.id, kid: String(x.id), n: x.n, k: x.k, slots: x.s, cls: x.c, img: x.i, g: x.g }));
     GRADE_ROWS = d.dereceler;
     catalogState = 'hazır';
+    /* Yayınlanan sürümde görseller tek dosyada (gorseller.json); repoda ayrı PNG'ler kullanılır */
+    fetch('gorseller.json').then(r => r.ok ? r.json() : null).then(m => { if (m) { IMG_DATA = m; if (state.build) renderBuild(); if (!document.getElementById('picker').hidden) renderPicker(); } }).catch(() => {});
     if (state.build) renderBuild();
     if (!document.getElementById('picker').hidden) renderPicker();
   }).catch(() => { catalogState = 'hata'; if (!document.getElementById('picker').hidden) renderPicker(); });
