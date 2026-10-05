@@ -85,8 +85,8 @@ a{color:var(--gold)}
 
 /* ---------- Izgara ve paneller ---------- */
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
-.s12{grid-column:span 12}.s7{grid-column:span 7}.s5{grid-column:span 5}.s8{grid-column:span 8}.s4{grid-column:span 4}
-@media (max-width:960px){.s7,.s5,.s8,.s4{grid-column:span 12}}
+.s12{grid-column:span 12}.s6{grid-column:span 6}.s7{grid-column:span 7}.s5{grid-column:span 5}.s8{grid-column:span 8}.s4{grid-column:span 4}
+@media (max-width:960px){.s7,.s5,.s8,.s4,.s6{grid-column:span 12}}
 .stack{display:flex;flex-direction:column;gap:16px;min-width:0}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0;box-shadow:var(--shadow)}
 .panel-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:14px}
@@ -319,6 +319,36 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .ts-addr{font:700 30px/1.1 var(--font-data);letter-spacing:.1em;color:var(--fg);user-select:all;margin-top:4px}
 .pf-input{width:100%;max-width:320px;height:48px;border:1px solid var(--input-line);border-radius:9px;background:var(--surface-2);padding:0 12px;font:500 16px/1 var(--font-body);color:var(--fg)}
 .reb{color:var(--gold);font-weight:700}
+.b-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px}
+.b-field{display:flex;flex-direction:column;min-width:0}
+.b-field .sel{min-width:160px;height:44px}
+.stepper.sm{max-width:200px}
+.stepper.sm button{width:44px;height:44px}
+.stepper.sm input{height:44px;font-size:20px}
+.b-sum{display:flex;flex-wrap:wrap;gap:10px;margin-left:auto}
+.b-pool{padding:8px 12px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line)}
+.b-pool b{display:block;font:600 24px/1 var(--font-data)}
+.b-pool span{font:600 11.5px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.b-pool.over b{color:var(--crit)}
+.b-row{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:9px;border-bottom:1px solid var(--line-subtle)}
+.b-row:last-child{border-bottom:0}
+.b-row .nm b{display:block;font:700 15px/1.1 var(--font-data);letter-spacing:.04em}
+.b-row .nm span{font-size:12.5px;color:var(--muted)}
+.b-row .meter{height:8px}
+.b-ctl{display:flex;align-items:center;gap:4px}
+.b-ctl button{width:36px;height:36px;border-radius:8px;border:1px solid var(--input-line);background:var(--surface-2);font:700 16px/1 var(--font-data);color:var(--fg)}
+.b-ctl button:disabled{opacity:.4;cursor:not-allowed}
+.b-ctl output{min-width:3ch;text-align:center;font:600 18px/1 var(--font-data);color:var(--fg)}
+.b-row.locked{opacity:.55}
+.gear{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+@media (max-width:640px){.gear{grid-template-columns:minmax(0,1fr)}}
+.gear-slot{display:grid;grid-template-columns:84px minmax(0,1fr) 64px;gap:8px;align-items:center}
+.gear-slot label{font:600 13px/1.2 var(--font-data);color:var(--muted)}
+.gear-slot input,.gear-slot select{height:38px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface-2);padding:0 8px;font-size:14px;color:var(--fg);min-width:0}
+.b-share{display:flex;flex-direction:column;gap:8px}
+.crit-note{margin:12px 0 0;padding:9px 12px;border-radius:8px;background:var(--crit-soft);color:var(--fg);font-size:14px}
+.rules li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding-block:8px;border-bottom:1px solid var(--line-subtle);font-size:14px}
+.rules li:last-child{border-bottom:0}
 .stepper{display:flex;align-items:center;gap:8px;max-width:280px}
 .stepper button{width:48px;height:48px;border-radius:9px;border:1px solid var(--input-line);background:var(--surface-2);font:700 22px/1 var(--font-data);color:var(--fg)}
 .stepper input{flex:1;min-width:0;height:48px;border:1px solid var(--input-line);border-radius:9px;background:var(--surface-2);text-align:center;font:600 24px/1 var(--font-data);color:var(--fg)}
@@ -394,6 +424,7 @@ section[data-tab].on{display:block}
       <button class="tab" role="tab" id="t-uyeler" data-go="uyeler">Üyeler</button>
       <button class="tab" role="tab" id="t-etkinlikler" data-go="etkinlikler">Etkinlikler ve katılım</button>
       <button class="tab" role="tab" id="t-takvim" data-go="takvim">Takvim ve duyurular</button>
+      <button class="tab" role="tab" id="t-karakter" data-go="karakter">Karakter tasarımı</button>
       <button class="tab" role="tab" id="t-profil" data-go="profil">Profilim</button>
     </div>
   </nav>
@@ -594,6 +625,69 @@ section[data-tab].on{display:block}
         </div>
       </div>
     </section>
+    <!-- ================= KARAKTER TASARIMI ================= -->
+    <section data-tab="karakter" aria-labelledby="t-karakter">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Build planlayıcı</div>
+          <h1>Karakter tasarımı</h1>
+          <p>Stat ve skill puanlarını planla, ekipmanını not et, klanla paylaş. AP, AC ve eşya testi gibi ayrıntılı hesaplar için KO Bugda’yı kullan.</p>
+        </div>
+        <a class="btn" href="https://kobugda.com/calculator/advanced" target="_blank" rel="noopener">KO Bugda’da hesapla <svg aria-hidden="true"><use href="#i-out"/></svg></a>
+      </div>
+      <div class="grid">
+        <div class="s12 panel">
+          <div class="b-head">
+            <div class="b-field"><label class="pf-label" for="b-cls" style="margin-top:0">Sınıf</label><select class="sel" id="b-cls"></select></div>
+            <div class="b-field"><span class="pf-label" style="margin-top:0">Level</span>
+              <div class="stepper sm"><button type="button" data-blv="-1" aria-label="Level azalt">−</button><input id="b-lv" type="number" min="1" max="83" inputmode="numeric" aria-label="Level"><button type="button" data-blv="1" aria-label="Level artır">+</button></div></div>
+            <div class="b-field"><span class="pf-label" style="margin-top:0">Reb</span>
+              <div class="stepper sm"><button type="button" data-breb="-1" aria-label="Reb azalt">−</button><input id="b-reb" type="number" min="0" max="10" inputmode="numeric" aria-label="Reb"><button type="button" data-breb="1" aria-label="Reb artır">+</button></div></div>
+            <div class="b-sum" id="b-sum"></div>
+          </div>
+        </div>
+
+        <div class="s6 panel">
+          <div class="panel-h"><h2>Statlar</h2><span class="sub" id="b-st-sub"></span></div>
+          <div id="b-stats"></div>
+          <p class="muted" style="font-size:13px;margin:12px 0 0">Değerler sınıfın başlangıç statlarına eklenir. Tek stat en fazla 255 olabilir; reb puanları bu sınırın üstüne bonus olarak eklenir.</p>
+        </div>
+        <div class="s6 panel">
+          <div class="panel-h"><h2>Skill ağaçları</h2><span class="sub" id="b-sk-sub"></span></div>
+          <div id="b-skills"></div>
+          <p class="muted" style="font-size:13px;margin:12px 0 0" id="b-sk-note"></p>
+        </div>
+
+        <div class="s8 panel">
+          <div class="panel-h"><h2>Ekipman</h2><span class="sub">Eşya adı ve artı seviyesi</span></div>
+          <div class="gear" id="b-gear"></div>
+        </div>
+        <div class="s4 stack">
+          <div class="panel">
+            <div class="panel-h"><h2>Kaydet ve paylaş</h2></div>
+            <div class="b-share" role="radiogroup" aria-label="Kimler görsün">
+              <label class="check" for="b-sh-k"><input type="radio" name="b-share" id="b-sh-k" value="klan" checked>Klan görsün</label>
+              <label class="check" for="b-sh-y"><input type="radio" name="b-share" id="b-sh-y" value="yetkili">Yalnızca ben ve yetkililer</label>
+            </div>
+            <p class="crit-note" id="b-err" hidden></p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+              <button type="button" class="btn primary" id="b-save" style="min-height:44px;padding-inline:18px">Build’i kaydet</button>
+              <button type="button" class="btn officer-only" id="b-tpl" style="min-height:44px">Şablon yap</button>
+              <button type="button" class="btn" id="b-reset" style="min-height:44px">Sıfırla</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h2>Klan şablonları</h2></div>
+            <p class="muted" style="font-size:14px;margin:0">Yetkililer klanın önerdiği build’leri sınıfa göre buraya ekler; üyeler tek tıkla kendi planına yükler. Henüz şablon yok.</p>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h2>Kural tablosu</h2><span class="sub">Yönetici günceller</span></div>
+            <ul class="list rules" id="b-rules"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= PROFİLİM ================= -->
     <section data-tab="profil" aria-labelledby="t-profil">
       <div class="page-head">
@@ -1184,7 +1278,82 @@ section[data-tab].on{display:block}
     document.getElementById('pf-updated').textContent = state.pf.saved ? `Son güncelleme: ${F(state.pf.saved, { day: 'numeric', month: 'long' })} ${hm(state.pf.saved)}` : 'Henüz güncellenmedi';
   }
 
-  function render() { renderShell(); renderHome(); renderMembers(); renderEvents(); renderCalendar(); renderProfile(); tick(); }
+  /* ---------- Karakter tasarımı ---------- */
+  const RULES = [
+    { k: 'Level başına stat puanı', v: '3', ok: true },
+    { k: 'Reb başına bonus stat', v: '+2', ok: true },
+    { k: 'Tek stat sınırı', v: '255', ok: true },
+    { k: 'Skill puanı başlangıcı', v: 'Level 10', ok: true },
+    { k: 'Master skill', v: 'Level 60', ok: true },
+    { k: 'Level başına skill puanı', v: '2', ok: false },
+    { k: 'Sınıf başlangıç statları', v: 'girilecek', ok: false }
+  ];
+  const STAT_PER_LV = 3, REB_STAT = 2, SKILL_START = 10, SKILL_PER_LV = 2, MASTER_LV = 60;
+  const STATS = [['str', 'STR', 'Güç'], ['hp', 'HP', 'Sağlık'], ['dex', 'DEX', 'Çeviklik'], ['int', 'INT', 'Zeka'], ['mp', 'MP', 'Büyü gücü']];
+  const TREES = { war: ['Attack', 'Defense', 'Passion'], rog: ['Archery', 'Assassin', 'Explore'], mag: ['Flame', 'Glacier', 'Lightning'], pri: ['Heal', 'Buff', 'Debuff'], kur: ['1. ağaç', '2. ağaç', '3. ağaç'] };
+  const SLOTS = ['Silah', 'İkinci el', 'Kask', 'Zırh', 'Pantolon', 'Eldiven', 'Bot', 'Pelerin', 'Kolye', 'Küpe 1', 'Küpe 2', 'Yüzük 1', 'Yüzük 2', 'Kemer'];
+  const newBuild = m => ({ cls: m.cls, lv: Math.max(1, m.lv || 1), reb: m.reb || 0, st: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, sk: [0, 0, 0, 0], gear: {} });
+  const pools = b => {
+    const stTot = STAT_PER_LV * (b.lv - 1) + REB_STAT * (b.lv === 83 ? b.reb : 0);
+    const skTot = b.lv >= SKILL_START ? SKILL_PER_LV * (b.lv - SKILL_START + 1) : 0;
+    const stUsed = Object.values(b.st).reduce((a, x) => a + x, 0);
+    const skUsed = b.sk.reduce((a, x) => a + x, 0);
+    return { stTot, skTot, stUsed, skUsed, stLeft: stTot - stUsed, skLeft: skTot - skUsed };
+  };
+  function renderBuild() {
+    const m = me();
+    if (!state.build || state.build.owner !== m.name) state.build = { owner: m.name, ...newBuild(m) };
+    const b = state.build;
+    if (b.lv < 83) b.reb = 0;
+    if (b.lv < MASTER_LV) b.sk[3] = 0;
+    const P = pools(b);
+    const sel = document.getElementById('b-cls');
+    sel.innerHTML = Object.entries(CLASSES).map(([k, l]) => `<option value="${k}" ${k === b.cls ? 'selected' : ''}>${l}</option>`).join('');
+    document.getElementById('b-lv').value = b.lv;
+    const rb = document.getElementById('b-reb');
+    rb.value = b.lv === 83 ? b.reb : '';
+    rb.placeholder = b.lv === 83 ? '' : '83’te';
+    rb.disabled = b.lv !== 83;
+    document.querySelectorAll('[data-breb]').forEach(x => { x.disabled = b.lv !== 83; });
+    const lvLabel = b.lv === 83 && b.reb ? `83+${b.reb}` : String(b.lv);
+    document.getElementById('b-sum').innerHTML =
+      `<div class="b-pool ${P.stLeft < 0 ? 'over' : ''}"><b class="num">${P.stLeft}</b><span>Kalan stat · ${P.stTot}</span></div>` +
+      `<div class="b-pool ${P.skLeft < 0 ? 'over' : ''}"><b class="num">${P.skLeft}</b><span>Kalan skill · ${P.skTot}</span></div>`;
+    document.getElementById('b-st-sub').textContent = `Level ${lvLabel} · ${P.stUsed} puan dağıtıldı`;
+    const maxSt = Math.max(1, ...Object.values(b.st));
+    document.getElementById('b-stats').innerHTML = STATS.map(([k, ab, nm]) => `
+      <div class="b-row">
+        <div class="nm"><b>${ab}</b><span>${nm}</span></div>
+        <div class="meter" aria-hidden="true"><i style="width:${b.st[k] / maxSt * 100}%"></i></div>
+        <div class="b-ctl"><button type="button" data-st="${k}" data-d="-1" aria-label="${ab} azalt" ${b.st[k] ? '' : 'disabled'}>−</button><output class="num">${b.st[k]}</output><button type="button" data-st="${k}" data-d="1" aria-label="${ab} artır" ${P.stLeft > 0 ? '' : 'disabled'}>+</button></div>
+      </div>`).join('');
+    const names = [...TREES[b.cls], 'Master'];
+    const maxSk = Math.max(1, ...b.sk);
+    document.getElementById('b-sk-sub').textContent = `${P.skUsed} puan dağıtıldı`;
+    document.getElementById('b-skills').innerHTML = names.map((n, i) => {
+      const lock = i === 3 && b.lv < MASTER_LV;
+      return `<div class="b-row ${lock ? 'locked' : ''}">
+        <div class="nm"><b>${n}</b><span>${i === 3 ? (lock ? 'Level 60’ta açılır' : 'Master') : `${i + 1}. ağaç`}</span></div>
+        <div class="meter" aria-hidden="true"><i style="width:${b.sk[i] / maxSk * 100}%"></i></div>
+        <div class="b-ctl"><button type="button" data-sk="${i}" data-d="-1" aria-label="${n} azalt" ${b.sk[i] && !lock ? '' : 'disabled'}>−</button><output class="num">${b.sk[i]}</output><button type="button" data-sk="${i}" data-d="1" aria-label="${n} artır" ${P.skLeft > 0 && !lock ? '' : 'disabled'}>+</button></div>
+      </div>`;
+    }).join('');
+    document.getElementById('b-sk-note').textContent = b.cls === 'kur'
+      ? `${CLASSES.kur} ağaç adları kural tablosuna girilecek. Skill puanı level 10’da başlar.`
+      : 'Skill puanı level 10’da başlar; master ağacı level 60’ta açılır.';
+    const gearEl = document.getElementById('b-gear');
+    if (!gearEl.children.length) gearEl.innerHTML = SLOTS.map((sl, i) => `
+      <div class="gear-slot"><label for="g-${i}">${sl}</label><input id="g-${i}" data-gear="${i}" type="text" placeholder="Eşya adı" autocomplete="off">
+        <select data-gup="${i}" aria-label="${sl} artı seviyesi">${Array.from({ length: 11 }, (_, n) => `<option value="${n}">+${n}</option>`).join('')}</select></div>`).join('');
+    SLOTS.forEach((sl, i) => { const g = b.gear[i] || {}; document.getElementById('g-' + i).value = g.name || ''; gearEl.querySelector(`[data-gup="${i}"]`).value = g.up || 0; });
+    const err = document.getElementById('b-err');
+    err.hidden = P.stLeft >= 0 && P.skLeft >= 0;
+    err.textContent = `Dağıtılan puan bu level için fazla: ${Math.max(0, -P.stLeft)} stat, ${Math.max(0, -P.skLeft)} skill düşür.`;
+    document.getElementById('b-save').disabled = !err.hidden;
+    document.getElementById('b-rules').innerHTML = RULES.map(r => `<li><span>${r.k}</span><span class="tag ${r.ok ? 'official' : ''}">${r.v}${r.ok ? '' : ' · doğrulanacak'}</span></li>`).join('');
+  }
+
+  function render() { renderShell(); renderHome(); renderMembers(); renderEvents(); renderCalendar(); renderBuild(); renderProfile(); tick(); }
 
   function tick() {
     const h = heroTarget();
@@ -1214,6 +1383,13 @@ section[data-tab].on{display:block}
     const rl = t.closest('[data-role]'); if (rl) { state.role = rl.dataset.role; render(); return; }
     const ik = t.closest('button[data-irk]'); if (ik) { state.irk = ik.dataset.irk; render(); return; }
     const cf = t.closest('[data-cls]'); if (cf) { state.cls = cf.dataset.cls; renderMembers(); return; }
+    const stb = t.closest('[data-st]'); if (stb) { const b = state.build, P = pools(b); const d = +stb.dataset.d; if (d < 0 ? b.st[stb.dataset.st] > 0 : P.stLeft > 0) b.st[stb.dataset.st] += d; renderBuild(); return; }
+    const skb = t.closest('[data-sk]'); if (skb) { const b = state.build, P = pools(b); const d = +skb.dataset.d, i = +skb.dataset.sk; if (d < 0 ? b.sk[i] > 0 : P.skLeft > 0) b.sk[i] += d; renderBuild(); return; }
+    const blv = t.closest('[data-blv]'); if (blv) { state.build.lv = Math.max(1, Math.min(83, state.build.lv + (+blv.dataset.blv))); renderBuild(); return; }
+    const brb = t.closest('[data-breb]'); if (brb) { state.build.reb = Math.max(0, Math.min(REB_MAX, state.build.reb + (+brb.dataset.breb))); renderBuild(); return; }
+    if (t.closest('#b-save')) { const b = state.build; toast(`Build kaydedildi: ${CLASSES[b.cls]}, level ${b.lv === 83 && b.reb ? '83+' + b.reb : b.lv}. ${document.getElementById('b-sh-k').checked ? 'Klan görebilir.' : 'Yalnızca sen ve yetkililer görebilir.'}`); return; }
+    if (t.closest('#b-tpl')) { toast('Prototip: şablon adı sorulacak ve klan şablonlarına eklenecek'); return; }
+    if (t.closest('#b-reset')) { const m = me(); state.build = { owner: m.name, ...newBuild(m), cls: state.build.cls }; renderBuild(); toast('Dağıtım sıfırlandı'); return; }
     const pc = t.closest('[data-pfcls]'); if (pc) { state.pf.cls = pc.dataset.pfcls; renderProfile(); return; }
     const lv = t.closest('[data-lv]'); if (lv) { state.pf.lv = Math.max(1, Math.min(state.levelCap, (+state.pf.lv || 1) + (+lv.dataset.lv))); renderProfile(); return; }
     const rbb = t.closest('[data-reb]'); if (rbb) { state.pf.reb = Math.max(0, Math.min(state.rebCap, (+state.pf.reb || 0) + (+rbb.dataset.reb))); renderProfile(); return; }
@@ -1264,6 +1440,17 @@ section[data-tab].on{display:block}
     if (t.id === 'status-filter') { state.status = t.value; renderMembers(); }
   });
   document.getElementById('q').addEventListener('input', e => { state.q = e.target.value; renderMembers(); });
+  document.getElementById('b-cls').addEventListener('change', e => { state.build.cls = e.target.value; state.build.sk = [0, 0, 0, 0]; renderBuild(); });
+  /* Yazarken güncelle; odak kaybında (change) yeniden çizme, yoksa hemen ardından basılan düğmenin tıklaması kaybolur */
+  const setBuildNum = (key, max, min) => e => {
+    const v = parseInt(e.target.value, 10);
+    if (Number.isNaN(v)) return;
+    const n = Math.max(min, Math.min(max, v));
+    if (n !== state.build[key]) { state.build[key] = n; renderBuild(); }
+  };
+  document.getElementById('b-lv').addEventListener('input', setBuildNum('lv', 83, 1));
+  document.getElementById('b-reb').addEventListener('input', setBuildNum('reb', REB_MAX, 0));
+  document.getElementById('b-gear').addEventListener('input', e => { const i = e.target.dataset.gear ?? e.target.dataset.gup; if (i === undefined) return; const g = state.build.gear[i] = state.build.gear[i] || {}; if (e.target.dataset.gear !== undefined) g.name = e.target.value; else g.up = +e.target.value; });
   document.getElementById('pf-ts').addEventListener('input', e => { state.pf.ts = e.target.value; });
   document.getElementById('pf-level').addEventListener('input', e => { const v = parseInt(e.target.value, 10); if (v) { state.pf.lv = Math.max(1, Math.min(state.levelCap, v)); renderProfile(); } });
   document.getElementById('pf-reb').addEventListener('input', e => { const v = parseInt(e.target.value, 10); state.pf.reb = Math.max(0, Math.min(state.rebCap, v || 0)); });
@@ -1297,7 +1484,7 @@ section[data-tab].on{display:block}
   });
 
   const h0 = (location.hash || '').slice(1);
-  if (['genel', 'uyeler', 'etkinlikler', 'takvim', 'profil'].includes(h0)) state.tab = h0;
+  if (['genel', 'uyeler', 'etkinlikler', 'takvim', 'karakter', 'profil'].includes(h0)) state.tab = h0;
   render();
 })();
 </script>

@@ -18,6 +18,7 @@
 | **Etkinlik katılım takibi** | Etkinlik oluşturma, etkinlik sırasında yoklama (Katıldı / Geç / Mazeretli / Yok), türlere ve üyelere göre katılım oranı | Yetkililer işaretler, üyeler kendi geçmişini görür |
 | **Takvim ve duyurular** | Aylık takvim (telefonda ajanda), haftalık etkinlik düzeni, duyurular, sabitleme, TeamSpeak'e (L4B) mesaj olarak gönderim | Herkes görür, yetkililer yazar |
 | **Davet koduyla kayıt** | Yeni üye, yetkililerin verdiği özel kodla kayıt olur: kod → nick ve şifre → karakter bilgisi | Kodu yetkililer üretir, üyeler kullanır |
+| **Karakter tasarımı** | Build planlayıcı: sınıf, level (83+N dahil), stat ve skill puanı dağıtımı, ekipman notları (eşya adı + artı seviyesi), klanla paylaşım, yetkili şablonları. AP/AC gibi ayrıntılı hesap için KO Bugda'ya bağlantı | Her üye kendi build'ini, yetkililer şablonları |
 | **Profilim** | Üye kendi sınıfını ve levelini günceller; değişiklik üye listesine hemen yansır | Her üye kendi profilini |
 
 **v1 dışında (sonra):** loot/DKP, TeamSpeak'ten çevrimiçi listesi (WebQuery `clientlist -away`: oyuncu durumları çevrimiçi / AFK / savaşta buradan gelecek), üyelerin etkinliğe "katılacağım" bildirimi, oyun içinden otomatik veri çekme (KO'nun resmi API'si yok, tüm veri elle girilir).
@@ -115,6 +116,23 @@ Güvenlik:
 
 **Level sınırı (yönetici ayarı):** Ayarlar'da tek seçim kutusu: `80`, `83`, `83+1` … `83+10`. Açılışta 80. Seçim `clan_settings.level_siniri` (80 ya da 83) ve `reb_siniri` (0–10) olarak saklanır; üyeler bu sınırın üstünde değer kaydedemez (sunucuda da doğrulanır).
 
+### Karakter tasarımı: kurallar ve veri
+
+KO Bugda'nın eşya ve formül verisi onların içeriği; panele kopyalanmaz. Panel kendi kural tablosuyla puan dağıtımını hesaplar, ayrıntılı AP/AC hesabı için KO Bugda'ya bağlantı verir. Kurallar `game_rules` tablosunda, yönetici Ayarlar'dan düzeltir; doğrulanmamış satırlar arayüzde "doğrulanacak" etiketiyle görünür.
+
+| Kural | Değer | Durum |
+|---|---|---|
+| Level başına stat puanı | 3 | Doğrulandı |
+| Reb başına bonus stat | +2 (255 sınırının üstüne) | Doğrulandı |
+| Tek stat sınırı | 255 | Doğrulandı |
+| Skill puanı başlangıcı | Level 10 | Doğrulandı |
+| Master skill | Level 60 | Doğrulandı |
+| Level başına skill puanı | 2 | Doğrulanacak |
+| Sınıf başlangıç statları | (girilecek) | Doğrulanacak |
+| Skill ağaçları | Warrior: Attack, Defense, Passion · Rogue: Archery, Assassin, Explore · Mage: Flame, Glacier, Lightning · Priest: Heal, Buff, Debuff · Kurian/Porutu: girilecek | Kurian/Porutu doğrulanacak |
+
+Hesap: dağıtılabilir stat = 3 × (level − 1) + 2 × reb; dağıtılabilir skill = level ≥ 10 ise 2 × (level − 9).
+
 Nick, rütbe ve durum yetkililerdedir; nick oyunda farklı alındıysa üye bir yetkiliye yazar. Her değişiklik `character_changes` tablosuna yazılır (kim, hangi alan, eski ve yeni değer, zaman); yetkililer karakter detayında görür.
 
 ---
@@ -161,6 +179,9 @@ clan_settings       tek satır: klan_adi, yedek_ad?, monogram, irk (karus | el_m
 invite_codes        id, kod_hash (unique), son_dort, rutbe (uye | aday), max_kullanim, kullanim, bitis, aktif, not, olusturan, created_at
 invite_redemptions  id, code_id, profile_id, created_at
 password_resets     id, profile_id, kod_hash, bitis, kullanildi_at?, olusturan, created_at
+builds              id, character_id?, ad, sinif, level, reb, statlar jsonb {str,hp,dex,int,mp}, skiller int[4] (3 ağaç + master), ekipman jsonb {slot: {ad, arti}}, paylasim (klan | yetkili), sablon bool, olusturan, updated_at
+game_rules          anahtar (pk), deger jsonb, dogrulandi bool, kaynak?   -- stat_per_level, reb_bonus_stat, stat_cap, skill_start_level, skill_per_level, master_level, sinif_baslangic_statlari
+class_trees         sinif, sira (1-4), ad                              -- ör. mage: Flame, Glacier, Lightning, Master
 ```
 
 Seed: `clan_settings` → `klan_adi = 'L4BEL'`, `monogram = 'L4'`, `ts_adres = 'L4B'`, `level_siniri = 80`, `reb_siniri = 0`. Klan adı kodda sabit yazılmaz; başlık, arma ve sayfa başlıkları bu satırdan okunur.
@@ -194,6 +215,7 @@ Katılım oranı = (katildi + gec) / işaretlenmiş yoklama sayısı. Mazeretli 
 | `/giris` | Nick + şifreyle giriş | Tuval: "Telefon · giriş ve davet koduyla kayıt" |
 | `/kayit` | Davet koduyla kayıt, 4 adım | Aynı tuval ekranı |
 | `/sifre-sifirla` | Nick + sıfırlama kodu + yeni şifre | yok |
+| `/karakter` | Karakter tasarımı (build planlayıcı), klan şablonları | Karakter tasarımı sekmesi, tuvalde "Karakter tasarımı · build planlayıcı" |
 | `/profil` | Profilim: nick (kilitli), TS nick, sınıf, level, reb, şifre | Profilim sekmesi, tuvalde "Telefon · profilim" |
 | `/` | Genel bakış (geri sayım, aşamalar, hazırlık, yaklaşanlar, sabit duyuru) | Genel bakış |
 | `/uyeler` | Üye tablosu, sınıf dağılımı, rütbe özeti | Üyeler |
@@ -214,10 +236,11 @@ Tasarım kuralları [`design/palet.md`](../design/palet.md)'den gelir: tek koyu 
 ```
 Faz 0  Temel altyapı          ──── 1 oturum (sıralı, diğerleri buna bağlı)
           │
-Faz 1  ┌─ A: Üyeler            ┐
-       ├─ B: Etkinlik + yoklama │  4 paralel oturum, her biri kendi dalında
-       ├─ C: Takvim + duyurular │
-       └─ D: Genel bakış + ayarlar┘
+Faz 1  ┌─ A: Üyeler + Profilim  ┐
+       ├─ B: Etkinlik + yoklama │
+       ├─ C: Takvim + duyurular │  5 paralel oturum, her biri kendi dalında
+       ├─ D: Genel bakış + ayarlar + giriş/kayıt
+       └─ E: Karakter tasarımı  ┘
           │
 Faz 2  Entegrasyon ve yayın   ──── 1 oturum
 ```
@@ -246,6 +269,7 @@ Her oturum Faz 0'ın birleştiği `main` dalından başlar, kendi dalında çal�
 | **B: Etkinlik + yoklama** | `feat/etkinlikler` | `app/(panel)/etkinlikler/**`, `components/etkinlikler/**`, `lib/data/events.ts`, `lib/data/attendance.ts` | Yaklaşan/geçmiş listesi, etkinlik oluştur-düzenle, yoklama ekranı (tek tıkla işaretleme, iyimser güncelleme, toplu işlemler), tür bazında katılım grafiği, en istikrarlı 5 üye, üyeler için salt okunur görünüm |
 | **C: Takvim + duyurular** | `feat/takvim-duyurular` | `app/(panel)/takvim/**`, `app/(panel)/duyurular/**`, `components/takvim/**`, `components/duyurular/**`, `lib/data/announcements.ts`, `lib/data/schedule.ts`, `lib/teamspeak/**` | Aylık takvim + telefonda ajanda, haftalık düzen düzenleme ve "bu haftanın etkinliklerini oluştur", duyuru yaz/sabitle/sil, TeamSpeak WebQuery ile gönderim (yapılandırılmamışsa kutucuk gizli; hata durumunda kullanıcıya açık mesaj), "Metni kopyala" düğmesi, WebQuery birim testi (fetch mock) |
 | **D: Genel bakış + ayarlar + kayıt** | `feat/genel-ayarlar` | `app/(panel)/page.tsx`, `app/(panel)/ayarlar/**`, `app/kayit/**`, `app/giris/**`, `app/sifre-sifirla/**`, `components/genel/**`, `components/kayit/**`, `lib/data/milestones.ts`, `lib/data/prep.ts`, `lib/data/settings.ts`, `lib/data/invites.ts` | Geri sayım (istemci bileşeni, saniyelik), aşama zaman çizelgesi, klan hazırlığı + "benim hazırlığım" (açılıştan sonra "L4BEL'e katıldım" adımı eklenir), açılış sonrası özet kutuları; Giriş (nick + şifre), Kayıt: 4 adımlı akış (kod, hesap, karakter, hoş geldin), tek tip hata mesajı, deneme sınırı, şifre sıfırlama; ana sayfada TeamSpeak kartı (L4B, kopyala); Ayarlar: açılış tarihleri, klan adı/ırk, TS adresi, level sınırı seçimi, yetki verme, davet kodu ve sıfırlama kodu üret/listele/iptal |
+| **E: Karakter tasarımı** | `feat/karakter` | `app/(panel)/karakter/**`, `components/karakter/**`, `lib/data/builds.ts`, `lib/rules/**` | Sınıf, level ve reb seçimi; stat dağıtımı (5 stat, kalan puan, 255 sınırı başlangıç statları girilince); skill dağıtımı (3 ağaç + master, master level 60'ta); level düşünce fazla puan uyarısı ve kaydetmenin kapanması; ekipman yuvaları (14 yuva, ad + artı 0–10); paylaşım seçimi; yetkili şablonları (oluştur, sınıfa göre listele, üyenin planına yükle); tüm sayılar `game_rules` ve `class_trees` tablolarından, kodda sabit yok; puan hesabı için birim testleri; KO Bugda bağlantısı |
 
 Ortak kurallar:
 - Her oturum bitmeden önce `lint`, `typecheck`, `test`, `build` temiz geçmeli.
@@ -280,3 +304,4 @@ Klan adı netleşti: **L4BEL**.
 5. Davet kodları varsayılan olarak kaç gün geçerli olsun, kaç kişi kullanabilsin? (Öneri: 7 gün, 25 kullanım)
 7. TeamSpeak sunucusunda (L4B) yönetici erişiminiz var mı? Varsa duyurular TS'e otomatik gönderilebilir, ileride kim TS'te bağlı ya da AFK panelde görünebilir.
 6. Haftalık etkinlik saatleri sunucu açılınca belli olacak; prototipteki saatler örnek.
+8. Karakter tasarımı kuralları: level başına skill puanı (2 mi?), sınıfların başlangıç statları ve Kurian/Porutu skill ağaçlarının adları. Klandan deneyimli biri doğrulayabilir mi?
