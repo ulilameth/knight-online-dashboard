@@ -4,6 +4,7 @@
 import type { Build } from "@/lib/types";
 import { yeniId } from "@/lib/demo/depo";
 import { type BuildDenetimi, buildDenetle } from "@/lib/rules/build";
+import { type Hesap, hesapGirdileri, hesapla } from "@/lib/rules/hesap";
 import { type KatalogVerisi, demoKatalogVerisi, supabaseKatalogVerisi } from "./items";
 import { type Db, type DemoBaglam, belki, calistir, VeriHatasi, build, demoYetki, simdiIso, sorgu } from "./ortak";
 
@@ -32,6 +33,13 @@ export async function buildDogrula(g: BuildGirdisi, katalog: KatalogVerisi): Pro
   });
   if (d.hatalar.length) throw new VeriHatasi(d.hatalar.join(" · "));
   return d;
+}
+
+/** Build'in AP, can, mana, savunma, direnç ve set bonusu hesabı (Üyeler › Ekipman, karakter tasarımı özeti) */
+export async function buildHesapla(b: Pick<Build, "sinif" | "irkTuru" | "level" | "reb" | "statlar" | "ekipman" | "apGirdileri">, katalog: KatalogVerisi): Promise<Hesap> {
+  const ids = Object.values(b.ekipman ?? {}).map((e) => e?.itemId).filter((id): id is number => Number.isInteger(id));
+  const [k, esyalar, setBonuslari] = await Promise.all([katalog.kurallar(), katalog.esyaDetaylari(ids), katalog.setBonuslari()]);
+  return hesapla(b, { irk: k.irklar.find((i) => i.irkTuru === b.irkTuru) ?? null, esyalar, setBonuslari }, hesapGirdileri(b.apGirdileri));
 }
 
 export function demoBuildler(b: DemoBaglam): BuildVerisi {

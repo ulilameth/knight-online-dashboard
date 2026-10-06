@@ -6,7 +6,7 @@ import { DEMO_DAVET_KODU, DEMO_SIFRE, karakterId, profilId } from "@/lib/demo/fi
 import { girisYap, kayitOlustur } from "@/lib/giris";
 import { tsi } from "@/lib/time";
 import { katilimOrani, demoYoklamalar } from "./attendance";
-import { demoBuildler } from "./builds";
+import { buildHesapla, demoBuildler } from "./builds";
 import { demoEtkinlikler, haftaninEtkinlikleri } from "./events";
 import { demoKatalogVerisi } from "./items";
 import { demoDavetler } from "./invites";
@@ -170,6 +170,17 @@ describe("demo: davet ve kayıt", () => {
   it("yetkili yöneticinin sıfırlama kodunu üretemez", async () => {
     await expect(demoDavetler(ol("DemirYumruk")).sifirlamaKoduOlustur(karakterId("KaraBey"))).rejects.toThrow("yalnızca yönetici");
     expect(await demoDavetler(ol("DemirYumruk")).sifirlamaKoduOlustur(karakterId("Bozkurt"))).toMatch(/^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/);
+  });
+});
+
+describe("demo: build hesabı", () => {
+  it("kayıtlı build'in AP, can ve set bonusu veri katmanından hesaplanır", async () => {
+    const b = (await demoBuildler(ol("Asena")).benimBuildim())!;
+    const h = await buildHesapla(b, demoKatalogVerisi(ol("Asena")));
+    expect(h.ap).toBeGreaterThan(3);
+    expect(h.ekipman.takili).toBe(Object.keys(b.ekipman).length);
+    const wes = await buildHesapla({ ...b, apGirdileri: { wes: true } }, demoKatalogVerisi(ol("Asena")));
+    expect(wes.ap).toBeGreaterThan(h.ap);
   });
 });
 

@@ -328,7 +328,8 @@ Durum (6 Ekim 2026): Oturum E'nin veri ve kural katmanı, ekranlardan önce yaz�
 - `buildler.buildKaydet` / `sablonKaydet` kaydetmeden önce `buildDenetle()` çalıştırır; hatalar tek mesajda döner.
 - `supabase/seed.sql`: `npm run db:seed` ile `design/katalog.json`'dan üretilir (dönüşüm `lib/katalog/satirlar.mjs`, demo da onu kullanır). CI güncelliğini denetler; `supabase/tests/katalog.test.ts` seed'i, tekrar çalıştırmayı, RLS'i ve demo kurallarının migration'la aynı olduğunu dener.
 - Eşya kataloğu yazma (yetkili): `esyaKaydet` (yeni elle eşya 1.000.000+, KO Bugda eşyası düzenlenir), `esyaSil` (yalnızca elle eklenenler), `iceAktar`. Ayrıştırıcılar `lib/katalog/ice-aktar.ts`: JSON (dizi ya da `{esyalar}`) ve CSV (başlıklı, her artı ayrı satır, `,` ya da `;` ayraçlı, değer sütunları KO Bugda adlarıyla). Doğrulamadan geçmeyen eşya varsa hiçbiri yazılmaz.
-- Kalan (E ekranları): Karakter tasarımı ve Eşyalar sayfaları, Ayarlar › Eşya kataloğu ekranı ve görsel yükleme, otomatik AP/savunma/can hesabı.
+- Otomatik hesap `lib/rules/hesap.ts`: ekipman toplamı, set bonusu (eski KO Bugda aile tabloları; Kurian Portu parçalarında KURIAN tablosu), AP, can, mana, savunma, direnç. Prototipteki KO Bugda hesaplayıcısıyla 300 rastgele build'de birebir aynı; örnekler `lib/rules/hesap.referans.json`. Veri katmanından `buildHesapla(build, veri().katalog)`. Setin kendi tablosu (`item_sets.bonus_tablosu`, kobugda.com/sets) henüz kullanılmıyor; veri gelince eklenir.
+- Kalan (E ekranları): Karakter tasarımı ve Eşyalar sayfaları, Ayarlar › Eşya kataloğu ekranı ve görsel yükleme.
 
 ### Faz 1: Paralel oturumlar
 
