@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "pg";
@@ -22,7 +22,10 @@ export async function testVeritabani(adresi: string, secenek: { seed?: boolean }
   const db = new Client({ connectionString: url.toString() });
   await db.connect();
   await db.query(readFileSync(join(KOK, "supabase", "tests", "supabase-stub.sql"), "utf8"));
-  await db.query(readFileSync(join(KOK, "supabase", "migrations", "0001_init.sql"), "utf8"));
+  const migrations = join(KOK, "supabase", "migrations");
+  for (const dosya of readdirSync(migrations).filter((d) => d.endsWith(".sql")).sort()) {
+    await db.query(readFileSync(join(migrations, dosya), "utf8"));
+  }
   if (secenek.seed) await db.query(readFileSync(join(KOK, "supabase", "seed.sql"), "utf8"));
 
   /** Superuser olarak (Supabase SQL Editor gibi) */

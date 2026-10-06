@@ -4,6 +4,7 @@
 import type { PostgrestError } from "@supabase/supabase-js";
 import { agaclar, irklar, oyunKuralSatirlari } from "@/lib/demo/fixtures";
 import { demoKatalog } from "@/lib/demo/katalog";
+import { GORSEL_KOVASI, GORSEL_MIME, gorselDenetle, gorselYolu, kovaYolu } from "@/lib/katalog/gorsel";
 import { ELLE_ESYA_BASLANGIC, type EsyaGirdisi, esyaDogrula } from "@/lib/katalog/ice-aktar";
 import { type OyunKurallari, kurallariCoz } from "@/lib/rules/kurallar";
 import type { Esya, EsyaDetayi, EsyaSeti, IrkStatlari, SetBonusSatiri, Sinif } from "@/lib/types";
@@ -44,7 +45,18 @@ export interface KatalogVerisi {
   esyaSil(id: number): Promise<void>;
   /** Yetkili; JSON/CSV ayrıştırıcısının (lib/katalog/ice-aktar.ts) çıktısı. Biri doğrulamadan geçmezse hiçbiri yazılmaz. */
   iceAktar(esyalar: EsyaGirdisi[]): Promise<{ eklenen: number; guncellenen: number }>;
+  /** Yetkili; PNG/JPEG/WebP/GIF, en fazla 256 KB (lib/katalog/gorsel.ts). Önceki yüklenen görsel silinir. */
+  esyaGorseliYukle(id: number, dosya: Uint8Array): Promise<EsyaDetayi>;
+  /** Yetkili; yüklenen görseli siler, eşya görselsiz kalır */
+  esyaGorseliKaldir(id: number): Promise<EsyaDetayi>;
 }
+
+function gorselDosyasi(dosya: Uint8Array) {
+  const d = gorselDenetle(dosya);
+  if ("hata" in d) throw new VeriHatasi(d.hata);
+  return d.tur;
+}
+const ESYA_YOK = "Eşya bulunamadı";
 
 function denetle(g: EsyaGirdisi): EsyaGirdisi {
   const d = esyaDogrula(g);
@@ -129,6 +141,23 @@ export function demoKatalogVerisi(b: DemoBaglam): KatalogVerisi {
       for (const g of temiz) if (kaydet(g).yeni) eklenen++;
       return { eklenen, guncellenen: temiz.length - eklenen };
     },
+    async esyaGorseliYukle(id, dosya) {
+      demoYetki(b, "yetkili");
+      const tur = gorselDosyasi(dosya);
+      const e = bul(id);
+      if (!e) throw new VeriHatasi(ESYA_YOK);
+      // Demo modunda depolama yok: görsel adresin kendisinde
+      const gorsel = `data:${GORSEL_MIME[tur]};base64,${Buffer.from(dosya).toString("base64")}`;
+      d.esyaDegisiklikleri.set(id, { ...e, gorsel });
+      return structuredClone({ ...e, gorsel });
+    },
+    async esyaGorseliKaldir(id) {
+      demoYetki(b, "yetkili");
+      const e = bul(id);
+      if (!e) throw new VeriHatasi(ESYA_YOK);
+      d.esyaDegisiklikleri.set(id, { ...e, gorsel: null });
+      return structuredClone({ ...e, gorsel: null });
+    },
   };
 }
 
@@ -144,6 +173,7 @@ async function tumu<T>(sayfa: (bas: number, son: number) => PromiseLike<{ data: 
 }
 
 export function supabaseKatalogVerisi(db: Db): KatalogVerisi {
+  const kova = db.storage.from(GORSEL_KOVASI);
   async function detaylar(ids: number[]) {
     const out = new Map<number, EsyaDetayi>();
     if (!ids.length) return out;
@@ -196,7 +226,41 @@ export function supabaseKatalogVerisi(db: Db): KatalogVerisi {
       for (const g of temiz) if ((await yaz(g)).yeni) eklenen++;
       return { eklenen, guncellenen: temiz.length - eklenen };
     },
+    async esyaGorseliYukle(id, dosya) {
+      const tur = gorselDosyasi(dosya);
+      const eski = (await detaylar([id])).get(id);
+      if (!eski) throw new VeriHatasi(ESYA_YOK);
+      const yol = gorselYolu(id, tur);
+      const { error } = await kova.upload(yol, dosya, { contentType: GORSEL_MIME[tur], cacheControl: "31536000", upsert: false });
+      if (error) throw new VeriHatasi(`Görsel yüklenemedi: ${error.message}`);
+      try {
+        await gorselYaz(id, kova.getPublicUrl(yol).data.publicUrl);
+      } catch (hata) {
+        await kova.remove([yol]);
+        throw hata;
+      }
+      await eskiyiSil(eski.gorsel);
+      return (await detaylar([id])).get(id)!;
+    },
+    async esyaGorseliKaldir(id) {
+      const eski = (await detaylar([id])).get(id);
+      if (!eski) throw new VeriHatasi(ESYA_YOK);
+      await gorselYaz(id, null);
+      await eskiyiSil(eski.gorsel);
+      return (await detaylar([id])).get(id)!;
+    },
   };
+
+  async function gorselYaz(id: number, gorsel: string | null) {
+    const r = await sorgu(db.from("items").update({ gorsel }).eq("id", id).select("id"));
+    if (!r.length) throw new VeriHatasi("Eşya bulunamadı ya da bu işlem için yetkin yok");
+  }
+
+  /** Yalnızca bu kovaya yüklenmiş görsel; KO Bugda dosya adına dokunulmaz. Silinemezse kova çöpü kalır, işlem bozulmaz. */
+  async function eskiyiSil(gorsel: string | null) {
+    const yol = kovaYolu(gorsel, kova.getPublicUrl("").data.publicUrl);
+    if (yol) await kova.remove([yol]);
+  }
 
   async function yaz(g: EsyaGirdisi): Promise<{ esya: EsyaDetayi; yeni: boolean }> {
     const eski = g.id !== undefined ? (await detaylar([g.id])).get(g.id) : undefined;

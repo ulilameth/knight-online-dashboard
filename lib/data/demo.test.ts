@@ -208,6 +208,19 @@ describe("demo: eşya kataloğu yazma", () => {
     expect(await k.esya(yeni.id)).toBeNull();
   });
 
+  it("görsel yükleme: yalnızca yetkili, yalnızca resim; kaldırınca görselsiz kalır", async () => {
+    const png = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1]);
+    await expect(demoKatalogVerisi(ol("GeceKuşu")).esyaGorseliYukle(393, png)).rejects.toThrow(YETKI_YOK);
+    const k = demoKatalogVerisi(ol("DemirYumruk"));
+    await expect(k.esyaGorseliYukle(393, new TextEncoder().encode("<svg/>"))).rejects.toThrow("PNG, JPEG, WebP ya da GIF");
+    await expect(k.esyaGorseliYukle(999_999_999, png)).rejects.toThrow("Eşya bulunamadı");
+    const e = await k.esyaGorseliYukle(393, png);
+    expect(e.gorsel).toBe(`data:image/png;base64,${Buffer.from(png).toString("base64")}`);
+    expect(e.dereceler.length).toBeGreaterThan(0);
+    expect((await demoKatalogVerisi(ol("GeceKuşu")).esya(393))?.gorsel).toBe(e.gorsel);
+    expect((await k.esyaGorseliKaldir(393)).gorsel).toBeNull();
+  });
+
   it("içe aktarma: biri hatalıysa hiçbiri yazılmaz; sonra eklenen/güncellenen sayılır", async () => {
     const k = demoKatalogVerisi(ol("DemirYumruk"));
     await expect(k.iceAktar([pelerin, { ...pelerin, yuvalar: ["omuz"] }])).rejects.toThrow("Bilinmeyen yuva: omuz");

@@ -76,6 +76,19 @@ describe.skipIf(!ADRES)("eşya kataloğu seed'i ve karakter kuralları", () => {
     expect(await say("item_stats")).toBe(satirlar.item_stats.length);
   });
 
+  it("eşya görseli kovası herkese açık; yalnızca yetkili yükler ve siler", async () => {
+    const { rows } = await db.sql("select public, file_size_limit, allowed_mime_types from storage.buckets where id = 'esya-gorselleri'");
+    expect(rows[0]).toMatchObject({ public: true, file_size_limit: "262144" });
+    const yetkili = (await db.sql("with y as (select gen_random_uuid() as id) insert into auth.users (id, email) select id, id || '@uye.l4bel.invalid' from y returning id")).rows[0].id as string;
+    await db.sql("insert into public.profiles (id, yetki) values ($1, 'yetkili')", [yetkili]);
+    const ekle = (kim: string, yol: string) => db.olarak("authenticated", kim, "insert into storage.objects (bucket_id, name) values ($1, $2)", ["esya-gorselleri", yol]);
+    await expect(ekle(uye, "393/a.png")).rejects.toThrow(/row-level security/);
+    await expect(ekle(disaridan, "393/a.png")).rejects.toThrow(/row-level security/);
+    await ekle(yetkili, "393/a.png");
+    expect((await db.olarak("authenticated", uye, "delete from storage.objects where name = '393/a.png'")).rowCount).toBe(0);
+    expect((await db.olarak("authenticated", yetkili, "delete from storage.objects where name = '393/a.png'")).rowCount).toBe(1);
+  });
+
   it("üye kataloğu değiştiremez", async () => {
     const r = await db.olarak("authenticated", uye, "update public.items set ad = 'x' where id = 393");
     expect(r.rowCount).toBe(0);
