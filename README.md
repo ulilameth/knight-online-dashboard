@@ -40,17 +40,21 @@ Veritabanı testleri için yerel Postgres: `DATABASE_URL=postgres://postgres:pos
 
 1. supabase.com'da proje aç. Authentication › Providers › Email: **Confirm email kapalı** (iç e-postalar gerçek değil).
 2. SQL Editor'da [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)'i çalıştır (ya da Supabase CLI ile `supabase db push`).
-3. İlk yönetici: [`scripts/ilk-yonetici.sql`](scripts/ilk-yonetici.sql)'deki adımlar (kurucu davet kodu üret, `/kayit`'ten kaydol, kendini yönetici yap).
-4. Vercel'de repoyu bağla, ortam değişkenlerini gir, `DATA_SOURCE=supabase`.
+3. Eşya kataloğu: [`supabase/seed.sql`](supabase/seed.sql)'i çalıştır (770 eşya, 9.156 derece satırı, setler; ~1,5 MB). SQL Editor'a yapıştırmak ağır gelirse `psql "<bağlantı adresi>" -f supabase/seed.sql`; Supabase CLI `supabase db reset` kendisi uygular. Tekrar çalıştırılabilir: KO Bugda eşyaları güncellenir, elle eklenenlere (id 1.000.000+) dokunulmaz.
+4. İlk yönetici: [`scripts/ilk-yonetici.sql`](scripts/ilk-yonetici.sql)'deki adımlar (kurucu davet kodu üret, `/kayit`'ten kaydol, kendini yönetici yap).
+5. Vercel'de repoyu bağla, ortam değişkenlerini gir, `DATA_SOURCE=supabase`.
 
 ### Yapı
 
 | Yol | İçerik |
 |---|---|
 | `supabase/migrations/` | Şema, RLS kuralları, kayıt/giriş/davet/sıfırlama fonksiyonları, başlangıç verisi |
-| `supabase/tests/` | Veritabanı testleri (yetki kuralları) |
+| `supabase/seed.sql` | Eşya kataloğu; `npm run db:seed` ile `design/katalog.json`'dan üretilir (elle düzenlenmez, CI güncelliğini denetler) |
+| `supabase/tests/` | Veritabanı testleri (yetki kuralları, katalog seed'i) |
 | `lib/data/` | Veri katmanı: her alan için arayüz + demo + Supabase uygulaması; giriş noktası `veri()` |
 | `lib/giris.ts`, `lib/auth*.ts`, `lib/actions/auth.ts` | Nick + şifreyle giriş, davet koduyla kayıt, şifre sıfırlama, oturum |
+| `lib/rules/` | Karakter tasarımı kuralları: stat/skill havuzu, ağaç sınırları, build denetimi (sunucu ve planlayıcı aynısını kullanır) |
+| `lib/katalog/` | `design/katalog.json` → veritabanı satırları (seed ve demo aynı dönüşümü kullanır) |
 | `lib/demo/` | Demo verisi ve bellekteki depo |
 | `lib/time.ts` | TSİ biçimlendirme, göreli zaman, açılış |
 | `app/(panel)/` | Giriş gerektiren sayfalar; `app/(hesap)/` giriş, kayıt, şifre sıfırlama |

@@ -1,7 +1,10 @@
 // Karakter tasarımı: üyenin kayıtlı build'i (Üyeler › Ekipman) ve yetkili şablonları.
 // Görünürlük: şablonlar herkese; kayıtlı build sahibine, ekipmanı "klan" olanlarınki tüm üyelere (Gizli: yalnızca sahibi).
+// Kaydetmeden önce kurallar (lib/rules/build.ts) sunucuda denetlenir: fazla puan, stat sınırı, ağaç sınırı, uymayan eşya.
 import type { Build } from "@/lib/types";
 import { yeniId } from "@/lib/demo/depo";
+import { type BuildDenetimi, buildDenetle } from "@/lib/rules/build";
+import { type KatalogVerisi, demoKatalogVerisi, supabaseKatalogVerisi } from "./items";
 import { type Db, type DemoBaglam, belki, calistir, VeriHatasi, build, demoYetki, simdiIso, sorgu } from "./ortak";
 
 export type BuildGirdisi = Omit<Build, "id" | "characterId" | "sablon" | "updatedAt">;
@@ -20,14 +23,20 @@ export interface BuildVerisi {
   sablonSil(id: string): Promise<void>;
 }
 
-function dogrula(g: BuildGirdisi) {
-  if (!Number.isInteger(g.level) || g.level < 1 || g.level > 83) throw new VeriHatasi("Level 1 ile 83 arası olmalı");
-  if (g.reb < 0 || g.reb > 10 || (g.reb && g.level !== 83)) throw new VeriHatasi("Reb yalnızca level 83'te, en fazla 10");
-  if (g.skiller.length !== 4) throw new VeriHatasi("Skill dağılımı 3 ağaç ve master'dan oluşur");
+/** Kuralları ve takılı eşyaları okuyup build'i denetler; hata varsa hepsini tek mesajda fırlatır */
+export async function buildDogrula(g: BuildGirdisi, katalog: KatalogVerisi): Promise<BuildDenetimi> {
+  const ids = Object.values(g.ekipman ?? {}).map((e) => e?.itemId).filter((id): id is number => Number.isInteger(id));
+  const [k, esyalar] = await Promise.all([katalog.kurallar(), katalog.esyaDetaylari(ids)]);
+  const d = buildDenetle(g, {
+    kurallar: k.oyun, irk: k.irklar.find((i) => i.irkTuru === g.irkTuru) ?? null, esyalar, agaclar: k.agaclar[g.sinif],
+  });
+  if (d.hatalar.length) throw new VeriHatasi(d.hatalar.join(" · "));
+  return d;
 }
 
 export function demoBuildler(b: DemoBaglam): BuildVerisi {
   const d = b.depo;
+  const dogrula = (g: BuildGirdisi) => buildDogrula(g, demoKatalogVerisi(b));
   const karakterim = () => d.karakterler.find((k) => k.profileId === b.kullaniciId && k.anaKarakter);
   return {
     async kayitliBuildler() {
@@ -46,7 +55,7 @@ export function demoBuildler(b: DemoBaglam): BuildVerisi {
     },
     async buildKaydet(g) {
       demoYetki(b, "uye");
-      dogrula(g);
+      await dogrula(g);
       const k = karakterim();
       if (!k) throw new VeriHatasi("Hesabına bağlı karakter yok");
       const mevcut = d.buildler.find((y) => !y.sablon && y.characterId === k.id);
@@ -58,7 +67,7 @@ export function demoBuildler(b: DemoBaglam): BuildVerisi {
     async sablonlar() { demoYetki(b, "uye"); return d.buildler.filter((x) => x.sablon).map((x) => structuredClone(x)); },
     async sablonKaydet(g) {
       demoYetki(b, "yetkili");
-      dogrula(g);
+      await dogrula(g);
       const mevcut = g.id ? d.buildler.find((y) => y.sablon && y.id === g.id) : undefined;
       if (g.id && !mevcut) throw new VeriHatasi("Şablon bulunamadı");
       const yeni: Build = { ...structuredClone(g), id: mevcut?.id ?? yeniId(d, "s"), characterId: null, sablon: true, updatedAt: simdiIso() };
@@ -71,6 +80,7 @@ export function demoBuildler(b: DemoBaglam): BuildVerisi {
 }
 
 export function supabaseBuildler(db: Db): BuildVerisi {
+  const dogrula = (g: BuildGirdisi) => buildDogrula(g, supabaseKatalogVerisi(db));
   const satir = (g: BuildGirdisi) => ({
     ad: g.ad, sinif: g.sinif, irk_turu: g.irkTuru, level: g.level, reb: g.reb, statlar: g.statlar, skiller: g.skiller,
     ekipman: g.ekipman, ap_girdileri: g.apGirdileri as Record<string, never>,
@@ -89,7 +99,7 @@ export function supabaseBuildler(db: Db): BuildVerisi {
       return r ? build(r) : null;
     },
     async buildKaydet(g) {
-      dogrula(g);
+      await dogrula(g);
       const k = await karakterim();
       if (!k) throw new VeriHatasi("Hesabına bağlı karakter yok");
       const mevcut = await belki(db.from("builds").select("id").eq("sablon", false).eq("character_id", k.id).maybeSingle());
@@ -100,7 +110,7 @@ export function supabaseBuildler(db: Db): BuildVerisi {
     },
     async sablonlar() { return (await sorgu(db.from("builds").select("*").eq("sablon", true).order("sinif"))).map(build); },
     async sablonKaydet(g) {
-      dogrula(g);
+      await dogrula(g);
       const r = g.id
         ? await belki(db.from("builds").update(satir(g)).eq("id", g.id).eq("sablon", true).select().maybeSingle())
         : await sorgu(db.from("builds").insert({ ...satir(g), sablon: true, olusturan: (await db.auth.getUser()).data.user?.id }).select().single());

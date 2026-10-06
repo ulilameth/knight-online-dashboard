@@ -8,6 +8,7 @@ import { tsi } from "@/lib/time";
 import { katilimOrani, demoYoklamalar } from "./attendance";
 import { demoBuildler } from "./builds";
 import { demoEtkinlikler, haftaninEtkinlikleri } from "./events";
+import { demoKatalogVerisi } from "./items";
 import { demoDavetler } from "./invites";
 import { demoUyeler, profilKurallari } from "./members";
 import { YETKI_YOK } from "./ortak";
@@ -91,7 +92,7 @@ describe("demo: build görünürlüğü", () => {
   });
 
   it("üye kendi build'ini kaydeder (karakter başına tek), şablonu yalnızca yetkili", async () => {
-    const g = { ad: "Build", sinif: "rogue" as const, irkTuru: "tuarek", level: 71, reb: 0, statlar: { str: 0, hp: 0, dex: 200, int: 0, mp: 0 }, skiller: [0, 0, 0, 0] as [number, number, number, number], ekipman: {}, apGirdileri: {} };
+    const g = { ad: "Build", sinif: "rogue" as const, irkTuru: "tuarek", level: 71, reb: 0, statlar: { str: 57, hp: 0, dex: 185, int: 0, mp: 0 }, skiller: [0, 0, 0, 0] as [number, number, number, number], ekipman: {}, apGirdileri: {} };
     const b = demoBuildler(ol("GeceKuşu"));
     const ilk = await b.buildKaydet(g);
     const ikinci = await b.buildKaydet({ ...g, level: 72 });
@@ -99,6 +100,47 @@ describe("demo: build görünürlüğü", () => {
     await expect(b.sablonKaydet(g)).rejects.toThrow(YETKI_YOK);
     await demoBuildler(ol("DemirYumruk")).sablonKaydet(g);
     expect(await b.sablonlar()).toHaveLength(1);
+  });
+
+  it("kurallara uymayan build kaydedilmez; hatalar tek mesajda", async () => {
+    const g = { ad: "Build", sinif: "rogue" as const, irkTuru: "tuarek", level: 71, reb: 0, statlar: { str: 60, hp: 0, dex: 186, int: 0, mp: 0 }, skiller: [0, 0, 0, 0] as [number, number, number, number], ekipman: { 0: { itemId: 262, arti: 7 } }, apGirdileri: {} };
+    await expect(demoBuildler(ol("GeceKuşu")).buildKaydet(g)).rejects.toThrow(
+      "DEX en fazla 255 olabilir (70 + 186) · Stat puanı fazla: 246 dağıtıldı, bu levelde 242 · Exceptional Raptor bu sınıfa uygun değil");
+    await expect(demoBuildler(ol("DemirYumruk")).sablonKaydet({ ...g, irkTuru: "arch_tuarek", statlar: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, skiller: [0, 0, 0, 0], ekipman: {} }))
+      .rejects.toThrow("Arch Tuarek bu sınıfı seçemez");
+  });
+});
+
+describe("demo: eşya kataloğu ve kurallar", () => {
+  it("oturum yoksa okunmaz", async () => {
+    await expect(demoKatalogVerisi(ol(null)).esyalar()).rejects.toThrow(YETKI_YOK);
+  });
+
+  it("sınıfa ve yuvaya göre süzer; sınıfsız eşyalar herkese, ad araması Türkçe harf duyarsız", async () => {
+    const k = demoKatalogVerisi(ol("GeceKuşu"));
+    const tumu = await k.esyalar();
+    expect(tumu).toHaveLength(770);
+    const rogue = await k.esyalar({ sinif: "rogue" });
+    expect(rogue.every((e) => !e.siniflar.length || e.siniflar.includes("rogue"))).toBe(true);
+    expect(rogue.some((e) => !e.siniflar.length)).toBe(true);
+    expect(rogue.length).toBeLessThan(tumu.length);
+    const kanat = await k.esyalar({ yuva: "kanat" });
+    expect(kanat.length).toBeGreaterThan(0);
+    expect(kanat.every((e) => e.yuvalar.includes("kanat"))).toBe(true);
+    expect((await k.esyalar({ ara: "HOLY KNIGHT PORTU" })).map((e) => e.id)).toContain(393);
+    expect((await k.esyalar({ ara: "holy knıght" })).map((e) => e.id)).toContain(393);
+  });
+
+  it("eşya detayı artı seviyeleriyle; kurallar sınıf ağaçları ve ırklarla", async () => {
+    const k = demoKatalogVerisi(ol("GeceKuşu"));
+    const e = await k.esya(393);
+    expect(e?.dereceler.find((d) => d.arti === 7)?.degerler).toMatchObject({ Defense: 107, RequiredLevel: 75 });
+    expect(await k.esya(999_999)).toBeNull();
+    expect([...(await k.esyaDetaylari([393, 999_999])).keys()]).toEqual([393]);
+    const kur = await k.kurallar();
+    expect(kur.agaclar.mage).toEqual(["Flame", "Glacier", "Lightning", "Master"]);
+    expect(kur.irklar).toHaveLength(9);
+    expect(kur.oyun.statCap).toBe(255);
   });
 });
 

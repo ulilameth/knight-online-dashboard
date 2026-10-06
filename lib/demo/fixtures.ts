@@ -1,9 +1,10 @@
 // Demo modunun örnek verisi (design/prototype.html ile aynı klan). Supabase olmadan her ekran bu veriyle çalışır.
 // Demo hesaplarının şifresi: DEMO_SIFRE. Demo davet kodu: DEMO_DAVET_KODU.
+import type { KuralSatiri } from "@/lib/rules/kurallar";
 import { tsi } from "@/lib/time";
 import type {
-  Asama, Build, Duyuru, Etkinlik, EtkinlikTuru, HaftalikDuzen, Hazirlik, Karakter, KarakterDurum, KlanAyarlari, Profil,
-  Rutbe, Sinif, Yetki, YoklamaDurumu, Yoklama,
+  Asama, Build, Duyuru, Etkinlik, EtkinlikTuru, HaftalikDuzen, Hazirlik, IrkStatlari, Karakter, KarakterDurum, KlanAyarlari,
+  Profil, Rutbe, Sinif, Yetki, YoklamaDurumu, Yoklama,
 } from "@/lib/types";
 
 export const DEMO_SIFRE = "demo1234";
@@ -204,3 +205,42 @@ export const buildler: Build[] = [
   build("AlevBüyü", "mage", 72, { int: 185, mp: 62 }, { 0: 549, 2: 333, 3: 335, 4: 334, 5: 332, 6: 331 }, "2026-10-02T22:30"),
   build("Asena", "priest", 74, { str: 150, hp: 50, mp: 57 }, { 2: 328, 3: 330, 4: 329, 5: 327, 6: 326 }, "2026-10-01T20:05"),
 ];
+
+// --- Karakter tasarımı kuralları: supabase/migrations/0001_init.sql seed'iyle aynı (supabase/tests/katalog.test.ts denetler) ---
+
+export const oyunKuralSatirlari: KuralSatiri[] = [
+  { anahtar: "olusturma_bonus_stat", deger: 10, dogrulandi: true },
+  { anahtar: "stat_per_level", deger: 3, dogrulandi: true },
+  { anahtar: "stat_per_level_60_ustu", deger: 5, dogrulandi: true },
+  { anahtar: "reb_bonus_stat", deger: 2, dogrulandi: true },
+  { anahtar: "stat_cap", deger: 255, dogrulandi: true },
+  { anahtar: "skill_start_level", deger: 10, dogrulandi: true },
+  { anahtar: "skill_per_level", deger: 2, dogrulandi: true },
+  { anahtar: "agac_siniri", deger: { genel: 80, warrior_3: 83 }, dogrulandi: true },
+  { anahtar: "master_level", deger: 60, dogrulandi: false },
+  { anahtar: "master_max", deger: 23, dogrulandi: false },
+];
+
+const irk = (irkTuru: string, ad: string, taraf: IrkStatlari["taraf"], siniflar: Sinif[], [str, hp, dex, int, mp]: number[]): IrkStatlari =>
+  ({ irkTuru, ad, taraf, siniflar, statlar: { str, hp, dex, int, mp }, dogrulandi: true });
+
+export const irklar: IrkStatlari[] = [
+  irk("arch_tuarek", "Arch Tuarek", "karus", ["warrior"], [65, 65, 60, 50, 50]),
+  irk("tuarek", "Tuarek", "karus", ["rogue", "priest"], [60, 60, 70, 50, 50]),
+  irk("wrinkle_tuarek", "Wrinkle Tuarek", "karus", ["mage"], [50, 50, 70, 70, 50]),
+  irk("puri_tuarek", "Puri Tuarek", "karus", ["mage", "priest"], [50, 60, 60, 70, 50]),
+  irk("kurian", "Kurian", "karus", ["kurian"], [65, 65, 60, 50, 50]),
+  irk("barbarian", "Barbarian", "el_morad", ["warrior"], [65, 65, 60, 50, 50]),
+  irk("el_morad_erkek", "El Moradian (erkek)", "el_morad", ["warrior", "rogue", "mage", "priest"], [60, 60, 70, 50, 50]),
+  irk("el_morad_kadin", "El Moradian (kadın)", "el_morad", ["warrior", "rogue", "mage", "priest"], [50, 60, 60, 70, 50]),
+  irk("porutu", "Porutu", "el_morad", ["kurian"], [65, 65, 60, 50, 50]),
+];
+
+/** class_trees: 3 ağaç + master */
+export const agaclar: Record<Sinif, string[]> = {
+  warrior: ["Attack", "Defense", "Passion", "Master"],
+  rogue: ["Archery", "Assassin", "Explore", "Master"],
+  mage: ["Flame", "Glacier", "Lightning", "Master"],
+  priest: ["Heal", "Buff", "Debuff", "Master"],
+  kurian: ["Attack", "Defense", "Devil", "Master"],
+};

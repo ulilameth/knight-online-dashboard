@@ -320,6 +320,15 @@ Teslim edilecekler:
 9. GitHub Actions: lint, typecheck, test, build.
 10. `README.md`: yerel çalıştırma (demo modu), ortam değişkenleri.
 
+### Faz 1 · E arka ucu: kurallar, katalog, build denetimi · tamamlandı
+
+Durum (6 Ekim 2026): Oturum E'nin veri ve kural katmanı, ekranlardan önce yazıldı. Ekran oturumu yalnızca sayfa ve Server Action yazar.
+- `lib/rules/kurallar.ts`: `game_rules` satırlarını tipli kurallara çevirir (eksik kural hata verir); stat havuzu, skill havuzu, ağaç sınırı formülleri. `lib/rules/build.ts`: `buildDenetle()` hata (kaydı engeller: fazla puan, 255 sınırı, ağaç sınırı, ırk/sınıf, yuva, sınıfa uymayan eşya, olmayan artı) ve uyarı (eşyanın istediği level/stat) döner. Planlayıcı aynı fonksiyonu istemcide çağırır.
+- `lib/data/items.ts` (`veri().katalog`): `kurallar()` (oyun kuralları, ırk başlangıç statları, sınıf ağaçları), `esyalar({sinif, yuva, ara})`, `esya(id)` (artı seviyeleriyle), `esyaDetaylari(ids)`, `setler()`, `setBonuslari()`. Demo ve Supabase uygulaması.
+- `buildler.buildKaydet` / `sablonKaydet` kaydetmeden önce `buildDenetle()` çalıştırır; hatalar tek mesajda döner.
+- `supabase/seed.sql`: `npm run db:seed` ile `design/katalog.json`'dan üretilir (dönüşüm `lib/katalog/satirlar.mjs`, demo da onu kullanır). CI güncelliğini denetler; `supabase/tests/katalog.test.ts` seed'i, tekrar çalıştırmayı, RLS'i ve demo kurallarının migration'la aynı olduğunu dener.
+- Kalan (E ekranları): Karakter tasarımı ve Eşyalar sayfaları, Ayarlar › Eşya kataloğu (ekle/düzenle, JSON/CSV içe aktar, görsel yükle), otomatik AP/savunma/can hesabı.
+
 ### Faz 1: Paralel oturumlar
 
 Her oturum Faz 0'ın birleştiği varsayılan daldan başlar, kendi dalında çalışır ve PR açar. **Yalnızca kendi klasörlerine yazar.** Ortak dosyada değişiklik gerekiyorsa (ör. `components/ui`) PR açıklamasında belirtir, kendisi değiştirmez; ihtiyaç Faz 2'de toplanır.

@@ -10,6 +10,7 @@ import { type DuyuruVerisi, demoDuyurular, supabaseDuyurular } from "./announcem
 import { type YoklamaVerisi, demoYoklamalar, supabaseYoklamalar } from "./attendance";
 import { type BuildVerisi, demoBuildler, supabaseBuildler } from "./builds";
 import { type EtkinlikVerisi, demoEtkinlikler, supabaseEtkinlikler } from "./events";
+import { type KatalogVerisi, demoKatalogVerisi, supabaseKatalogVerisi } from "./items";
 import { type DavetVerisi, demoDavetler, supabaseDavetler } from "./invites";
 import { type UyeVerisi, demoUyeler, supabaseUyeler } from "./members";
 import { type AsamaVerisi, demoAsamalar, supabaseAsamalar } from "./milestones";
@@ -26,6 +27,7 @@ export interface Veri {
   hazirlik: HazirlikVerisi;
   davetler: DavetVerisi;
   buildler: BuildVerisi;
+  katalog: KatalogVerisi;
 }
 
 export async function veri(): Promise<Veri> {
@@ -34,14 +36,14 @@ export async function veri(): Promise<Veri> {
     return {
       uyeler: demoUyeler(b), ayarlar: demoAyarlar(b), asamalar: demoAsamalar(b), etkinlikler: demoEtkinlikler(b),
       yoklamalar: demoYoklamalar(b), duyurular: demoDuyurular(b), hazirlik: demoHazirlik(b), davetler: demoDavetler(b),
-      buildler: demoBuildler(b),
+      buildler: demoBuildler(b), katalog: demoKatalogVerisi(b),
     };
   }
   const db = await supabaseSunucu();
   return {
     uyeler: supabaseUyeler(db), ayarlar: supabaseAyarlar(db), asamalar: supabaseAsamalar(db), etkinlikler: supabaseEtkinlikler(db),
     yoklamalar: supabaseYoklamalar(db), duyurular: supabaseDuyurular(db), hazirlik: supabaseHazirlik(db), davetler: supabaseDavetler(db),
-    buildler: supabaseBuildler(db),
+    buildler: supabaseBuildler(db), katalog: supabaseKatalogVerisi(db),
   };
 }
 
