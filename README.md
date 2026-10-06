@@ -51,7 +51,7 @@ Gerçek klan verisi için aşağıdaki Supabase kurulumundan sonra Vercel › Se
 ### Supabase kurulumu
 
 1. supabase.com'da proje aç. Authentication › Providers › Email: **Confirm email kapalı** (iç e-postalar gerçek değil).
-2. SQL Editor'da [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)'i çalıştır (ya da Supabase CLI ile `supabase db push`).
+2. SQL Editor'da [`supabase/migrations/`](supabase/migrations/) altındaki dosyaları sırayla çalıştır: `0001_init.sql`, sonra `0002_esya_gorselleri.sql` (ya da Supabase CLI ile `supabase db push`).
 3. Eşya kataloğu: [`supabase/seed.sql`](supabase/seed.sql)'i çalıştır (770 eşya, 9.156 derece satırı, setler; ~1,5 MB). SQL Editor'a yapıştırmak ağır gelirse `psql "<bağlantı adresi>" -f supabase/seed.sql`; Supabase CLI `supabase db reset` kendisi uygular. Tekrar çalıştırılabilir: KO Bugda eşyaları güncellenir, elle eklenenlere (id 1.000.000+) dokunulmaz.
 4. İlk yönetici: [`scripts/ilk-yonetici.sql`](scripts/ilk-yonetici.sql)'deki adımlar (kurucu davet kodu üret, `/kayit`'ten kaydol, kendini yönetici yap).
 5. Vercel'de repoyu bağla, ortam değişkenlerini gir, `DATA_SOURCE=supabase`.
