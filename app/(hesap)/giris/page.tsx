@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AksiyonFormu } from "@/components/hesap/AksiyonFormu";
+import { SifreAlani } from "@/components/hesap/SifreAlani";
 import { Alan } from "@/components/ui/Alan";
+import { LinkButton } from "@/components/ui/Button";
 import { girisAksiyonu } from "@/lib/actions/auth";
 import { getCurrentUser } from "@/lib/auth";
 import { DEMO_DAVET_KODU, DEMO_SIFRE } from "@/lib/demo/fixtures";
@@ -17,11 +19,14 @@ export default async function Giris() {
       <h1 className="mb-4 font-ui text-2xl font-semibold text-baslik">Giriş yap</h1>
       <AksiyonFormu aksiyon={girisAksiyonu} dugme="Giriş yap">
         <Alan id="nick" name="nick" etiket="Nick" autoComplete="username" required autoCapitalize="none" spellCheck={false} />
-        <Alan id="sifre" name="sifre" etiket="Şifre" type="password" autoComplete="current-password" required />
+        <SifreAlani id="sifre" name="sifre" etiket="Şifre" autoComplete="current-password" required />
       </AksiyonFormu>
-      <div className="mt-5 flex flex-wrap justify-between gap-2 text-sm">
-        <Link href="/kayit" className="text-altin hover:text-altin-parlak">Davet kodun var mı? Kayıt ol</Link>
+      <p className="mt-4 text-right text-sm">
         <Link href="/sifre-sifirla" className="text-soluk hover:text-baslik">Şifremi unuttum</Link>
+      </p>
+      <div className="mt-5 flex flex-col gap-2 border-t border-cizgi-ince pt-5">
+        <p className="text-sm text-metin">Klana yeni mi katılıyorsun? Yetkililerden aldığın davet koduyla hesap aç.</p>
+        <LinkButton href="/kayit">Davet koduyla kayıt ol</LinkButton>
       </div>
       {veriKaynagi() === "demo" && (
         <p className="mt-5 rounded-lg bg-altin-sis p-3 text-sm text-metin">

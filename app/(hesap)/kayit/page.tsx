@@ -14,9 +14,10 @@ export default async function Kayit() {
   return (
     <>
       <KayitAdimi adim={1} baslik="Davet kodu" />
-      <p className="mb-4 text-metin">Yetkililerden aldığın kodu yaz. Kod olmadan hesap açılmaz.</p>
+      <p className="mb-4 text-metin">Yetkililerden aldığın kodu yaz. Kod olmadan hesap açılmaz; kod tek kişilik ya da süreli olabilir.</p>
       <AksiyonFormu aksiyon={davetAksiyonu} dugme="Devam et">
-        <Alan id="kod" name="kod" etiket="Davet kodu" placeholder="L4BEL-XXXX-XXXX" autoComplete="off" autoCapitalize="characters" spellCheck={false} required />
+        <Alan id="kod" name="kod" etiket="Davet kodu" placeholder="L4BEL-XXXX-XXXX" autoComplete="off" autoCapitalize="characters" spellCheck={false} required
+          className="font-mono uppercase tracking-wider" />
       </AksiyonFormu>
       <p className="mt-5 text-sm"><Link href="/giris" className="text-altin hover:text-altin-parlak">Zaten üye misin? Giriş yap</Link></p>
     </>
