@@ -36,6 +36,18 @@ Veritabanı testleri için yerel Postgres: `DATABASE_URL=postgres://postgres:pos
 
 [`.env.example`](.env.example)'a bak. `DATA_SOURCE=supabase` için `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (gizli, yalnızca sunucuda) ve `KAYIT_IMZA_ANAHTARI` (en az 32 karakter rastgele) gerekir.
 
+### Vercel'e yayın (demo modu)
+
+Supabase olmadan, örnek klan verisiyle herkesin açıp gezebileceği bir adres:
+
+1. vercel.com'da GitHub hesabınla giriş yap › **Add New › Project** › `knight-online-dashboard` reposunu seç › **Import**.
+2. Ayarlara dokunma (Framework: Next.js, komutlar `package.json`'dan gelir). Ortam değişkeni girmeden **Deploy**'a bas: `DATA_SOURCE` yoksa uygulama demo modunda çalışır.
+3. Production adresi varsayılan daldan (`claude/relaxed-galileo-qvzykz`) yayınlanır; her PR'ın kendi önizleme adresi olur (PR sayfasında Vercel botu yazar).
+
+Demo hesapları giriş sayfasında yazar (şifre `demo1234`, davet kodu `L4BEL-DEMO-2026`). Demo verisi sunucunun belleğinde durur: yapılan kayıtlar ve değişiklikler kalıcı değildir, sunucu yeniden başlayınca (yeni yayın ya da bir süre kullanılmayınca) örnek veriye döner. Sunucu bölgesi `vercel.json`'da Frankfurt (`fra1`). Arama motorları siteyi dizine eklemez (`robots: noindex`).
+
+Gerçek klan verisi için aşağıdaki Supabase kurulumundan sonra Vercel › Settings › Environment Variables'a `.env.example`'daki değişkenler girilir ve `DATA_SOURCE=supabase` yapılır.
+
 ### Supabase kurulumu
 
 1. supabase.com'da proje aç. Authentication › Providers › Email: **Confirm email kapalı** (iç e-postalar gerçek değil).
