@@ -173,6 +173,41 @@ describe("demo: davet ve kayıt", () => {
   });
 });
 
+describe("demo: eşya kataloğu yazma", () => {
+  const pelerin = { ad: "Klan Pelerini", kategori: "Wings", yuvalar: ["kanat"], siniflar: [], derece: "cospre" as const, dereceler: [{ arti: 0, degerler: { BonusHp: 100 } }] };
+
+  it("yalnızca yetkili ekler; yeni eşya 1.000.000'dan başlar, listede ve build'de görünür", async () => {
+    await expect(demoKatalogVerisi(ol("GeceKuşu")).esyaKaydet(pelerin)).rejects.toThrow(YETKI_YOK);
+    const k = demoKatalogVerisi(ol("DemirYumruk"));
+    const e = await k.esyaKaydet(pelerin);
+    expect(e).toMatchObject({ id: 1_000_000, kaynak: "elle", dereceler: [{ arti: 0, degerler: { BonusHp: 100 } }] });
+    expect((await k.esyaKaydet(pelerin)).id).toBe(1_000_001);
+    expect((await demoKatalogVerisi(ol("GeceKuşu")).esyalar({ yuva: "kanat" })).map((x) => x.id)).toContain(1_000_000);
+    expect((await demoKatalogVerisi(ol("GeceKuşu")).esyalar({ yuva: "kanat" }))[0]).not.toHaveProperty("dereceler");
+  });
+
+  it("KO Bugda eşyası düzenlenir (set bilgisi korunur), silinmez; elle eşya silinir", async () => {
+    const k = demoKatalogVerisi(ol("DemirYumruk"));
+    const e = await k.esyaKaydet({ id: 393, ad: "Holy Knight Portu Boots", kategori: "Armor - Kurian", yuvalar: ["bot"], siniflar: ["kurian"], derece: "set", etki: "Deneme" });
+    expect(e).toMatchObject({ etki: "Deneme", setAnahtari: "393,394,395,396,397", kaynak: "kobugda" });
+    expect(e.dereceler.length).toBeGreaterThan(0);
+    await expect(k.esyaSil(393)).rejects.toThrow("KO Bugda eşyaları silinmez");
+    const yeni = await k.esyaKaydet(pelerin);
+    await k.esyaSil(yeni.id);
+    expect(await k.esya(yeni.id)).toBeNull();
+  });
+
+  it("içe aktarma: biri hatalıysa hiçbiri yazılmaz; sonra eklenen/güncellenen sayılır", async () => {
+    const k = demoKatalogVerisi(ol("DemirYumruk"));
+    await expect(k.iceAktar([pelerin, { ...pelerin, yuvalar: ["omuz"] }])).rejects.toThrow("Bilinmeyen yuva: omuz");
+    expect(await k.esya(1_000_000)).toBeNull();
+    const ilk = await k.iceAktar([{ ...pelerin, id: 1_000_010 }, { ...pelerin, id: 1_000_011 }]);
+    expect(ilk).toEqual({ eklenen: 2, guncellenen: 0 });
+    expect(await k.iceAktar([{ ...pelerin, id: 1_000_010, ad: "Yeni ad" }])).toEqual({ eklenen: 0, guncellenen: 1 });
+    expect((await k.esya(1_000_010))?.ad).toBe("Yeni ad");
+  });
+});
+
 describe("haftalık düzen ve yoklama", () => {
   it("pazartesiden başlayan haftanın etkinlikleri TSİ'de doğru günlerde", () => {
     const e = haftaninEtkinlikleri("2026-11-16", yeniDemoDepo().haftalikDuzen);

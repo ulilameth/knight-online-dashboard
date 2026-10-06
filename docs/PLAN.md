@@ -327,7 +327,8 @@ Durum (6 Ekim 2026): Oturum E'nin veri ve kural katmanı, ekranlardan önce yaz�
 - `lib/data/items.ts` (`veri().katalog`): `kurallar()` (oyun kuralları, ırk başlangıç statları, sınıf ağaçları), `esyalar({sinif, yuva, ara})`, `esya(id)` (artı seviyeleriyle), `esyaDetaylari(ids)`, `setler()`, `setBonuslari()`. Demo ve Supabase uygulaması.
 - `buildler.buildKaydet` / `sablonKaydet` kaydetmeden önce `buildDenetle()` çalıştırır; hatalar tek mesajda döner.
 - `supabase/seed.sql`: `npm run db:seed` ile `design/katalog.json`'dan üretilir (dönüşüm `lib/katalog/satirlar.mjs`, demo da onu kullanır). CI güncelliğini denetler; `supabase/tests/katalog.test.ts` seed'i, tekrar çalıştırmayı, RLS'i ve demo kurallarının migration'la aynı olduğunu dener.
-- Kalan (E ekranları): Karakter tasarımı ve Eşyalar sayfaları, Ayarlar › Eşya kataloğu (ekle/düzenle, JSON/CSV içe aktar, görsel yükle), otomatik AP/savunma/can hesabı.
+- Eşya kataloğu yazma (yetkili): `esyaKaydet` (yeni elle eşya 1.000.000+, KO Bugda eşyası düzenlenir), `esyaSil` (yalnızca elle eklenenler), `iceAktar`. Ayrıştırıcılar `lib/katalog/ice-aktar.ts`: JSON (dizi ya da `{esyalar}`) ve CSV (başlıklı, her artı ayrı satır, `,` ya da `;` ayraçlı, değer sütunları KO Bugda adlarıyla). Doğrulamadan geçmeyen eşya varsa hiçbiri yazılmaz.
+- Kalan (E ekranları): Karakter tasarımı ve Eşyalar sayfaları, Ayarlar › Eşya kataloğu ekranı ve görsel yükleme, otomatik AP/savunma/can hesabı.
 
 ### Faz 1: Paralel oturumlar
 

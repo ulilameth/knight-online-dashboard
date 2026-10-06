@@ -66,6 +66,16 @@ describe.skipIf(!ADRES)("eşya kataloğu seed'i ve karakter kuralları", () => {
     }
   });
 
+  it("yetkili eşya ve derece yazar, siler", async () => {
+    const yetkili = (await db.sql("with y as (select gen_random_uuid() as id) insert into auth.users (id, email) select id, id || '@uye.l4bel.invalid' from y returning id")).rows[0].id as string;
+    await db.sql("insert into public.profiles (id, yetki) values ($1, 'yetkili')", [yetkili]);
+    await db.olarak("authenticated", yetkili, "insert into public.items (id, ad, kategori, yuvalar, kaynak) values (1000002, 'Yüzük', 'Ring', '{yuzuk}', 'elle')");
+    await db.olarak("authenticated", yetkili, "insert into public.item_stats (item_id, arti, degerler) values (1000002, 0, '{\"BonusHp\": 50}')");
+    await db.olarak("authenticated", yetkili, "update public.items set etki = 'x' where id = 393");
+    expect((await db.olarak("authenticated", yetkili, "delete from public.items where id = 1000002")).rowCount).toBe(1);
+    expect(await say("item_stats")).toBe(satirlar.item_stats.length);
+  });
+
   it("üye kataloğu değiştiremez", async () => {
     const r = await db.olarak("authenticated", uye, "update public.items set ad = 'x' where id = 393");
     expect(r.rowCount).toBe(0);
