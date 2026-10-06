@@ -331,7 +331,12 @@ Durum (6 Ekim 2026): Oturum E'nin veri ve kural katmanı, ekranlardan önce yaz�
 - Otomatik hesap `lib/rules/hesap.ts`: ekipman toplamı, set bonusu (eski KO Bugda aile tabloları; Kurian Portu parçalarında KURIAN tablosu), AP, can, mana, savunma, direnç. Prototipteki KO Bugda hesaplayıcısıyla 300 rastgele build'de birebir aynı; örnekler `lib/rules/hesap.referans.json`. Veri katmanından `buildHesapla(build, veri().katalog)`. Setin kendi tablosu (`item_sets.bonus_tablosu`, kobugda.com/sets) henüz kullanılmıyor; veri gelince eklenir.
 - Kalan (E ekranları): Karakter tasarımı ve Eşyalar sayfaları, Ayarlar › Eşya kataloğu ekranı ve görsel yükleme.
 
-### Faz 1: Paralel oturumlar
+### Faz 1 · C arka ucu: TeamSpeak duyuru gönderimi · tamamlandı
+
+- `lib/teamspeak/webquery.ts`: `tsAyari()` / `tsYapilandirildi()` (ortamdan; eksikse özellik kapalı), `tsSunucuyaGonder()` (WebQuery `sendtextmessage`, sunucudaki herkese; 8 sn zaman aşımı; hata kodları Türkçe mesaja çevrilir), mesaj 1024 bayta sığdırılır, kullanıcı metnindeki BBCode etkisizleştirilir.
+- `lib/teamspeak/duyuru.ts`: `duyuruyuTsyeGonder(veri, kullanici, id)` yetkiyi göndermeden önce denetler, gönderim başarılıysa `ts_gonderildi_at` yazar.
+- Kalan (C ekranları): Duyurular ekranında "TeamSpeak'e de gönder" kutusu ve Server Action.
+
 
 Her oturum Faz 0'ın birleştiği varsayılan daldan başlar, kendi dalında çalışır ve PR açar. **Yalnızca kendi klasörlerine yazar.** Ortak dosyada değişiklik gerekiyorsa (ör. `components/ui`) PR açıklamasında belirtir, kendisi değiştirmez; ihtiyaç Faz 2'de toplanır.
 
