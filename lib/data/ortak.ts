@@ -3,8 +3,9 @@ import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Tables } from "@/lib/database.types";
 import type { DemoDepo } from "@/lib/demo/depo";
 import {
-  type Asama, type Build, type DavetKodu, type Duyuru, type Etkinlik, type EtkinlikTuru, type HaftalikDuzen,
-  type Hazirlik, type Karakter, type KarakterDegisikligi, type KlanAyarlari, type Profil, type Yetki, type Yoklama,
+  type Asama, type Build, type DavetKodu, type Duyuru, type Esya, type EsyaSeti, type Etkinlik, type EtkinlikTuru,
+  type HaftalikDuzen, type Hazirlik, type IrkStatlari, type Karakter, type KarakterDegisikligi, type KlanAyarlari,
+  type Profil, type SetBonusSatiri, type Yetki, type Yoklama,
   yetkiYeterli,
 } from "@/lib/types";
 
@@ -126,4 +127,20 @@ export const build = (r: Tables<"builds">): Build => ({
   id: r.id, characterId: r.character_id, ad: r.ad, sinif: r.sinif, irkTuru: r.irk_turu, level: r.level, reb: r.reb,
   statlar: r.statlar as Build["statlar"], skiller: r.skiller as Build["skiller"], ekipman: r.ekipman as Build["ekipman"],
   apGirdileri: r.ap_girdileri as Build["apGirdileri"], sablon: r.sablon, updatedAt: r.updated_at,
+});
+
+export const esya = (r: Tables<"items">): Esya => ({
+  id: r.id, ad: r.ad, kategori: r.kategori, yuvalar: r.yuvalar, siniflar: r.siniflar, derece: r.derece,
+  setAnahtari: r.set_anahtari, setParcasi: r.set_parcasi as Esya["setParcasi"], etki: r.etki, gorsel: r.gorsel, kaynak: r.kaynak,
+});
+
+export const esyaSeti = (r: Tables<"item_sets">): EsyaSeti => ({
+  anahtar: r.anahtar, ad: r.ad, aile: r.aile, parcalar: r.parcalar, bonusTablosu: r.bonus_tablosu,
+});
+
+export const setBonusSatiri = (r: Tables<"item_set_bonuses">): SetBonusSatiri => ({ tablo: r.tablo, maske: r.maske, bonus: r.bonus as Record<string, number> });
+
+export const irkStatlari = (r: Tables<"race_stats">): IrkStatlari => ({
+  irkTuru: r.irk_turu, ad: r.ad, taraf: r.taraf, siniflar: r.siniflar,
+  statlar: { str: r.str, hp: r.hp, dex: r.dex, int: r.int, mp: r.mp }, dogrulandi: r.dogrulandi,
 });

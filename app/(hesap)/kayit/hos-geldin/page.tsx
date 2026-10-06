@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Kopyala } from "@/components/hesap/Kopyala";
 import { LinkButton } from "@/components/ui/Button";
 import { getCurrentUser } from "@/lib/auth";
 import { veri } from "@/lib/data";
@@ -15,7 +16,10 @@ export default async function HosGeldin() {
     <>
       <KayitAdimi adim={4} baslik={`Hoş geldin, ${k.karakter?.ad ?? ""}`} />
       <ul className="mb-6 flex list-disc flex-col gap-2 pl-5 text-metin">
-        <li>TeamSpeak 3’te Bağlan › Sunucu adresi alanına <b className="text-baslik">{a.tsAdres}</b> yaz.</li>
+        <li>
+          TeamSpeak 3’te Bağlan › Sunucu adresi alanına <b className="text-baslik">{a.tsAdres}</b> yaz.{" "}
+          <Kopyala metin={a.tsAdres} etiket="Adresi kopyala" />
+        </li>
         <li>Genel bakış’taki hazırlık listesinden telefon doğrulaması ve OTP’yi işaretle.</li>
         <li>Ön kayıt ve sunucu seçimi tarihleri panelde.</li>
       </ul>

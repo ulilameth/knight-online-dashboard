@@ -164,3 +164,61 @@ export interface Build {
   sablon: boolean;
   updatedAt: string;
 }
+
+// --- Karakter tasarımı: kurallar ve eşya kataloğu ---
+
+export type EsyaDerecesi = "normal" | "set" | "unique" | "rare" | "draki" | "cospre";
+
+/** Irk başlangıç statları (race_stats) */
+export interface IrkStatlari {
+  irkTuru: string;
+  ad: string;
+  taraf: Taraf;
+  siniflar: Sinif[];
+  statlar: Record<StatAdi, number>;
+  dogrulandi: boolean;
+}
+
+export interface Esya {
+  /** KO Bugda kimliği; elle eklenenler 1.000.000'dan başlar */
+  id: number;
+  /** Sahibinin nick'ini taşıyan silahlarda {ad} yer tutucusu */
+  ad: string;
+  kategori: string;
+  yuvalar: string[];
+  /** Boş: tüm sınıflar */
+  siniflar: Sinif[];
+  derece: EsyaDerecesi;
+  setAnahtari: string | null;
+  /** Eski KO Bugda set tablosu: [aile, parça biti] */
+  setParcasi: [string, number] | null;
+  etki: string | null;
+  /** Görsel dosya adı (data/esyalar/kobugda/gorseller/) ya da yüklenen görselin adresi */
+  gorsel: string | null;
+  kaynak: string;
+}
+
+/** Eşyanın bir artı seviyesindeki değerleri (AttackPower, RequiredLevel, BonusStrength …); sıfırlar yazılmaz */
+export interface EsyaDerecesiSatiri {
+  arti: number;
+  degerler: Record<string, number>;
+}
+
+export interface EsyaDetayi extends Esya {
+  dereceler: EsyaDerecesiSatiri[];
+}
+
+export interface EsyaSeti {
+  anahtar: string;
+  ad: string;
+  aile: string | null;
+  parcalar: number[];
+  bonusTablosu: unknown | null;
+}
+
+/** Eski KO Bugda aile tablosu satırı: tablo '<SINIF>_<AILE>', maske takılı parçaların bit toplamı */
+export interface SetBonusSatiri {
+  tablo: string;
+  maske: number;
+  bonus: Record<string, number>;
+}

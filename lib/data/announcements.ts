@@ -66,7 +66,8 @@ export function supabaseDuyurular(db: Db): DuyuruVerisi {
     },
     async duyuruSil(id) { await calistir(db.from("announcements").delete().eq("id", id)); },
     async tsGonderildi(id) {
-      await calistir(db.from("announcements").update({ ts_gonderildi_at: new Date().toISOString() }).eq("id", id));
+      const r = await sorgu(db.from("announcements").update({ ts_gonderildi_at: new Date().toISOString() }).eq("id", id).select("id"));
+      if (!r.length) throw new VeriHatasi("Duyuru bulunamadı ya da bu işlem için yetkin yok");
     },
   };
 }

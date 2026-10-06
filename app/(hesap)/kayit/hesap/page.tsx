@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AksiyonFormu } from "@/components/hesap/AksiyonFormu";
+import { SifreAlani } from "@/components/hesap/SifreAlani";
 import { Alan } from "@/components/ui/Alan";
 import { kayitAksiyonu } from "@/lib/actions/auth";
 import { DAVET_CEREZI, davetCereziOku } from "@/lib/davet-cerezi";
@@ -16,10 +17,11 @@ export default async function Hesap() {
   return (
     <>
       <KayitAdimi adim={2} baslik="Hesabını oluştur" />
+      <p className="mb-4 text-metin">Kodun doğrulandı. 15 dakika içinde hesabını aç.</p>
       <AksiyonFormu aksiyon={kayitAksiyonu} dugme="Hesabı oluştur">
         <Alan id="nick" name="nick" etiket="Nick" ipucu="Oyundaki karakter adın; giriş bununla yapılır." autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={20} required />
-        <Alan id="sifre" name="sifre" etiket="Şifre" type="password" ipucu={`En az ${SIFRE_EN_AZ} karakter.`} autoComplete="new-password" minLength={SIFRE_EN_AZ} required />
-        <Alan id="sifreTekrar" name="sifreTekrar" etiket="Şifre tekrar" type="password" autoComplete="new-password" required />
+        <SifreAlani id="sifre" name="sifre" etiket="Şifre" ipucu={`En az ${SIFRE_EN_AZ} karakter.`} autoComplete="new-password" minLength={SIFRE_EN_AZ} required />
+        <SifreAlani id="sifreTekrar" name="sifreTekrar" etiket="Şifre tekrar" autoComplete="new-password" required />
       </AksiyonFormu>
     </>
   );

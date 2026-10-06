@@ -2,7 +2,7 @@
 import { createHash } from "node:crypto";
 import { simdi } from "@/lib/time";
 import type {
-  Asama, Build, DavetKodu, Duyuru, Etkinlik, EtkinlikTuru, HaftalikDuzen, Hazirlik, Karakter, KarakterDegisikligi,
+  Asama, Build, DavetKodu, Duyuru, EsyaDetayi, Etkinlik, EtkinlikTuru, HaftalikDuzen, Hazirlik, Karakter, KarakterDegisikligi,
   KlanAyarlari, Profil, Yoklama,
 } from "@/lib/types";
 import * as f from "./fixtures";
@@ -23,6 +23,9 @@ export interface DemoDepo {
   davetKullanimlari: { codeId: string; profileId: string; createdAt: string }[];
   sifirlamalar: { profileId: string; kodHash: string; bitis: string; kullanildi: boolean }[];
   buildler: Build[];
+  /** Ayarlar › Eşya kataloğu'nda eklenen ya da düzenlenen eşyalar (lib/demo/katalog.ts'teki salt okunur kataloğun üstüne) */
+  esyaDegisiklikleri: Map<number, EsyaDetayi>;
+  silinenEsyalar: Set<number>;
   /** profil kimliği → { e-posta, şifre } (Supabase Auth'un yerine) */
   hesaplar: Map<string, { eposta: string; sifre: string }>;
   denemeler: Map<string, number[]>;
@@ -49,6 +52,8 @@ export function yeniDemoDepo(): DemoDepo {
     davetKullanimlari: [],
     sifirlamalar: [],
     buildler: kopya(f.buildler),
+    esyaDegisiklikleri: new Map(),
+    silinenEsyalar: new Set(),
     hesaplar: new Map(f.profiller.map((p) => [p.id, { eposta: `${p.id}@demo.l4bel.invalid`, sifre: f.DEMO_SIFRE }])),
     denemeler: new Map(),
     sayac: 0,

@@ -6,8 +6,9 @@ import { DEMO_DAVET_KODU, DEMO_SIFRE, karakterId, profilId } from "@/lib/demo/fi
 import { girisYap, kayitOlustur } from "@/lib/giris";
 import { tsi } from "@/lib/time";
 import { katilimOrani, demoYoklamalar } from "./attendance";
-import { demoBuildler } from "./builds";
+import { buildHesapla, demoBuildler } from "./builds";
 import { demoEtkinlikler, haftaninEtkinlikleri } from "./events";
+import { demoKatalogVerisi } from "./items";
 import { demoDavetler } from "./invites";
 import { demoUyeler, profilKurallari } from "./members";
 import { YETKI_YOK } from "./ortak";
@@ -91,7 +92,7 @@ describe("demo: build görünürlüğü", () => {
   });
 
   it("üye kendi build'ini kaydeder (karakter başına tek), şablonu yalnızca yetkili", async () => {
-    const g = { ad: "Build", sinif: "rogue" as const, irkTuru: "tuarek", level: 71, reb: 0, statlar: { str: 0, hp: 0, dex: 200, int: 0, mp: 0 }, skiller: [0, 0, 0, 0] as [number, number, number, number], ekipman: {}, apGirdileri: {} };
+    const g = { ad: "Build", sinif: "rogue" as const, irkTuru: "tuarek", level: 71, reb: 0, statlar: { str: 57, hp: 0, dex: 185, int: 0, mp: 0 }, skiller: [0, 0, 0, 0] as [number, number, number, number], ekipman: {}, apGirdileri: {} };
     const b = demoBuildler(ol("GeceKuşu"));
     const ilk = await b.buildKaydet(g);
     const ikinci = await b.buildKaydet({ ...g, level: 72 });
@@ -99,6 +100,47 @@ describe("demo: build görünürlüğü", () => {
     await expect(b.sablonKaydet(g)).rejects.toThrow(YETKI_YOK);
     await demoBuildler(ol("DemirYumruk")).sablonKaydet(g);
     expect(await b.sablonlar()).toHaveLength(1);
+  });
+
+  it("kurallara uymayan build kaydedilmez; hatalar tek mesajda", async () => {
+    const g = { ad: "Build", sinif: "rogue" as const, irkTuru: "tuarek", level: 71, reb: 0, statlar: { str: 60, hp: 0, dex: 186, int: 0, mp: 0 }, skiller: [0, 0, 0, 0] as [number, number, number, number], ekipman: { 0: { itemId: 262, arti: 7 } }, apGirdileri: {} };
+    await expect(demoBuildler(ol("GeceKuşu")).buildKaydet(g)).rejects.toThrow(
+      "DEX en fazla 255 olabilir (70 + 186) · Stat puanı fazla: 246 dağıtıldı, bu levelde 242 · Exceptional Raptor bu sınıfa uygun değil");
+    await expect(demoBuildler(ol("DemirYumruk")).sablonKaydet({ ...g, irkTuru: "arch_tuarek", statlar: { str: 0, hp: 0, dex: 0, int: 0, mp: 0 }, skiller: [0, 0, 0, 0], ekipman: {} }))
+      .rejects.toThrow("Arch Tuarek bu sınıfı seçemez");
+  });
+});
+
+describe("demo: eşya kataloğu ve kurallar", () => {
+  it("oturum yoksa okunmaz", async () => {
+    await expect(demoKatalogVerisi(ol(null)).esyalar()).rejects.toThrow(YETKI_YOK);
+  });
+
+  it("sınıfa ve yuvaya göre süzer; sınıfsız eşyalar herkese, ad araması Türkçe harf duyarsız", async () => {
+    const k = demoKatalogVerisi(ol("GeceKuşu"));
+    const tumu = await k.esyalar();
+    expect(tumu).toHaveLength(770);
+    const rogue = await k.esyalar({ sinif: "rogue" });
+    expect(rogue.every((e) => !e.siniflar.length || e.siniflar.includes("rogue"))).toBe(true);
+    expect(rogue.some((e) => !e.siniflar.length)).toBe(true);
+    expect(rogue.length).toBeLessThan(tumu.length);
+    const kanat = await k.esyalar({ yuva: "kanat" });
+    expect(kanat.length).toBeGreaterThan(0);
+    expect(kanat.every((e) => e.yuvalar.includes("kanat"))).toBe(true);
+    expect((await k.esyalar({ ara: "HOLY KNIGHT PORTU" })).map((e) => e.id)).toContain(393);
+    expect((await k.esyalar({ ara: "holy knıght" })).map((e) => e.id)).toContain(393);
+  });
+
+  it("eşya detayı artı seviyeleriyle; kurallar sınıf ağaçları ve ırklarla", async () => {
+    const k = demoKatalogVerisi(ol("GeceKuşu"));
+    const e = await k.esya(393);
+    expect(e?.dereceler.find((d) => d.arti === 7)?.degerler).toMatchObject({ Defense: 107, RequiredLevel: 75 });
+    expect(await k.esya(999_999)).toBeNull();
+    expect([...(await k.esyaDetaylari([393, 999_999])).keys()]).toEqual([393]);
+    const kur = await k.kurallar();
+    expect(kur.agaclar.mage).toEqual(["Flame", "Glacier", "Lightning", "Master"]);
+    expect(kur.irklar).toHaveLength(9);
+    expect(kur.oyun.statCap).toBe(255);
   });
 });
 
@@ -128,6 +170,65 @@ describe("demo: davet ve kayıt", () => {
   it("yetkili yöneticinin sıfırlama kodunu üretemez", async () => {
     await expect(demoDavetler(ol("DemirYumruk")).sifirlamaKoduOlustur(karakterId("KaraBey"))).rejects.toThrow("yalnızca yönetici");
     expect(await demoDavetler(ol("DemirYumruk")).sifirlamaKoduOlustur(karakterId("Bozkurt"))).toMatch(/^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/);
+  });
+});
+
+describe("demo: build hesabı", () => {
+  it("kayıtlı build'in AP, can ve set bonusu veri katmanından hesaplanır", async () => {
+    const b = (await demoBuildler(ol("Asena")).benimBuildim())!;
+    const h = await buildHesapla(b, demoKatalogVerisi(ol("Asena")));
+    expect(h.ap).toBeGreaterThan(3);
+    expect(h.ekipman.takili).toBe(Object.keys(b.ekipman).length);
+    const wes = await buildHesapla({ ...b, apGirdileri: { wes: true } }, demoKatalogVerisi(ol("Asena")));
+    expect(wes.ap).toBeGreaterThan(h.ap);
+  });
+});
+
+describe("demo: eşya kataloğu yazma", () => {
+  const pelerin = { ad: "Klan Pelerini", kategori: "Wings", yuvalar: ["kanat"], siniflar: [], derece: "cospre" as const, dereceler: [{ arti: 0, degerler: { BonusHp: 100 } }] };
+
+  it("yalnızca yetkili ekler; yeni eşya 1.000.000'dan başlar, listede ve build'de görünür", async () => {
+    await expect(demoKatalogVerisi(ol("GeceKuşu")).esyaKaydet(pelerin)).rejects.toThrow(YETKI_YOK);
+    const k = demoKatalogVerisi(ol("DemirYumruk"));
+    const e = await k.esyaKaydet(pelerin);
+    expect(e).toMatchObject({ id: 1_000_000, kaynak: "elle", dereceler: [{ arti: 0, degerler: { BonusHp: 100 } }] });
+    expect((await k.esyaKaydet(pelerin)).id).toBe(1_000_001);
+    expect((await demoKatalogVerisi(ol("GeceKuşu")).esyalar({ yuva: "kanat" })).map((x) => x.id)).toContain(1_000_000);
+    expect((await demoKatalogVerisi(ol("GeceKuşu")).esyalar({ yuva: "kanat" }))[0]).not.toHaveProperty("dereceler");
+  });
+
+  it("KO Bugda eşyası düzenlenir (set bilgisi korunur), silinmez; elle eşya silinir", async () => {
+    const k = demoKatalogVerisi(ol("DemirYumruk"));
+    const e = await k.esyaKaydet({ id: 393, ad: "Holy Knight Portu Boots", kategori: "Armor - Kurian", yuvalar: ["bot"], siniflar: ["kurian"], derece: "set", etki: "Deneme" });
+    expect(e).toMatchObject({ etki: "Deneme", setAnahtari: "393,394,395,396,397", kaynak: "kobugda" });
+    expect(e.dereceler.length).toBeGreaterThan(0);
+    await expect(k.esyaSil(393)).rejects.toThrow("KO Bugda eşyaları silinmez");
+    const yeni = await k.esyaKaydet(pelerin);
+    await k.esyaSil(yeni.id);
+    expect(await k.esya(yeni.id)).toBeNull();
+  });
+
+  it("görsel yükleme: yalnızca yetkili, yalnızca resim; kaldırınca görselsiz kalır", async () => {
+    const png = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1]);
+    await expect(demoKatalogVerisi(ol("GeceKuşu")).esyaGorseliYukle(393, png)).rejects.toThrow(YETKI_YOK);
+    const k = demoKatalogVerisi(ol("DemirYumruk"));
+    await expect(k.esyaGorseliYukle(393, new TextEncoder().encode("<svg/>"))).rejects.toThrow("PNG, JPEG, WebP ya da GIF");
+    await expect(k.esyaGorseliYukle(999_999_999, png)).rejects.toThrow("Eşya bulunamadı");
+    const e = await k.esyaGorseliYukle(393, png);
+    expect(e.gorsel).toBe(`data:image/png;base64,${Buffer.from(png).toString("base64")}`);
+    expect(e.dereceler.length).toBeGreaterThan(0);
+    expect((await demoKatalogVerisi(ol("GeceKuşu")).esya(393))?.gorsel).toBe(e.gorsel);
+    expect((await k.esyaGorseliKaldir(393)).gorsel).toBeNull();
+  });
+
+  it("içe aktarma: biri hatalıysa hiçbiri yazılmaz; sonra eklenen/güncellenen sayılır", async () => {
+    const k = demoKatalogVerisi(ol("DemirYumruk"));
+    await expect(k.iceAktar([pelerin, { ...pelerin, yuvalar: ["omuz"] }])).rejects.toThrow("Bilinmeyen yuva: omuz");
+    expect(await k.esya(1_000_000)).toBeNull();
+    const ilk = await k.iceAktar([{ ...pelerin, id: 1_000_010 }, { ...pelerin, id: 1_000_011 }]);
+    expect(ilk).toEqual({ eklenen: 2, guncellenen: 0 });
+    expect(await k.iceAktar([{ ...pelerin, id: 1_000_010, ad: "Yeni ad" }])).toEqual({ eklenen: 0, guncellenen: 1 });
+    expect((await k.esya(1_000_010))?.ad).toBe("Yeni ad");
   });
 });
 

@@ -36,4 +36,8 @@ jobs:
         run: |
           npm run db:tipler
           git diff --exit-code lib/database.types.ts || { echo "::error::lib/database.types.ts eski; npm run db:tipler çalıştırıp commit et"; exit 1; }
+      - name: Katalog seed'i design/katalog.json ile uyumlu
+        run: |
+          npm run db:seed
+          git diff --exit-code supabase/seed.sql || { echo "::error::supabase/seed.sql eski; npm run db:seed çalıştırıp commit et"; exit 1; }
       - run: npm run build
