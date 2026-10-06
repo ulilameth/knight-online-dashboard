@@ -18,8 +18,8 @@ describe("TeamSpeak WebQuery", () => {
   });
 
   it("sendtextmessage'ı anahtar başlığıyla, sunucuya (targetmode=3) çağırır", async () => {
-    const f = vi.fn(async (..._: unknown[]) => yanit(200, { body: [], status: { code: 0, message: "ok" } }));
-    await tsSunucuyaGonder("Merhaba & hoş geldin", ayar, f as unknown as typeof fetch);
+    const f = vi.fn<typeof fetch>(async () => yanit(200, { body: [], status: { code: 0, message: "ok" } }));
+    await tsSunucuyaGonder("Merhaba & hoş geldin", ayar, f);
     const [url, secenek] = f.mock.calls[0] as [URL, RequestInit];
     expect(url.pathname).toBe("/1/sendtextmessage");
     expect(Object.fromEntries(url.searchParams)).toEqual({ targetmode: "3", target: "1", msg: "Merhaba & hoş geldin" });
@@ -59,7 +59,7 @@ describe("duyuruyu TeamSpeak'e gönderme", () => {
   });
 
   it("yetkili gönderir, gönderildi zamanı yazılır; gönderim başarısızsa yazılmaz", async () => {
-    const gonder = vi.fn(async (_: string) => {});
+    const gonder = vi.fn<(metin: string) => Promise<void>>(async () => {});
     await duyuruyuTsyeGonder(v("DemirYumruk"), kullanici("DemirYumruk"), "d-ardream", gonder);
     expect(gonder.mock.calls[0][0]).toMatch(/^\[b\]\[L4BEL\] Yeni sunucularda Ardream yok\[\/b\]\n/);
     expect(depo.duyurular.find((d) => d.id === "d-ardream")?.tsGonderildiAt).not.toBeNull();
