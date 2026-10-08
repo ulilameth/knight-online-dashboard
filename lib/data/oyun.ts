@@ -10,6 +10,8 @@ export interface OyunVerisi {
   irklar(): Promise<Irk[]>;
   agaclar(): Promise<Agaclar>;
   kurallar(): Promise<Kurallar>;
+  /** game_rules'ta "doğrulanacak" işaretli anahtarlar (kural tablosunda etiketlenir) */
+  dogrulanmamisKurallar(): Promise<string[]>;
 }
 
 /** Sınıfın bu taraftaki ırkları; kayıtlı ırk yoksa ya da bu tarafta değilse ilki */
@@ -24,13 +26,16 @@ export function demoOyun(b: DemoBaglam): OyunVerisi {
     async irklar() { demoYetki(b, "uye"); return structuredClone(demoIrklar); },
     async agaclar() { demoYetki(b, "uye"); return structuredClone(demoAgaclar); },
     async kurallar() { demoYetki(b, "uye"); return VARSAYILAN_KURALLAR; },
+    async dogrulanmamisKurallar() { demoYetki(b, "uye"); return ["master_level", "master_max"]; },
   };
 }
 
 export function supabaseOyun(db: Db): OyunVerisi {
   return {
     async irklar() {
-      const r = await sorgu(db.from("race_stats").select("*").order("irk_turu"));
+      // Demo ile aynı sıra: sınıfın varsayılan ırkı ilk sıradaki
+      const sira = (t: string) => { const i = demoIrklar.findIndex((x) => x.irkTuru === t); return i < 0 ? 999 : i; };
+      const r = (await sorgu(db.from("race_stats").select("*"))).sort((a, b) => sira(a.irk_turu) - sira(b.irk_turu) || a.irk_turu.localeCompare(b.irk_turu));
       return r.map((x) => ({ irkTuru: x.irk_turu, ad: x.ad, taraf: x.taraf, siniflar: x.siniflar, statlar: { str: x.str, hp: x.hp, dex: x.dex, int: x.int, mp: x.mp } }));
     },
     async agaclar() {
@@ -42,6 +47,9 @@ export function supabaseOyun(db: Db): OyunVerisi {
     async kurallar() {
       const r = await sorgu(db.from("game_rules").select("anahtar, deger"));
       return r.length ? kurallariOku(r) : VARSAYILAN_KURALLAR;
+    },
+    async dogrulanmamisKurallar() {
+      return (await sorgu(db.from("game_rules").select("anahtar").eq("dogrulandi", false))).map((x) => x.anahtar);
     },
   };
 }
