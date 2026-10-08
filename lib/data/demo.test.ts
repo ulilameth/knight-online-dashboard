@@ -1,5 +1,5 @@
 // Demo adaptörleri veritabanındaki kuralları (RLS ve fonksiyonlar) taklit eder; burada aynı senaryolar denenir.
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { demoAuthArkaUc } from "@/lib/demo/auth";
 import { type DemoDepo, yeniDemoDepo } from "@/lib/demo/depo";
 import { DEMO_DAVET_KODU, DEMO_SIFRE, karakterId, profilId } from "@/lib/demo/fixtures";
@@ -145,6 +145,16 @@ describe("haftalık düzen ve yoklama", () => {
     expect(await e.haftayiOlustur("2026-12-07")).toHaveLength(7);
     expect(await e.haftayiOlustur("2026-12-07")).toHaveLength(0);
     await expect(demoEtkinlikler(ol("GeceKuşu")).haftayiOlustur("2026-12-14")).rejects.toThrow(YETKI_YOK);
+  });
+
+  it("haftanın saati geçmiş günleri oluşturulmaz", async () => {
+    vi.useFakeTimers({ now: new Date(tsi("2026-12-09T12:00")), toFake: ["Date"] });
+    try {
+      const yeni = await demoEtkinlikler(ol("DemirYumruk")).haftayiOlustur("2026-12-07");
+      expect(yeni.map((x) => x.tur)).toEqual(["chaos", "boss", "ft", "bdw", "csw"]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("yoklama işaretle ve katılım oranı (geç sayılır, mazeretli düşürür)", async () => {

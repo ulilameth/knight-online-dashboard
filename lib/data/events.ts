@@ -1,5 +1,5 @@
 // Etkinlikler, etkinlik türleri ve haftalık düzenden etkinlik üretme.
-import { tsi, tsiGunu } from "@/lib/time";
+import { simdi, tsi, tsiGunu } from "@/lib/time";
 import type { Etkinlik, EtkinlikTuru, HaftalikDuzen } from "@/lib/types";
 import { yeniId } from "@/lib/demo/depo";
 import { type Db, type DemoBaglam, belki, calistir, VeriHatasi, demoYetki, duzen, etkinlik, etkinlikTuru, sorgu } from "./ortak";
@@ -21,7 +21,7 @@ export interface EtkinlikVerisi {
   duzenKaydet(g: DuzenGirdisi): Promise<HaftalikDuzen>;
   /** Yetkili */
   duzenSil(id: string): Promise<void>;
-  /** Yetkili: haftanın (pazartesi verilir) etkinliklerini aktif düzenden oluşturur; olanlar tekrar oluşturulmaz */
+  /** Yetkili: haftanın (pazartesi verilir) etkinliklerini aktif düzenden oluşturur; olanlar ve saati geçmişler oluşturulmaz */
   haftayiOlustur(pazartesi: string): Promise<Etkinlik[]>;
 }
 
@@ -37,6 +37,9 @@ function duzenDogrula(g: DuzenGirdisi) {
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(g.saat)) throw new VeriHatasi("Saat SS:DD biçiminde olmalı");
   if (!(g.sureDk > 0)) throw new VeriHatasi("Süre 0'dan büyük olmalı");
 }
+
+/** Pazartesiden başlayan haftada düzenin oluşturacağı, henüz başlamamış etkinlikler (TSİ) */
+const ileride = <T extends { baslangic: string }>(g: T) => Date.parse(g.baslangic) > simdi().getTime();
 
 /** Pazartesiden başlayan haftada düzenin oluşturacağı etkinlikler (TSİ) */
 export function haftaninEtkinlikleri(pazartesi: string, duzenler: HaftalikDuzen[]): (EtkinlikGirdisi & { scheduleId: string })[] {
@@ -102,7 +105,7 @@ export function demoEtkinlikler(b: DemoBaglam): EtkinlikVerisi {
     async haftayiOlustur(pazartesi) {
       const p = demoYetki(b, "yetkili");
       const yeni: Etkinlik[] = [];
-      for (const g of haftaninEtkinlikleri(pazartesi, d.haftalikDuzen)) {
+      for (const g of haftaninEtkinlikleri(pazartesi, d.haftalikDuzen).filter(ileride)) {
         if (d.etkinlikler.some((e) => e.scheduleId === g.scheduleId && e.baslangic === g.baslangic)) continue;
         const e: Etkinlik = { ...g, id: yeniId(d, "e"), olusturan: p.id };
         d.etkinlikler.push(e);
@@ -152,7 +155,7 @@ export function supabaseEtkinlikler(db: Db): EtkinlikVerisi {
     },
     async duzenSil(id) { await calistir(db.from("recurring_schedules").delete().eq("id", id)); },
     async haftayiOlustur(pazartesi) {
-      const plan = haftaninEtkinlikleri(pazartesi, await duzenOku());
+      const plan = haftaninEtkinlikleri(pazartesi, await duzenOku()).filter(ileride);
       if (!plan.length) return [];
       const mevcut = await sorgu(db.from("events").select("schedule_id, baslangic")
         .gte("baslangic", plan[0].baslangic).lte("baslangic", plan[plan.length - 1].baslangic));

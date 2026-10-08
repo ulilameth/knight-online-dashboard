@@ -2,7 +2,7 @@
 // Tam kod yalnızca üretildiği anda döner; listede son 4 karakter görünür.
 import type { DavetKodu } from "@/lib/types";
 import { demoKodHash, yeniId } from "@/lib/demo/depo";
-import { type Db, type DemoBaglam, belki, VeriHatasi, davetKodu, demoYetki, simdiIso, sorgu } from "./ortak";
+import { type Db, type DemoBaglam, belki, VeriHatasi, davetKodu, demoYetki, sorgu } from "./ortak";
 
 export interface KodGirdisi {
   rutbe: DavetKodu["rutbe"];
@@ -63,7 +63,7 @@ export function demoDavetler(b: DemoBaglam): DavetVerisi {
       const kod = `${d.ayarlar.klanAdi.toUpperCase().replace(/[^A-Z0-9]/g, "") || "KLAN"}-${rastgeleKod(4)}-${rastgeleKod(4)}`;
       d.davetKodlari.push({
         id: yeniId(d, "dk"), kodHash: demoKodHash(kod), sonDort: kod.slice(-4), rutbe: g.rutbe, maxKullanim: max, kullanim: 0,
-        bitis: new Date(Date.now() + gun * 86_400_000).toISOString(), aktif: true, aciklama: g.aciklama ?? null, olusturan: p.id, createdAt: simdiIso(),
+        bitis: new Date(Date.now() + gun * 86_400_000).toISOString(), aktif: true, aciklama: g.aciklama ?? null, olusturan: p.id, createdAt: new Date().toISOString(),
       });
       return kod;
     },

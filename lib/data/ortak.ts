@@ -2,6 +2,7 @@
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Tables } from "@/lib/database.types";
 import type { DemoDepo } from "@/lib/demo/depo";
+import { simdi } from "@/lib/time";
 import {
   type Asama, type Build, type DavetKodu, type Duyuru, type Etkinlik, type EtkinlikTuru, type HaftalikDuzen,
   type Hazirlik, type Karakter, type KarakterDegisikligi, type KlanAyarlari, type Profil, type Yetki, type Yoklama,
@@ -67,7 +68,8 @@ export function demoYetki(b: DemoBaglam, enAz: Yetki): Profil {
   return p;
 }
 
-export const simdiIso = () => new Date().toISOString();
+/** Demo modunda DEMO_SIMDI ile ilerleyen saat (lib/time); Supabase'de gerçek saat */
+export const simdiIso = () => simdi().toISOString();
 
 // --- Satır dönüştürücüleri (snake_case → camelCase) ---
 

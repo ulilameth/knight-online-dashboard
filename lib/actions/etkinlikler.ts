@@ -9,7 +9,7 @@ import type { YoklamaDurumu } from "@/lib/types";
 
 export type EtkinlikSonucu = { hata?: string; tamam?: string; id?: string } | null;
 
-const metin = (f: FormData, ad: string) => String(f.get(ad) ?? "");
+const metin = (f: FormData, ad: string) => String(f.get(ad) ?? "").replace(/\r\n?/g, "\n");
 const hataMetni = (e: unknown, varsayilan: string) => (e instanceof VeriHatasi ? e.message : varsayilan);
 
 function yenile() {

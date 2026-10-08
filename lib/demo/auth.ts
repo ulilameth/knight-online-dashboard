@@ -1,5 +1,6 @@
 // Demo modunda Supabase Auth'un yerine: hesaplar ve kodlar bellekteki depoda, oturum bir çerezde.
 import type { AuthArkaUc } from "@/lib/giris";
+import { simdi } from "@/lib/time";
 import { type DemoDepo, demoKodHash, yeniId } from "./depo";
 
 /** oturumYaz: oturum açılınca profil kimliğini çereze yazar (Server Action'da) */
@@ -36,11 +37,11 @@ export function demoAuthArkaUc(d: DemoDepo, oturumYaz: (profilId: string) => Pro
             d.karakterler.push({
               id: yeniId(d, "c"), profileId: id, ad: x.p_nick.trim(), sinif: null, irkTuru: null, level: null, reb: 0,
               rutbe: kod.rutbe, durum: "aktif", anaKarakter: true, ekipmanGorunur: "klan", notlar: null,
-              katilmaTarihi: new Date().toISOString().slice(0, 10), guncellendiAt: new Date().toISOString(),
+              katilmaTarihi: simdi().toISOString().slice(0, 10), guncellendiAt: simdi().toISOString(),
             });
           }
           kod.kullanim += 1;
-          d.davetKullanimlari.push({ codeId: kod.id, profileId: id, createdAt: new Date().toISOString() });
+          d.davetKullanimlari.push({ codeId: kod.id, profileId: id, createdAt: simdi().toISOString() });
           return (mevcut?.rutbe ?? kod.rutbe) as never;
         }
         case "sifirlama_kodu_kullan": {
@@ -70,7 +71,7 @@ export function demoAuthArkaUc(d: DemoDepo, oturumYaz: (profilId: string) => Pro
     },
     async sonGirisYaz(id) {
       const p = d.profiller.find((x) => x.id === id);
-      if (p) p.sonGiris = new Date().toISOString();
+      if (p) p.sonGiris = simdi().toISOString();
     },
   };
 }
