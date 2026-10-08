@@ -320,7 +320,14 @@ Teslim edilecekler:
 9. GitHub Actions: lint, typecheck, test, build.
 10. `README.md`: yerel çalıştırma (demo modu), ortam değişkenleri.
 
-### Faz 1: Paralel oturumlar
+### Faz 1: Paralel oturumlar · tamamlandı
+
+Durum (8 Ekim 2026): A–E teslim edildi. Plandan farklar:
+- Oturumlar paralel değil, tek oturumda sırayla yapıldı (A → B → C → D → E), doğrudan varsayılan dala; PR ve birleştirme adımı gerekmedi.
+- Her bölüm demo, açılış sonrası demo (`DEMO_SIMDI`) ve yerel Supabase'te tarayıcıyla uçtan uca denendi.
+- Genel bakış ve giriş/kayıt ekranları Faz 0 sonrasında yapılmıştı; D'de Ayarlar kaldı.
+- Karşılaşılan ve düzeltilen hatalar: Supabase'te şifre değişince tüm oturumlar kapanıyor (mevcut şifre çerezsiz doğrulanır, oturum yeni şifreyle yeniden açılır); Node'un `fetch`'i TeamSpeak WebQuery'nin varsayılan portu 10080'i reddediyor (`node:http` kullanılır); aramada Türkçe küçük harf "Iron"u "ıron" yapıyordu.
+- **Yapılmayanlar (sonraya):** Ayarlar › Eşya kataloğu (ekle, JSON/CSV içe aktar, görsel yükle): katalog şimdilik `design/katalog.json`'dan okunur, `scripts/katalog_olustur.py` ile güncellenir; `items`/`item_stats` tabloları kullanılmıyor. `game_rules` arayüzden düzenlenmiyor (Supabase Studio'dan); kural tablosu doğrulanmamış satırları etiketler.
 
 Her oturum Faz 0'ın birleştiği varsayılan daldan başlar, kendi dalında çalışır ve PR açar. **Yalnızca kendi klasörlerine yazar.** Ortak dosyada değişiklik gerekiyorsa (ör. `components/ui`) PR açıklamasında belirtir, kendisi değiştirmez; ihtiyaç Faz 2'de toplanır.
 
@@ -338,7 +345,9 @@ Ortak kurallar:
 - Metinler Türkçe, saatler TSİ.
 - Başka oturumun klasörüne dokunulmaz.
 
-### Faz 2: Entegrasyon ve yayın (1 oturum)
+### Faz 2: Entegrasyon ve yayın (1 oturum) · tamamlandı
+
+Durum (8 Ekim 2026): Playwright uçtan uca testleri `e2e/` altında (18 senaryo; açılış öncesi ve sonrası iki demo sunucusu, saat sabit), CI'da ayrı iş. Kurulum rehberi README'de (demo, yerel Supabase: `npm run db:baslat` + `npm run db:env`, yayına alma). CI ayrıca `supabase/seed.sql`'in demo verisiyle güncel olduğunu denetler. Irk değişimi (Karus ↔ El Morad: renkler, Kurian ↔ Porutu) de uçtan uca testte.
 
 1. PR'ları sırayla birleştir (A → B → C → D), çakışmaları çöz, ortak bileşen isteklerini topla.
 2. Playwright duman testi (demo modunda tüm sayfalar, iki ırk rengi, telefon genişliği, giriş, davet koduyla kayıt, level sınırı).

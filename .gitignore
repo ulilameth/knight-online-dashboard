@@ -51,3 +51,5 @@ next-env.d.ts
 # Üretilen: scripts/varliklar.mjs
 /public/katalog.json
 /public/esya/
+/test-results/
+/playwright-report/

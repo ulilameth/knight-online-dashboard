@@ -1,4 +1,5 @@
-# Her push ve PR'da: lint, tip denetimi, testler (veritabanı testleri gerçek Postgres'te), DB tipleri güncel mi, derleme.
+# Her push ve PR'da: lint, tip denetimi, testler (veritabanı testleri gerçek Postgres'te), DB tipleri ve seed güncel mi,
+# derleme; ayrıca demo modunda uçtan uca (Playwright) testler.
 name: CI
 
 on:
@@ -36,4 +37,27 @@ jobs:
         run: |
           npm run db:tipler
           git diff --exit-code lib/database.types.ts || { echo "::error::lib/database.types.ts eski; npm run db:tipler çalıştırıp commit et"; exit 1; }
+      - name: Demo seed'i (supabase/seed.sql) örnek veriyle uyumlu
+        run: |
+          npm run db:seed
+          git diff --exit-code supabase/seed.sql || { echo "::error::supabase/seed.sql eski; npm run db:seed çalıştırıp commit et"; exit 1; }
       - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-izleri
+          path: test-results/
+          retention-days: 7
