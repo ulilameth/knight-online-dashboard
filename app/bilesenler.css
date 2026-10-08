@@ -219,7 +219,7 @@ a{color:var(--gold)}
 .chip[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);border-color:var(--muted)}
 .chip i{width:9px;height:9px;border-radius:2px}
 select.sel{height:38px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface-2);padding:0 10px;font:600 14px/1 var(--font-data)}
-.table-wrap{overflow-x:auto;margin-inline:-20px;padding-inline:20px}
+.table-wrap{position:relative;overflow-x:auto;margin-inline:-20px;padding-inline:20px}
 table{width:100%;border-collapse:collapse;min-width:720px}
 th{text-align:left;font:600 12px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 10px;border-bottom:1px solid var(--line-subtle);white-space:nowrap}
 td{padding:11px 10px;border-bottom:1px solid var(--line-subtle);vertical-align:middle}
