@@ -4,5 +4,5 @@ import { Yakinda } from "@/components/kabuk/Yakinda";
 export const metadata: Metadata = { title: "Takvim ve duyurular" };
 
 export default function Sayfa() {
-  return <Yakinda ust="Takvim" baslik="Takvim ve duyurular" oturum="Faz 1, oturum C" veri="lib/data/events.ts, announcements.ts" />;
+  return <Yakinda ust="Takvim" baslik="Takvim ve duyurular" />;
 }

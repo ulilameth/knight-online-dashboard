@@ -23,9 +23,9 @@ export const ayarlar: KlanAyarlari = {
 };
 
 export const asamalar: Asama[] = [
-  { id: 1, sira: 1, baslik: "1. Ön kayıt", baslangic: tsi("2026-10-15"), bitis: tsi("2026-10-29"), saatBelli: false, aciklama: "Ödüllü dönem. Telefon doğrulaması gerekli.", kaynakUrl: KAYNAK },
+  { id: 1, sira: 1, baslik: "1. Ön kayıt", baslangic: tsi("2026-10-15"), bitis: tsi("2026-10-30"), saatBelli: false, aciklama: "Ödüllü dönem. Telefon doğrulaması gerekli.", kaynakUrl: KAYNAK },
   { id: 2, sira: 2, baslik: "2. Ön kayıt ve sunucu seçimi", baslangic: tsi("2026-10-29"), bitis: tsi("2026-11-10"), saatBelli: false, aciklama: "Bitiş bazı kaynaklarda 12 Kasım.", kaynakUrl: KAYNAK },
-  { id: 3, sira: 3, baslik: "Karakter oluşturma", baslangic: tsi("2026-11-10"), bitis: tsi("2026-11-12T16:00"), saatBelli: false, aciklama: "Nick’ler ilk saatlerde alınmalı.", kaynakUrl: KAYNAK },
+  { id: 3, sira: 3, baslik: "Karakter oluşturma", baslangic: tsi("2026-11-10"), bitis: tsi("2026-11-12"), saatBelli: false, aciklama: "Nick’ler ilk saatlerde alınmalı.", kaynakUrl: KAYNAK },
   { id: 4, sira: 4, baslik: "Sunucu açılışı", baslangic: tsi("2026-11-12T16:00"), bitis: null, saatBelli: true, aciklama: "Lider L4BEL klanını ilk gün kurar. Savaş yalnızca Ronark Land (CZ)’de.", kaynakUrl: KAYNAK },
 ];
 

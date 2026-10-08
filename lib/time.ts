@@ -12,12 +12,14 @@ export function tsi(yerel: string): string {
 }
 
 /**
- * Şimdiki zaman. Demo modunda DEMO_SIMDI (ör. "2026-11-21T19:40") verilirse o an kullanılır;
+ * Şimdiki zaman. Demo modunda DEMO_SIMDI (ör. "2026-11-21T19:40") verilirse o andan başlar;
  * açılış sonrası ekranları gerçek tarihi beklemeden görmek için.
  */
+const SUREC_BASLANGICI = Date.now();
 export function simdi(): Date {
   const demo = process.env.DATA_SOURCE !== "supabase" ? process.env.DEMO_SIMDI : undefined;
-  return demo ? new Date(tsi(demo)) : new Date();
+  // Demo zamanı sunucu başladığından beri geçen süre kadar ilerler
+  return demo ? new Date(Date.parse(tsi(demo)) + (Date.now() - SUREC_BASLANGICI)) : new Date();
 }
 
 export function bicimle(iso: string | Date, secenek: Intl.DateTimeFormatOptions): string {
@@ -70,4 +72,20 @@ export function kalanSure(hedef: string, su: Date = simdi()) {
     dakika: Math.floor((ms % 3_600_000) / 60_000),
     saniye: Math.floor((ms % 60_000) / 1000),
   };
+}
+
+/** Gün bazında: "bugün", "yarın", "dün", "3 gün sonra", "2 gün önce" (listelerde saat ayrıca yazılır) */
+export function gunGoreli(iso: string | Date, su: Date = simdi()): string {
+  const n = gunFarki(su, iso);
+  if (n === 0) return "bugün";
+  if (n === 1) return "yarın";
+  if (n === -1) return "dün";
+  return n > 0 ? `${n} gün sonra` : `${-n} gün önce`;
+}
+
+/** TSİ'de haftanın pazartesisi (gün metni, "2026-11-16") */
+export function haftaninPazartesisi(su: Date = simdi()): string {
+  const gun = tsiGunu(su);
+  const hg = new Date(`${gun}T12:00:00Z`).getUTCDay();
+  return new Date(Date.parse(`${gun}T12:00:00Z`) - ((hg + 6) % 7) * GUN_MS).toISOString().slice(0, 10);
 }

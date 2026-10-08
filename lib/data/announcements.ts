@@ -1,6 +1,7 @@
 // Duyurular: yetkili yazar, sabitler, siler; TeamSpeak'e gönderildiyse zamanı tutulur (gönderim lib/teamspeak, oturum C).
 import type { Duyuru } from "@/lib/types";
 import { yeniId } from "@/lib/demo/depo";
+import { simdi } from "@/lib/time";
 import { type Db, type DemoBaglam, belki, calistir, VeriHatasi, demoYetki, duyuru, simdiIso, sorgu } from "./ortak";
 
 export type DuyuruGirdisi = Pick<Duyuru, "baslik" | "govde" | "sabit"> & { id?: string };
@@ -26,7 +27,12 @@ const sirala = (d: Duyuru[]) => d.sort((x, y) => Number(y.sabit) - Number(x.sabi
 export function demoDuyurular(b: DemoBaglam): DuyuruVerisi {
   const bul = (id: string) => b.depo.duyurular.find((x) => x.id === id);
   return {
-    async duyurular() { demoYetki(b, "uye"); return sirala(structuredClone(b.depo.duyurular)); },
+    async duyurular() {
+      demoYetki(b, "uye");
+      // Örnek veride açılış sonrasına tarihli duyurular da var; "şimdi"den sonrakiler henüz yazılmamış sayılır
+      const su = simdi().toISOString();
+      return sirala(structuredClone(b.depo.duyurular.filter((d) => d.createdAt <= su)));
+    },
     async duyuruKaydet(g) {
       const p = demoYetki(b, "yetkili");
       dogrula(g);

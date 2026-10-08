@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./bilesenler.css";
 
 /* Renk ve yazı token'ları design/tokens.css'ten (yazı tipleri next/font değişkenleriyle); token değişince ikisi birlikte güncellenir */
 :root {

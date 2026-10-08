@@ -61,8 +61,12 @@ ${satirlar(f.yoklamalar(new Date("2100-01-01")).map((y) => [uid(y.eventId), uid(
 join public.events e on e.id = v.event_id
 where e.baslangic <= now();
 `,
-  `insert into public.announcements (id, baslik, govde, sabit, ts_gonderildi_at, yazar, created_at) values
-${satirlar(f.duyurular.map((d) => [uid(d.id), q(d.baslik), q(d.govde), q(d.sabit), q(d.tsGonderildiAt), uid(d.yazar), q(d.createdAt)]))};
+  `-- Duyurular: seed anında geçmiş tarihli olanlar (örnek veride açılış sonrasına tarihliler de var)
+insert into public.announcements (id, baslik, govde, sabit, ts_gonderildi_at, yazar, created_at)
+select * from (values
+${satirlar(f.duyurular.map((d) => [uid(d.id), q(d.baslik), q(d.govde), q(d.sabit), `${q(d.tsGonderildiAt)}::timestamptz`, uid(d.yazar), `${q(d.createdAt)}::timestamptz`]))}
+) as v(id, baslik, govde, sabit, ts_gonderildi_at, yazar, created_at)
+where v.created_at <= now();
 `,
   `insert into public.builds (id, character_id, ad, sinif, irk_turu, level, reb, statlar, skiller, ekipman, ap_girdileri, sablon, olusturan) values
 ${satirlar(f.buildler.map((b) => [uid(b.id), uid(b.characterId), q(b.ad), q(b.sinif), q(b.irkTuru), q(b.level), q(b.reb), q(b.statlar), `'{${b.skiller.join(",")}}'`, q(b.ekipman), q(b.apGirdileri), q(b.sablon), "null"]))};

@@ -1,12 +1,21 @@
 import type { ReactNode } from "react";
 
-export function Panel({ baslik, sag, children, className = "" }: { baslik?: ReactNode; sag?: ReactNode; children: ReactNode; className?: string }) {
+/** Prototipin paneli: başlık, sağda alt yazı ya da düğme */
+export function Panel({ baslik, alt, sag, className = "", id, children }: {
+  baslik?: ReactNode;
+  alt?: ReactNode;
+  sag?: ReactNode;
+  className?: string;
+  id?: string;
+  children?: ReactNode;
+}) {
   return (
-    <section className={`rounded-xl border border-cizgi bg-kart p-5 shadow-[var(--shadow-card)] ${className}`}>
-      {(baslik || sag) && (
-        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-          {baslik && <h2 className="font-ui text-xl font-semibold text-baslik">{baslik}</h2>}
-          {sag && <div className="text-sm text-soluk">{sag}</div>}
+    <section className={`panel ${className}`} id={id}>
+      {(baslik || alt || sag) && (
+        <div className="panel-h">
+          {baslik && <h2>{baslik}</h2>}
+          {alt && <span className="sub">{alt}</span>}
+          {sag}
         </div>
       )}
       {children}

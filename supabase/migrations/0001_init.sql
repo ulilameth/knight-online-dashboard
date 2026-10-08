@@ -747,10 +747,11 @@ insert into public.clan_settings (klan_adi, monogram, irk, ts_adres, acilis_at, 
 values ('L4BEL', 'L4', 'karus', 'L4B', '2026-11-12 16:00+03', 80, 0);
 
 -- Kaynak: NTTGame yeni sunucu sayfası (5 Ekim 2026). Tarihler kaynaklarda tutarsız; yönetici Ayarlar'dan düzeltir.
+-- bitis: aşamanın bittiği an (gece yarısıysa önceki gün son gün olarak gösterilir).
 insert into public.milestones (sira, baslik, baslangic, bitis, saat_belli, aciklama, kaynak_url) values
-  (1, '1. Ön kayıt', '2026-10-15 00:00+03', '2026-10-29 00:00+03', false, 'Ödüllü dönem. Telefon doğrulaması gerekli.', 'https://www.nttgame.com/knight/tr/newserveropen2026/'),
+  (1, '1. Ön kayıt', '2026-10-15 00:00+03', '2026-10-30 00:00+03', false, 'Ödüllü dönem. Telefon doğrulaması gerekli.', 'https://www.nttgame.com/knight/tr/newserveropen2026/'),
   (2, '2. Ön kayıt ve sunucu seçimi', '2026-10-29 00:00+03', '2026-11-10 00:00+03', false, 'Bitiş bazı kaynaklarda 12 Kasım.', 'https://www.nttgame.com/knight/tr/newserveropen2026/'),
-  (3, 'Karakter oluşturma', '2026-11-10 00:00+03', '2026-11-12 16:00+03', false, 'Nick''ler ilk saatlerde alınmalı.', 'https://www.nttgame.com/knight/tr/newserveropen2026/'),
+  (3, 'Karakter oluşturma', '2026-11-10 00:00+03', '2026-11-12 00:00+03', false, 'Nick''ler ilk saatlerde alınmalı.', 'https://www.nttgame.com/knight/tr/newserveropen2026/'),
   (4, 'Sunucu açılışı', '2026-11-12 16:00+03', null, true, 'Lider L4BEL klanını ilk gün kurar. Savaş yalnızca Ronark Land (CZ)''de.', 'https://www.nttgame.com/knight/tr/newserveropen2026/');
 
 insert into public.event_types (kod, ad, kisa_ad, yoklama_var) values

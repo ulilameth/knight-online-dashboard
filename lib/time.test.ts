@@ -49,3 +49,19 @@ describe("açılış", () => {
     expect(kalanSure(ACILIS, new Date(tsi("2026-11-13T00:00")))).toEqual({ gun: 0, saat: 0, dakika: 0, saniye: 0 });
   });
 });
+
+describe("gün bazında göreli ve hafta", () => {
+  it("gunGoreli", async () => {
+    const { gunGoreli } = await import("./time");
+    const su = new Date(tsi("2026-11-10T23:30"));
+    expect(gunGoreli(tsi("2026-11-10T08:00"), su)).toBe("bugün");
+    expect(gunGoreli(tsi("2026-11-11T00:10"), su)).toBe("yarın");
+    expect(gunGoreli(tsi("2026-11-14T21:00"), su)).toBe("4 gün sonra");
+    expect(gunGoreli(tsi("2026-11-08T21:00"), su)).toBe("2 gün önce");
+  });
+  it("haftanın pazartesisi (TSİ)", async () => {
+    const { haftaninPazartesisi } = await import("./time");
+    expect(haftaninPazartesisi(new Date(tsi("2026-11-22T23:59")))).toBe("2026-11-16");
+    expect(haftaninPazartesisi(new Date(tsi("2026-11-23T00:01")))).toBe("2026-11-23");
+  });
+});

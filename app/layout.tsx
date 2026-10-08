@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Barlow, Barlow_Condensed, Cinzel } from "next/font/google";
 import type { ReactNode } from "react";
+import { IkonSeti } from "@/components/ui/Ikon";
 import { veri } from "@/lib/data";
 import "./globals.css";
 
@@ -17,7 +18,10 @@ export default async function KokDuzen({ children }: { children: ReactNode }) {
   const a = await (await veri()).ayarlar.ayarlar();
   return (
     <html lang="tr" data-irk={a.irk === "el_morad" ? "el-morad" : "karus"} className={`${cinzel.variable} ${barlowCondensed.variable} ${barlow.variable}`}>
-      <body>{children}</body>
+      <body>
+        <IkonSeti />
+        {children}
+      </body>
     </html>
   );
 }

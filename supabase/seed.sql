@@ -684,13 +684,17 @@ from (values
 join public.events e on e.id = v.event_id
 where e.baslangic <= now();
 
-insert into public.announcements (id, baslik, govde, sabit, ts_gonderildi_at, yazar, created_at) values
-  (md5('d-plan')::uuid, 'Açılış planı', 'Bu hafta herkes telefon doğrulamasını ve OTP’yi açsın; yeni sunuculara OTP olmadan girilemiyor. Ön kayıt 15 Ekim’de başlıyor ve ilk dönem ödüllü.', true, '2026-10-03T16:10:00.000Z', md5('p-karabey')::uuid, '2026-10-03T16:10:00.000Z'),
-  (md5('d-sinif')::uuid, 'Sınıf dağılımı', 'Şu an 5 Warrior, 4 Rogue, 3 Mage, 4 Priest, 2 Kurian var. Mage ve Kurian açığımız var; kararsız kalanlar kanala yazsın.', false, '2026-10-02T20:05:00.000Z', md5('p-asena')::uuid, '2026-10-02T20:05:00.000Z'),
-  (md5('d-ardream')::uuid, 'Yeni sunucularda Ardream yok', 'Ardream ve Ronark Land Base haritaları olmayacak, tüm savaş Ronark Land (CZ)’de. Level planınızı buna göre yapın.', false, null, md5('p-sessizok')::uuid, '2026-10-01T15:40:00.000Z'),
-  (md5('d-csw')::uuid, 'Pazar CSW kadrosu', 'İlk iki parti belli, liste panelde. Herkes 20:15’te Ronark Land (CZ) girişinde. Mazereti olan cumartesi akşamına kadar panelden bildirsin.', true, '2026-11-20T19:15:00.000Z', md5('p-karabey')::uuid, '2026-11-20T19:15:00.000Z'),
-  (md5('d-boss')::uuid, 'Boss avı saati', 'Perşembe boss avı 21:00’de kalıyor. Drop dağılımı avdan sonra duyurulacak.', false, '2026-11-18T09:30:00.000Z', md5('p-demiryumruk')::uuid, '2026-11-18T09:30:00.000Z'),
-  (md5('d-juraid')::uuid, 'Juraid partileri', 'Juraid için 8 kişilik iki parti kuruyoruz; Priest sayısı az, Bilge ve Nur ikinci partide.', false, null, md5('p-asena')::uuid, '2026-11-16T17:00:00.000Z');
+-- Duyurular: seed anında geçmiş tarihli olanlar (örnek veride açılış sonrasına tarihliler de var)
+insert into public.announcements (id, baslik, govde, sabit, ts_gonderildi_at, yazar, created_at)
+select * from (values
+  (md5('d-plan')::uuid, 'Açılış planı', 'Bu hafta herkes telefon doğrulamasını ve OTP’yi açsın; yeni sunuculara OTP olmadan girilemiyor. Ön kayıt 15 Ekim’de başlıyor ve ilk dönem ödüllü.', true, '2026-10-03T16:10:00.000Z'::timestamptz, md5('p-karabey')::uuid, '2026-10-03T16:10:00.000Z'::timestamptz),
+  (md5('d-sinif')::uuid, 'Sınıf dağılımı', 'Şu an 5 Warrior, 4 Rogue, 3 Mage, 4 Priest, 2 Kurian var. Mage ve Kurian açığımız var; kararsız kalanlar kanala yazsın.', false, '2026-10-02T20:05:00.000Z'::timestamptz, md5('p-asena')::uuid, '2026-10-02T20:05:00.000Z'::timestamptz),
+  (md5('d-ardream')::uuid, 'Yeni sunucularda Ardream yok', 'Ardream ve Ronark Land Base haritaları olmayacak, tüm savaş Ronark Land (CZ)’de. Level planınızı buna göre yapın.', false, null::timestamptz, md5('p-sessizok')::uuid, '2026-10-01T15:40:00.000Z'::timestamptz),
+  (md5('d-csw')::uuid, 'Pazar CSW kadrosu', 'İlk iki parti belli, liste panelde. Herkes 20:15’te Ronark Land (CZ) girişinde. Mazereti olan cumartesi akşamına kadar panelden bildirsin.', true, '2026-11-20T19:15:00.000Z'::timestamptz, md5('p-karabey')::uuid, '2026-11-20T19:15:00.000Z'::timestamptz),
+  (md5('d-boss')::uuid, 'Boss avı saati', 'Perşembe boss avı 21:00’de kalıyor. Drop dağılımı avdan sonra duyurulacak.', false, '2026-11-18T09:30:00.000Z'::timestamptz, md5('p-demiryumruk')::uuid, '2026-11-18T09:30:00.000Z'::timestamptz),
+  (md5('d-juraid')::uuid, 'Juraid partileri', 'Juraid için 8 kişilik iki parti kuruyoruz; Priest sayısı az, Bilge ve Nur ikinci partide.', false, null::timestamptz, md5('p-asena')::uuid, '2026-11-16T17:00:00.000Z'::timestamptz)
+) as v(id, baslik, govde, sabit, ts_gonderildi_at, yazar, created_at)
+where v.created_at <= now();
 
 insert into public.builds (id, character_id, ad, sinif, irk_turu, level, reb, statlar, skiller, ekipman, ap_girdileri, sablon, olusturan) values
   (md5('b-karabey')::uuid, md5('c-karabey')::uuid, 'Build', 'warrior', 'arch_tuarek', 76, 0, '{"str":180,"hp":87,"dex":0,"int":0,"mp":0}'::jsonb, '{0,0,0,0}', '{"0":{"itemId":262,"arti":7},"2":{"itemId":126,"arti":7},"3":{"itemId":128,"arti":7},"4":{"itemId":127,"arti":7},"5":{"itemId":125,"arti":7},"6":{"itemId":124,"arti":7}}'::jsonb, '{}'::jsonb, false, null),
