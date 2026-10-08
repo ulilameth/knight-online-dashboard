@@ -22,11 +22,7 @@ describe("klan bilgisi formu", () => {
 
 describe("aşama formu", () => {
   it("son gün dahil: bitiş ertesi gece yarısı; formdan geri dönüş aynı", () => {
-    for (const a of asamalar) {
-      const { id, ...geri } = { ...a, ...(asamaFormunuCoz(asamadanForm(a), a.id) as object) };
-      expect(id).toBe(a.id);
-      expect(geri).toEqual((({ id: _, ...x }) => x)(a));
-    }
+    for (const a of asamalar) expect(asamaFormunuCoz(asamadanForm(a), a.id)).toEqual(a);
     expect(asamaFormunuCoz({ sira: "1", baslik: "Ön kayıt", baslangicGun: "2026-10-15", saat: "", sonGun: "2026-10-29", aciklama: "", kaynakUrl: "" }))
       .toMatchObject({ baslangic: tsi("2026-10-15"), bitis: tsi("2026-10-30"), saatBelli: false, aciklama: null, kaynakUrl: null });
     expect(asamaFormunuCoz({ sira: "4", baslik: "Açılış", baslangicGun: "2026-11-12", saat: "16:00", sonGun: "", aciklama: "", kaynakUrl: "" }))
