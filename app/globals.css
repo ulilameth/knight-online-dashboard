@@ -64,7 +64,10 @@
   /* Gölge */
   --shadow-card: 0 1px 0 rgba(241, 232, 212, 0.03) inset, 0 8px 24px rgba(0, 0, 0, 0.35);
 
-  /* Yazı (Google Fonts) */
+  /* Yazı (@fontsource paketleri, app/layout.tsx) */
+  --font-cinzel: "Cinzel";
+  --font-barlow-condensed: "Barlow Condensed";
+  --font-barlow: "Barlow";
   --font-display: var(--font-cinzel), "Cinzel", "Times New Roman", serif;               /* klan adı, sayfa başlıkları, geri sayım */
   --font-ui:      var(--font-barlow-condensed), "Barlow Condensed", "Arial Narrow", sans-serif;   /* kart başlıkları, etiketler, sayılar, butonlar */
   --font-body:    var(--font-barlow), "Barlow", system-ui, -apple-system, sans-serif;   /* gövde metni */

@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
-import { Barlow, Barlow_Condensed, Cinzel } from "next/font/google";
 import type { ReactNode } from "react";
 import { IkonSeti } from "@/components/ui/Ikon";
 import { veri } from "@/lib/data";
+// Yazı tipleri npm'den (@fontsource, OFL): derleme sırasında Google Fonts'a bağlanılmaz. Her ağırlık latin ve
+// latin-ext (ğ, ş, ı, İ) alt kümeleriyle gelir; tarayıcı unicode-range'e göre yalnızca gerekeni indirir.
+import "@fontsource/cinzel/600.css";
+import "@fontsource/cinzel/700.css";
+import "@fontsource/barlow-condensed/500.css";
+import "@fontsource/barlow-condensed/600.css";
+import "@fontsource/barlow-condensed/700.css";
+import "@fontsource/barlow/400.css";
+import "@fontsource/barlow/500.css";
+import "@fontsource/barlow/600.css";
 import "./globals.css";
-
-const cinzel = Cinzel({ subsets: ["latin", "latin-ext"], weight: ["600", "700"], variable: "--font-cinzel" });
-const barlowCondensed = Barlow_Condensed({ subsets: ["latin", "latin-ext"], weight: ["500", "600", "700"], variable: "--font-barlow-condensed" });
-const barlow = Barlow({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], variable: "--font-barlow" });
 
 export async function generateMetadata(): Promise<Metadata> {
   const a = await (await veri()).ayarlar.ayarlar();
@@ -17,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function KokDuzen({ children }: { children: ReactNode }) {
   const a = await (await veri()).ayarlar.ayarlar();
   return (
-    <html lang="tr" data-irk={a.irk === "el_morad" ? "el-morad" : "karus"} className={`${cinzel.variable} ${barlowCondensed.variable} ${barlow.variable}`}>
+    <html lang="tr" data-irk={a.irk === "el_morad" ? "el-morad" : "karus"}>
       <body>
         <IkonSeti />
         {children}
