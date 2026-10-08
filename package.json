@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "varliklar": "node scripts/varliklar.mjs",
+    "predev": "node scripts/varliklar.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/varliklar.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

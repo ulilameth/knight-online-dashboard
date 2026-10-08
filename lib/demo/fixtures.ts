@@ -2,7 +2,7 @@
 // Demo hesaplarının şifresi: DEMO_SIFRE. Demo davet kodu: DEMO_DAVET_KODU.
 import { tsi } from "@/lib/time";
 import type {
-  Asama, Build, Duyuru, Etkinlik, EtkinlikTuru, HaftalikDuzen, Hazirlik, Karakter, KarakterDurum, KlanAyarlari, Profil,
+  Asama, Build, Duyuru, Etkinlik, EtkinlikTuru, HaftalikDuzen, Hazirlik, Irk, Karakter, KarakterDurum, KlanAyarlari, Profil,
   Rutbe, Sinif, Yetki, YoklamaDurumu, Yoklama,
 } from "@/lib/types";
 
@@ -28,6 +28,23 @@ export const asamalar: Asama[] = [
   { id: 3, sira: 3, baslik: "Karakter oluşturma", baslangic: tsi("2026-11-10"), bitis: tsi("2026-11-12"), saatBelli: false, aciklama: "Nick’ler ilk saatlerde alınmalı.", kaynakUrl: KAYNAK },
   { id: 4, sira: 4, baslik: "Sunucu açılışı", baslangic: tsi("2026-11-12T16:00"), bitis: null, saatBelli: true, aciklama: "Lider L4BEL klanını ilk gün kurar. Savaş yalnızca Ronark Land (CZ)’de.", kaynakUrl: KAYNAK },
 ];
+
+/** Irk başlangıç statları ve skill ağaçları (migration'daki race_stats ve class_trees ile aynı) */
+export const irklar: Irk[] = [
+  { irkTuru: "arch_tuarek", ad: "Arch Tuarek", taraf: "karus", siniflar: ["warrior"], statlar: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
+  { irkTuru: "tuarek", ad: "Tuarek", taraf: "karus", siniflar: ["rogue", "priest"], statlar: { str: 60, hp: 60, dex: 70, int: 50, mp: 50 } },
+  { irkTuru: "wrinkle_tuarek", ad: "Wrinkle Tuarek", taraf: "karus", siniflar: ["mage"], statlar: { str: 50, hp: 50, dex: 70, int: 70, mp: 50 } },
+  { irkTuru: "puri_tuarek", ad: "Puri Tuarek", taraf: "karus", siniflar: ["mage", "priest"], statlar: { str: 50, hp: 60, dex: 60, int: 70, mp: 50 } },
+  { irkTuru: "kurian", ad: "Kurian", taraf: "karus", siniflar: ["kurian"], statlar: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
+  { irkTuru: "barbarian", ad: "Barbarian", taraf: "el_morad", siniflar: ["warrior"], statlar: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
+  { irkTuru: "el_morad_erkek", ad: "El Moradian (erkek)", taraf: "el_morad", siniflar: ["warrior", "rogue", "mage", "priest"], statlar: { str: 60, hp: 60, dex: 70, int: 50, mp: 50 } },
+  { irkTuru: "el_morad_kadin", ad: "El Moradian (kadın)", taraf: "el_morad", siniflar: ["warrior", "rogue", "mage", "priest"], statlar: { str: 50, hp: 60, dex: 60, int: 70, mp: 50 } },
+  { irkTuru: "porutu", ad: "Porutu", taraf: "el_morad", siniflar: ["kurian"], statlar: { str: 65, hp: 65, dex: 60, int: 50, mp: 50 } },
+];
+export const agaclar: Record<Sinif, [string, string, string, string]> = {
+  warrior: ["Attack", "Defense", "Passion", "Master"], rogue: ["Archery", "Assassin", "Explore", "Master"],
+  mage: ["Flame", "Glacier", "Lightning", "Master"], priest: ["Heal", "Buff", "Debuff", "Master"], kurian: ["Attack", "Defense", "Devil", "Master"],
+};
 
 export const etkinlikTurleri: EtkinlikTuru[] = [
   { kod: "csw", ad: "Castle Siege War", kisaAd: "CSW", yoklamaVar: true },

@@ -47,3 +47,7 @@ next-env.d.ts
 # Ortam değişkeni örneği repoda kalır
 !.env.example
 /.next-*/
+
+# Üretilen: scripts/varliklar.mjs
+/public/katalog.json
+/public/esya/

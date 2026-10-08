@@ -147,6 +147,14 @@ export interface DavetKodu {
 
 export type StatAdi = "str" | "hp" | "dex" | "int" | "mp";
 
+export interface Irk {
+  irkTuru: string;
+  ad: string;
+  taraf: Taraf;
+  siniflar: Sinif[];
+  statlar: Record<StatAdi, number>;
+}
+
 export interface Build {
   id: string;
   characterId: string | null;

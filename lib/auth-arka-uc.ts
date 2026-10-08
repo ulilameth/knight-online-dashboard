@@ -1,11 +1,12 @@
 // Giriş mantığının (lib/giris.ts) gerçek arka ucu: service role ile veritabanı fonksiyonları ve Supabase Auth admin,
 // oturum açma ise kullanıcının çerezli istemcisiyle (Server Action içinde çağrılır).
 import "server-only";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { demoAuthArkaUc } from "@/lib/demo/auth";
 import { DEMO_OTURUM_CEREZI } from "@/lib/demo/cerez";
 import { demoDepo } from "@/lib/demo/depo";
-import { veriKaynagi } from "@/lib/env";
+import { supabaseAdresi, supabaseAnonAnahtari, veriKaynagi } from "@/lib/env";
 import type { AuthArkaUc } from "@/lib/giris";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseSunucu } from "@/lib/supabase/server";
@@ -37,6 +38,14 @@ export async function authArkaUc(): Promise<AuthArkaUc> {
     async sifreDegistir(id, sifre) {
       const { error } = await admin.auth.admin.updateUserById(id, { password: sifre });
       if (error) throw new Error(error.message);
+    },
+    async sifreDogrula(eposta, sifre) {
+      // Çerezsiz, saklanmayan geçici istemci: kullanıcının açık oturumu değişmez
+      const gecici = createClient(supabaseAdresi(), supabaseAnonAnahtari(), { auth: { persistSession: false, autoRefreshToken: false } });
+      const { data, error } = await gecici.auth.signInWithPassword({ email: eposta, password: sifre });
+      if (error) return null;
+      await gecici.auth.signOut({ scope: "local" });
+      return data.user.id;
     },
     async oturumAc(eposta, sifre) {
       const { data, error } = await oturum.auth.signInWithPassword({ email: eposta, password: sifre });

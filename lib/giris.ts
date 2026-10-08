@@ -43,7 +43,10 @@ export interface AuthArkaUc {
   rpc<A extends keyof SunucuFonksiyonlari>(ad: A, args: SunucuFonksiyonlari[A]["args"]): Promise<SunucuFonksiyonlari[A]["donus"]>;
   kullaniciOlustur(id: string, eposta: string, sifre: string): Promise<void>;
   kullaniciSil(id: string): Promise<void>;
+  /** Supabase'de kullanıcının açık oturumlarını da kapatır */
   sifreDegistir(id: string, sifre: string): Promise<void>;
+  /** Şifre doğruysa kullanıcı kimliğini, değilse null döner; oturuma ve çerezlere dokunmaz */
+  sifreDogrula(eposta: string, sifre: string): Promise<string | null>;
   /** Şifre doğruysa oturum çerezini yazar ve kullanıcı kimliğini, değilse null döner */
   oturumAc(eposta: string, sifre: string): Promise<string | null>;
   sonGirisYaz(id: string): Promise<void>;
@@ -147,5 +150,38 @@ export async function sifreSifirla(a: AuthArkaUc, g: SifirlamaGirdisi, ip: strin
   }
   await a.sifreDegistir(profilId, g.sifre);
   await a.rpc("deneme_temizle", { p_anahtar: `giris:${nickAnahtari(g.nick)}` });
+  return basarili(undefined);
+}
+
+export interface SifreDegisikligi {
+  nick: string;
+  eski: string;
+  sifre: string;
+  sifreTekrar: string;
+}
+
+/**
+ * Profilim › Şifremi değiştir: mevcut şifre doğrulanır (nick başına deneme sınırı), sonra yenisi yazılır.
+ * Şifre değişince Supabase bütün oturumları kapatır; bu cihazdaki oturum yeni şifreyle yeniden açılır.
+ */
+export async function sifreDegistir(a: AuthArkaUc, kullaniciId: string, g: SifreDegisikligi): Promise<Sonuc> {
+  const sh = sifreHatasi(g.sifre, g.sifreTekrar);
+  if (sh) return hatali(sh);
+  if (g.eski === g.sifre) return hatali("Yeni şifre eskisiyle aynı olamaz");
+  const anahtar = `sifre:${nickAnahtari(g.nick)}`;
+  if (await sinirda(a, anahtar)) return hatali(HATA.bekle);
+  const eposta = await a.rpc("giris_eposta", { p_nick: g.nick });
+  const dogru = eposta ? await a.sifreDogrula(eposta, g.eski) : null;
+  if (!eposta || dogru !== kullaniciId) {
+    await a.rpc("deneme_kaydet", { p_anahtar: anahtar });
+    return hatali("Mevcut şifre hatalı");
+  }
+  try {
+    await a.sifreDegistir(kullaniciId, g.sifre);
+  } catch {
+    return hatali(HATA.genel);
+  }
+  await a.rpc("deneme_temizle", { p_anahtar: anahtar });
+  await a.oturumAc(eposta, g.sifre);
   return basarili(undefined);
 }

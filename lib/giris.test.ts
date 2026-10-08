@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { davetCereziOku, davetCereziYaz } from "./davet-cerezi";
-import { type AuthArkaUc, HATA, davetKoduKontrol, girisYap, icEposta, kayitOlustur, sifreSifirla } from "./giris";
+import { type AuthArkaUc, HATA, davetKoduKontrol, girisYap, icEposta, kayitOlustur, sifreDegistir, sifreSifirla } from "./giris";
 
 /** Bellekte çalışan sahte arka uç: veritabanı fonksiyonlarının davranışını taklit eder */
 function sahteArkaUc() {
@@ -44,7 +44,13 @@ function sahteArkaUc() {
     },
     async kullaniciOlustur(id, eposta, sifre) { kullanicilar.set(id, { eposta, sifre }); olaylar.push(`olustur:${id}`); },
     async kullaniciSil(id) { kullanicilar.delete(id); olaylar.push(`sil:${id}`); },
-    async sifreDegistir(id, sifre) { kullanicilar.get(id)!.sifre = sifre; },
+    async sifreDegistir(id, sifre) {
+      kullanicilar.get(id)!.sifre = sifre;
+      if (oturum === id) oturum = null; // Supabase gibi: şifre değişince oturumlar kapanır
+    },
+    async sifreDogrula(eposta, sifre) {
+      return [...kullanicilar].find(([, v]) => v.eposta === eposta && v.sifre === sifre)?.[0] ?? null;
+    },
     async oturumAc(eposta, sifre) {
       const k = [...kullanicilar].find(([, v]) => v.eposta === eposta && v.sifre === sifre);
       oturum = k ? k[0] : null;
@@ -160,5 +166,35 @@ describe("davet çerezi", () => {
     expect(davetCereziOku(`${veri}.${imza}x`, anahtar, 0)).toBeNull();
     expect(davetCereziOku(c, "baska-anahtar", 0)).toBeNull();
     expect(davetCereziOku(undefined, anahtar, 0)).toBeNull();
+  });
+});
+
+describe("şifre değiştirme (Profilim)", () => {
+  const g = { nick: "KaraBey", eski: "dogru-sifre", sifre: "yepyeni-sifre", sifreTekrar: "yepyeni-sifre" };
+  it("mevcut şifre doğruysa yenisi yazılır ve oturum yeni şifreyle yeniden açılır", async () => {
+    const s = sahteArkaUc();
+    await s.a.oturumAc(icEposta("u-kara"), "dogru-sifre");
+    expect((await sifreDegistir(s.a, "u-kara", g)).ok).toBe(true);
+    expect(s.kullanicilar.get("u-kara")?.sifre).toBe("yepyeni-sifre");
+    expect(s.oturum()).toBe("u-kara");
+  });
+  it("yanlış mevcut şifre oturuma dokunmaz", async () => {
+    const s = sahteArkaUc();
+    await s.a.oturumAc(icEposta("u-kara"), "dogru-sifre");
+    await sifreDegistir(s.a, "u-kara", { ...g, eski: "yanlis" });
+    expect(s.oturum()).toBe("u-kara");
+  });
+  it("mevcut şifre yanlışsa ya da başka hesabın şifresiyse reddedilir; 5 denemeden sonra bekleme", async () => {
+    const s = sahteArkaUc();
+    expect(await sifreDegistir(s.a, "u-kara", { ...g, eski: "yanlis" })).toEqual({ ok: false, hata: "Mevcut şifre hatalı" });
+    expect(await sifreDegistir(s.a, "u-baska", g)).toEqual({ ok: false, hata: "Mevcut şifre hatalı" });
+    for (let i = 0; i < 3; i++) await sifreDegistir(s.a, "u-kara", { ...g, eski: "yanlis" });
+    expect(await sifreDegistir(s.a, "u-kara", g)).toEqual({ ok: false, hata: HATA.bekle });
+  });
+  it("kısa, uyuşmayan ya da eskisiyle aynı şifre", async () => {
+    const s = sahteArkaUc();
+    expect((await sifreDegistir(s.a, "u-kara", { ...g, sifre: "kisa", sifreTekrar: "kisa" })).ok).toBe(false);
+    expect(await sifreDegistir(s.a, "u-kara", { ...g, sifreTekrar: "baska" })).toEqual({ ok: false, hata: HATA.sifreAyni });
+    expect(await sifreDegistir(s.a, "u-kara", { ...g, sifre: "dogru-sifre", sifreTekrar: "dogru-sifre" })).toEqual({ ok: false, hata: "Yeni şifre eskisiyle aynı olamaz" });
   });
 });

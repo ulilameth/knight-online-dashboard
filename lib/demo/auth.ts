@@ -59,6 +59,9 @@ export function demoAuthArkaUc(d: DemoDepo, oturumYaz: (profilId: string) => Pro
       const h = d.hesaplar.get(id);
       if (h) h.sifre = sifre;
     },
+    async sifreDogrula(eposta, sifre) {
+      return [...d.hesaplar].find(([, h]) => h.eposta === eposta && h.sifre === sifre)?.[0] ?? null;
+    },
     async oturumAc(eposta, sifre) {
       const kayit = [...d.hesaplar].find(([, h]) => h.eposta === eposta && h.sifre === sifre);
       if (!kayit) return null;
