@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { BenimHazirligim } from "@/components/genel/BenimHazirligim";
 import { GeriSayim } from "@/components/genel/GeriSayim";
 import { SayfaBasligi } from "@/components/kabuk/SayfaBasligi";
@@ -191,7 +192,7 @@ export default async function GenelBakis() {
               {yaklasan.length ? yaklasan.map((x) => (
                 <li className="item" key={x.id}>
                   <TarihKutusu iso={x.an} />
-                  <div style={{ minWidth: 0 }}><h3>{x.baslik}</h3><p>{x.tumGun ? "Tüm gün" : saatMetni(x.an)} · {gunGoreli(x.an, su)}</p></div>
+                  <div style={{ minWidth: 0 }}><h3>{x.resmi ? x.baslik : <Link href={`/etkinlikler?e=${encodeURIComponent(x.id)}`}>{x.baslik}</Link>}</h3><p>{x.tumGun ? "Tüm gün" : saatMetni(x.an)} · {gunGoreli(x.an, su)}</p></div>
                   <Tag resmi={x.resmi}>{x.etiket}</Tag>
                 </li>
               )) : <li className="empty">Yaklaşan etkinlik yok.</li>}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SayfaBasligi } from "@/components/kabuk/SayfaBasligi";
 import { DurumPill, Pill, SinifEtiketi } from "@/components/ui/Durum";
@@ -9,17 +10,16 @@ import { EkipmanIcerik } from "@/components/uyeler/EkipmanIcerik";
 import { requireYetki } from "@/lib/auth";
 import { veri } from "@/lib/data";
 import { irkBul } from "@/lib/data/oyun";
-import { DURUM_ADI, RUTBE_ADI, RUTBE_RENGI, sinifAdi } from "@/lib/etiketler";
+import { DURUM_ADI, RUTBE_ADI, RUTBE_RENGI, sinifAdi, YOKLAMA_ADI, YOKLAMA_TURU } from "@/lib/etiketler";
 import { gecmisEtkinlikler, uyeKatilimi } from "@/lib/istatistik";
 import { katalog } from "@/lib/oyun/katalog-sunucu";
 import { ekipmanOzeti } from "@/lib/oyun/ozet";
 import { bicimle, gunMetni, saatMetni, simdi } from "@/lib/time";
-import type { KarakterDurum, Rutbe, Sinif, YoklamaDurumu } from "@/lib/types";
+import type { KarakterDurum, Rutbe, Sinif } from "@/lib/types";
 import { yetkiYeterli } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Üye" };
 
-const YOKLAMA: Record<YoklamaDurumu, [string, "good" | "warn" | "idle" | "crit"]> = { katildi: ["Katıldı", "good"], gec: ["Geç", "warn"], mazeretli: ["Mazeretli", "idle"], yok: ["Yok", "crit"] };
 const ALAN: Record<string, string> = { ad: "Nick", sinif: "Sınıf", level: "Level", reb: "Reb", rutbe: "Rütbe", durum: "Durum", ana_karakter: "Ana karakter", profile_id: "Hesap" };
 
 export default async function UyeDetayi({ params }: { params: Promise<{ id: string }> }) {
@@ -63,8 +63,8 @@ export default async function UyeDetayi({ params }: { params: Promise<{ id: stri
                 return (
                   <li className="item" key={e.id}>
                     <TarihKutusu iso={e.baslangic} />
-                    <div style={{ minWidth: 0 }}><h3>{e.baslik}</h3><p>{bicimle(e.baslangic, { weekday: "short" })} {saatMetni(e.baslangic)} · {tur(e.tur)?.kisaAd}</p></div>
-                    {y ? <Pill tur={YOKLAMA[y.durum][1]}>{YOKLAMA[y.durum][0]}</Pill> : <span className="muted">İşaretlenmedi</span>}
+                    <div style={{ minWidth: 0 }}><h3><Link href={`/etkinlikler?e=${encodeURIComponent(e.id)}`}>{e.baslik}</Link></h3><p>{bicimle(e.baslangic, { weekday: "short" })} {saatMetni(e.baslangic)} · {tur(e.tur)?.kisaAd}</p></div>
+                    {y ? <Pill tur={YOKLAMA_TURU[y.durum]}>{YOKLAMA_ADI[y.durum]}</Pill> : <span className="muted">İşaretlenmedi</span>}
                   </li>
                 );
               })}

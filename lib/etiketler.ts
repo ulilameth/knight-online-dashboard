@@ -1,5 +1,5 @@
 // Arayüz etiketleri (Türkçe). Sınıf adı ırka göre değişir: El Morad'da Kurian yerine Porutu.
-import type { KarakterDurum, Rutbe, Sinif, Taraf, Yetki } from "@/lib/types";
+import type { KarakterDurum, Rutbe, Sinif, Taraf, Yetki, YoklamaDurumu } from "@/lib/types";
 
 export const SINIFLAR: readonly Sinif[] = ["warrior", "rogue", "mage", "priest", "kurian"];
 /** Prototipin CSS sınıf kısaltmaları (c-war, c-rog ...) */
@@ -19,3 +19,8 @@ export const RUTBE_RENGI: Record<Rutbe, string> = {
 
 export const RUTBELER: readonly Rutbe[] = ["lider", "asistan", "subay", "uye", "aday"];
 export const DURUMLAR: readonly KarakterDurum[] = ["aktif", "izinli", "pasif", "ayrildi"];
+
+export const YOKLAMA_DURUMLARI: readonly YoklamaDurumu[] = ["katildi", "gec", "mazeretli", "yok"];
+export const YOKLAMA_ADI: Record<YoklamaDurumu, string> = { katildi: "Katıldı", gec: "Geç", mazeretli: "Mazeretli", yok: "Yok" };
+/** Pill rengi */
+export const YOKLAMA_TURU: Record<YoklamaDurumu, "good" | "warn" | "idle" | "crit"> = { katildi: "good", gec: "warn", mazeretli: "idle", yok: "crit" };
