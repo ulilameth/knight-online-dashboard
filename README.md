@@ -25,6 +25,8 @@ Supabase gerekmez; örnek klan verisi sunucunun belleğinde tutulur (sunucuyu ka
 npm run dev          # http://localhost:3000
 ```
 
+> **Windows:** PowerShell'de `npm.ps1 cannot be loaded because running scripts is disabled` hatası alırsan `npm` yerine `npm.cmd` yaz (`npm.cmd install`, `npm.cmd run dev`) ya da komutları Komut İstemi'nde (cmd) çalıştır. Kalıcı çözüm, yalnızca kendi kullanıcın için: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`.
+
 | Hesap (şifre `demo1234`) | Panel yetkisi |
 |---|---|
 | **KaraBey** (Lider), Asena, SessizOk | Yönetici: her şey, klan bilgisi ve yetkiler dahil |
@@ -38,6 +40,8 @@ Panel açılıştan önce ve sonra farklı görünür (geri sayım ve hazırlık
 ```bash
 DEMO_SIMDI=2026-11-21T19:40
 ```
+
+Windows PowerShell'de tek komutla: `Set-Content .env.local "DEMO_SIMDI=2026-11-21T19:40"` (Not Defteri dosya adının sonuna `.txt` ekleyebilir).
 
 ### 2. Yerel Supabase (gerçek veritabanıyla)
 
