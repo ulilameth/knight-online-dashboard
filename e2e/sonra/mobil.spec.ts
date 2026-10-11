@@ -15,7 +15,7 @@ for (const [kim, sayfalar] of [
       await expect(page.locator("main h1")).toBeVisible();
       if (yol === "/karakter") await expect(page.locator("#ap-val")).toBeVisible();
       if (yol === "/esyalar") await expect(page.locator(".cls-tab").first()).toBeVisible();
-      if (yol === "/gorevler") await expect(page.locator(".gq").first()).toBeVisible();
+      if (yol === "/gorevler") await expect(page.locator(".durak").first()).toBeVisible();
       await tasmaYok(page);
     }
     expect(hatalar).toEqual([]);

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { EN_YUKSEK_LEVEL, aradaki, bar, barYuzdesi, birikmis } from "./exp";
-import { aralikOf, barMetni, expMetni, gorevFiltrele, ilerleme, karsilama, npcOf, oneriOf } from "./hesap";
+import { aralikOf, barMetni, durakDurumu, durakPayi, expMetni, gorevFiltrele, ilerleme, karsilama, npcOf, oneriOf, rotaKonumu } from "./hesap";
 import { ARALIKLAR, GOREVLER, KAYNAKLAR } from "./veri";
 
-const bos = { aralik: "", oneri: "", ara: "", yapilanlariGizle: false } as const;
+const bos = { ara: "", yapilanlariGizle: false } as const;
+const aralik = (id: string) => ARALIKLAR.find((a) => a.id === id)!;
 
 describe("EXP tablosu", () => {
   it("toplamlar raporla aynı", () => {
@@ -91,18 +92,15 @@ describe("metinler", () => {
   });
 });
 
-describe("filtre ve ilerleme", () => {
-  it("aralık, öneri, arama ve yapılanlar", () => {
-    const hepsi = gorevFiltrele(GOREVLER, bos, 80, new Set(), "karus");
-    expect(hepsi).toHaveLength(GOREVLER.length);
-    expect(gorevFiltrele(GOREVLER, { ...bos, aralik: "80-83" }, 80, new Set(), "karus").map((g) => g.id)).toEqual(["nightmare", "past-mistake", "fallen-spirit"]);
-    expect(gorevFiltrele(GOREVLER, { ...bos, oneri: "sakla" }, 83, new Set(), "karus")).toHaveLength(0);
+describe("arama ve ilerleme", () => {
+  it("arama ve yapılanları gizleme", () => {
+    expect(gorevFiltrele(GOREVLER, bos, new Set(), "karus")).toHaveLength(GOREVLER.length);
     // NPC tarafa göre aranır; "I" büyük harfi Türkçe küçültmede kaybolmaz
-    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "tabeth" }, 80, new Set(), "karus")).toHaveLength(0);
-    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "tabeth" }, 80, new Set(), "el_morad").length).toBeGreaterThan(0);
-    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "investigation" }, 80, new Set(), "karus").map((g) => g.id)).toEqual(["draki-start"]);
-    const gizli = gorevFiltrele(GOREVLER, { ...bos, aralik: "80-83", yapilanlariGizle: true }, 80, new Set(["nightmare"]), "karus");
-    expect(gizli.map((g) => g.id)).toEqual(["past-mistake", "fallen-spirit"]);
+    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "tabeth" }, new Set(), "karus")).toHaveLength(0);
+    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "tabeth" }, new Set(), "el_morad").length).toBeGreaterThan(0);
+    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "investigation" }, new Set(), "karus").map((g) => g.id)).toEqual(["draki-start"]);
+    const saklanan = GOREVLER.filter((g) => g.aralik === "80-83");
+    expect(gorevFiltrele(saklanan, { ...bos, yapilanlariGizle: true }, new Set(["nightmare"]), "karus").map((g) => g.id)).toEqual(["past-mistake", "fallen-spirit"]);
   });
 
   it("ilerleme atlananları saymaz", () => {
@@ -115,5 +113,31 @@ describe("filtre ve ilerleme", () => {
     expect(k["60–70"]).toBeGreaterThanOrEqual(100);
     expect(k["70–75"]).toBe(46);
     expect(k["75–80"]).toBe(10);
+  });
+});
+
+describe("rota", () => {
+  it("durak durumu levele ve sınıra göre", () => {
+    expect(durakDurumu(aralik("1-10"), 57, 80)).toBe("gecti");
+    expect(durakDurumu(aralik("50-60"), 57, 80)).toBe("burada");
+    expect(durakDurumu(aralik("60-70"), 57, 80)).toBe("ileride");
+    expect(durakDurumu(aralik("80-83"), 80, 80)).toBe("kilitli");
+    expect(durakDurumu(aralik("80-83"), 80, 83)).toBe("burada");
+    expect(durakDurumu(aralik("75-80"), 80, 80)).toBe("gecti");
+  });
+
+  it("çizgide yer: duraklar eşit aralıklı", () => {
+    expect(rotaKonumu(1)).toBe(0);
+    expect(rotaKonumu(10)).toBeCloseTo(0.1);
+    expect(rotaKonumu(55)).toBeCloseTo(0.55);
+    expect(rotaKonumu(80)).toBeCloseTo(0.9);
+    expect(rotaKonumu(83)).toBe(1);
+  });
+
+  it("durak payı: 45-50 ve 50-60 birlikte, 80-83 yok", () => {
+    expect(durakPayi(aralik("45-50"))?.ad).toBe("45–60");
+    expect(durakPayi(aralik("50-60"))?.ad).toBe("45–60");
+    expect(durakPayi(aralik("75-80"))?.ad).toBe("75–80");
+    expect(durakPayi(aralik("80-83"))).toBeUndefined();
   });
 });

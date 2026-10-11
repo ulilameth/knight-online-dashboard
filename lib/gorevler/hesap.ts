@@ -1,15 +1,12 @@
-// Görevler ekranının hesapları: oyuncunun aralığı, sınıra göre öneri, EXP ve bar yüzdesi metinleri, filtreler.
+// Görevler ekranının hesapları: rota durakları ve oyuncunun yeri, sınıra göre öneri, EXP ve bar yüzdesi metinleri, arama.
 import type { Taraf } from "@/lib/types";
 import { aradaki, barYuzdesi } from "./exp";
-import { ARALIKLAR, type Aralik, type AralikId, GOREV_KARSILAMA, type Gorev, type Oneri } from "./veri";
+import { ARALIKLAR, type Aralik, GOREV_KARSILAMA, type Gorev, type Oneri } from "./veri";
 
-export const ONERI_ADI: Record<Oneri, string> = {
-  hemen: "Hemen yap", ertele: "Ertele", sakla: "83'e sakla", atla: "Atla", istege: "İsteğe bağlı",
-};
-export const ONERI_SIRASI: readonly Oneri[] = ["hemen", "ertele", "sakla", "istege", "atla"];
-/** Pill rengi */
-export const ONERI_TURU: Record<Oneri, "good" | "warn" | "idle" | "crit"> = {
-  hemen: "good", ertele: "warn", sakla: "warn", istege: "idle", atla: "crit",
+/** Durakta görevler öneriye göre bu sırayla ve bu başlıklarla gruplanır */
+export const ONERI_SIRASI: readonly Oneri[] = ["hemen", "istege", "ertele", "sakla", "atla"];
+export const ONERI_BASLIGI: Record<Oneri, string> = {
+  hemen: "Önce bunlar", istege: "İsteğe bağlı", ertele: "Sonraya bırak", sakla: "83 açılınca", atla: "Atla",
 };
 
 /** Levelin içinde bulunduğu aralık (aralığın son leveli bir sonrakine aittir: 10 → 10–20) */
@@ -47,8 +44,6 @@ export function barMetni(exp: number, level: number): string {
 }
 
 export interface GorevFiltresi {
-  aralik: AralikId | "";
-  oneri: Oneri | "";
   ara: string;
   yapilanlariGizle: boolean;
 }
@@ -56,12 +51,10 @@ export interface GorevFiltresi {
 /** Türkçe "I" küçülünce "ı" olur; İngilizce görev adlarında "Iron" "iron" ile bulunsun */
 const duz = (s: string) => s.toLocaleLowerCase("tr").replace(/ı/g, "i");
 
-export function gorevFiltrele(gorevler: readonly Gorev[], f: GorevFiltresi, levelSiniri: 80 | 83, yapilanlar: ReadonlySet<string>, taraf: Taraf): Gorev[] {
+export function gorevFiltrele(gorevler: readonly Gorev[], f: GorevFiltresi, yapilanlar: ReadonlySet<string>, taraf: Taraf): Gorev[] {
   const q = duz(f.ara.trim());
   return gorevler.filter((g) =>
-    (!f.aralik || g.aralik === f.aralik)
-    && (!f.oneri || oneriOf(g, levelSiniri) === f.oneri)
-    && (!f.yapilanlariGizle || !yapilanlar.has(g.id))
+    (!f.yapilanlariGizle || !yapilanlar.has(g.id))
     && (!q || duz([g.ad, npcOf(g, taraf), g.bolge, g.hedef ?? "", g.odul ?? ""].join(" ")).includes(q)));
 }
 
@@ -77,4 +70,25 @@ export function karsilama() {
     const ihtiyac = aradaki(r.a, r.b);
     return { ...r, ihtiyac, oran: r.gorevExp / ihtiyac };
   });
+}
+
+/** Durağın görev payı: aralığı kapsayan satır (45–50 ve 50–60 için 45–60); 80–83 için yok */
+export const durakPayi = (a: Pick<Aralik, "levelMin" | "levelMax">) =>
+  karsilama().find((r) => r.a <= a.levelMin && a.levelMax <= r.b);
+
+export type DurakDurumu = "gecti" | "burada" | "ileride" | "kilitli";
+
+/** Oyuncunun leveline göre durak: geçti, burada, ileride; sınırın üstündeyse kilitli */
+export function durakDurumu(a: Pick<Aralik, "id" | "levelMin" | "levelMax">, level: number, levelSiniri: 80 | 83): DurakDurumu {
+  if (a.levelMin >= levelSiniri) return "kilitli";
+  if (aralikOf(level).id === a.id) return "burada";
+  return a.levelMax <= level ? "gecti" : "ileride";
+}
+
+/** Rota çizgisinde levelin yeri (0-1): duraklar eşit aralıklı, durak içinde levele göre */
+export function rotaKonumu(level: number): number {
+  const a = aralikOf(level);
+  const i = ARALIKLAR.indexOf(a);
+  const ici = Math.max(0, Math.min(1, (level - a.levelMin) / (a.levelMax - a.levelMin)));
+  return (i + ici) / ARALIKLAR.length;
 }
