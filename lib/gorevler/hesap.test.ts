@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { EN_YUKSEK_LEVEL, aradaki, bar, barYuzdesi, birikmis } from "./exp";
-import { aralikOf, barMetni, durakDurumu, durakPayi, expMetni, gorevFiltrele, ilerleme, karsilama, npcOf, oneriOf, rotaKonumu } from "./hesap";
+import { aralikOf, barMetni, durakDurumu, durakPayi, expMetni, gorevAra, ilerleme, karsilama, kisaAd, npcOf, oneriOf } from "./hesap";
 import { ARALIKLAR, GOREVLER, KAYNAKLAR } from "./veri";
 
-const bos = { ara: "", yapilanlariGizle: false } as const;
 const aralik = (id: string) => ARALIKLAR.find((a) => a.id === id)!;
 
 describe("EXP tablosu", () => {
@@ -85,6 +84,15 @@ describe("metinler", () => {
     expect(expMetni(10_789_460_044)).toBe("10,79 milyar");
   });
 
+  it("birleşik satırın kısa adı", () => {
+    expect(kisaAd("Worm hunt")).toEqual({ baslik: "Worm hunt", ek: 0, parcalar: ["Worm hunt"] });
+    expect(kisaAd("Nightmare (1) / Nightmare (2)").baslik).toBe("Nightmare (1–2)");
+    expect(kisaAd("Fallen Spirit of Flame (1) / Fallen Spirit of Flame (2)").baslik).toBe("Fallen Spirit of Flame (1–2)");
+    const u = kisaAd("Unfinished hunt II (1) / Unfinished hunt II (2) / Unfinished hunt III");
+    expect([u.baslik, u.ek, u.parcalar.length]).toEqual(["Unfinished hunt II (1)", 2, 3]);
+    expect(kisaAd("Kongaus Hunt / Ash Knight Hunt / Haunga Hunt")).toMatchObject({ baslik: "Kongaus Hunt", ek: 2 });
+  });
+
   it("bar oranı", () => {
     expect(barMetni(170_250_000, 50)).toBe("11,2 bar");
     expect(barMetni(38_047_370, 60)).toBe("%52 bar");
@@ -93,14 +101,14 @@ describe("metinler", () => {
 });
 
 describe("arama ve ilerleme", () => {
-  it("arama ve yapılanları gizleme", () => {
-    expect(gorevFiltrele(GOREVLER, bos, new Set(), "karus")).toHaveLength(GOREVLER.length);
+  it("arama: ad parçaları, NPC tarafa göre", () => {
+    expect(gorevAra(GOREVLER, "  ", "karus")).toHaveLength(GOREVLER.length);
     // NPC tarafa göre aranır; "I" büyük harfi Türkçe küçültmede kaybolmaz
-    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "tabeth" }, new Set(), "karus")).toHaveLength(0);
-    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "tabeth" }, new Set(), "el_morad").length).toBeGreaterThan(0);
-    expect(gorevFiltrele(GOREVLER, { ...bos, ara: "investigation" }, new Set(), "karus").map((g) => g.id)).toEqual(["draki-start"]);
-    const saklanan = GOREVLER.filter((g) => g.aralik === "80-83");
-    expect(gorevFiltrele(saklanan, { ...bos, yapilanlariGizle: true }, new Set(["nightmare"]), "karus").map((g) => g.id)).toEqual(["past-mistake", "fallen-spirit"]);
+    expect(gorevAra(GOREVLER, "tabeth", "karus")).toHaveLength(0);
+    expect(gorevAra(GOREVLER, "tabeth", "el_morad").length).toBeGreaterThan(0);
+    expect(gorevAra(GOREVLER, "investigation", "karus").map((g) => g.id)).toEqual(["draki-start"]);
+    // Birleşik satırın sonraki parçası da bulunur
+    expect(gorevAra(GOREVLER, "haunga", "karus").map((g) => g.id)).toEqual(["tales-45"]);
   });
 
   it("ilerleme atlananları saymaz", () => {
@@ -124,14 +132,6 @@ describe("rota", () => {
     expect(durakDurumu(aralik("80-83"), 80, 80)).toBe("kilitli");
     expect(durakDurumu(aralik("80-83"), 80, 83)).toBe("burada");
     expect(durakDurumu(aralik("75-80"), 80, 80)).toBe("gecti");
-  });
-
-  it("çizgide yer: duraklar eşit aralıklı", () => {
-    expect(rotaKonumu(1)).toBe(0);
-    expect(rotaKonumu(10)).toBeCloseTo(0.1);
-    expect(rotaKonumu(55)).toBeCloseTo(0.55);
-    expect(rotaKonumu(80)).toBeCloseTo(0.9);
-    expect(rotaKonumu(83)).toBe(1);
   });
 
   it("durak payı: 45-50 ve 50-60 birlikte, 80-83 yok", () => {

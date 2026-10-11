@@ -1,4 +1,4 @@
-// Görevler ekranının hesapları: rota durakları ve oyuncunun yeri, sınıra göre öneri, EXP ve bar yüzdesi metinleri, arama.
+// Görevler ekranının hesapları: rota durakları ve oyuncunun yeri, sınıra göre öneri, kısa adlar, EXP ve bar yüzdesi metinleri, arama.
 import type { Taraf } from "@/lib/types";
 import { aradaki, barYuzdesi } from "./exp";
 import { ARALIKLAR, type Aralik, GOREV_KARSILAMA, type Gorev, type Oneri } from "./veri";
@@ -26,6 +26,18 @@ export function npcOf(g: Pick<Gorev, "npc">, taraf: Taraf): string {
   return taraf === "el_morad" ? g.npc.elmorad : g.npc.karus;
 }
 
+/**
+ * Birleşik satırın kısa adı: "Nightmare (1) / Nightmare (2)" → "Nightmare (1–2)";
+ * farklı görevlerde ilk ad ve kaç görev daha olduğu ("Lamia Hunt" +5). Tam liste ayrıntıda.
+ */
+export function kisaAd(ad: string): { baslik: string; ek: number; parcalar: string[] } {
+  const parcalar = ad.split(" / ").map((s) => s.trim());
+  if (parcalar.length === 1) return { baslik: ad, ek: 0, parcalar };
+  const m = parcalar.map((s) => /^(.*) \((\d+)\)$/.exec(s));
+  if (m.every((x) => x && x[1] === m[0]![1])) return { baslik: `${m[0]![1]} (${m[0]![2]}–${m.at(-1)![2]})`, ek: 0, parcalar };
+  return { baslik: parcalar[0], ek: parcalar.length - 1, parcalar };
+}
+
 const sayi = (n: number, basamak: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: basamak });
 
 /** 15.125 · 4,9M · 170,25M · 1,09 milyar */
@@ -43,19 +55,14 @@ export function barMetni(exp: number, level: number): string {
   return `%${Math.round(y)} bar`;
 }
 
-export interface GorevFiltresi {
-  ara: string;
-  yapilanlariGizle: boolean;
-}
-
 /** Türkçe "I" küçülünce "ı" olur; İngilizce görev adlarında "Iron" "iron" ile bulunsun */
 const duz = (s: string) => s.toLocaleLowerCase("tr").replace(/ı/g, "i");
 
-export function gorevFiltrele(gorevler: readonly Gorev[], f: GorevFiltresi, yapilanlar: ReadonlySet<string>, taraf: Taraf): Gorev[] {
-  const q = duz(f.ara.trim());
-  return gorevler.filter((g) =>
-    (!f.yapilanlariGizle || !yapilanlar.has(g.id))
-    && (!q || duz([g.ad, npcOf(g, taraf), g.bolge, g.hedef ?? "", g.odul ?? ""].join(" ")).includes(q)));
+/** Görev adında (birleşik satırın bütün parçaları dahil), NPC'de (klanın tarafındaki), hedefte ve ödülde arar */
+export function gorevAra(gorevler: readonly Gorev[], ara: string, taraf: Taraf): Gorev[] {
+  const q = duz(ara.trim());
+  if (!q) return [...gorevler];
+  return gorevler.filter((g) => duz([g.ad, npcOf(g, taraf), g.hedef ?? "", g.odul ?? ""].join(" ")).includes(q));
 }
 
 /** "Atla" dışındaki görevlerden kaçı işaretli */
@@ -83,12 +90,4 @@ export function durakDurumu(a: Pick<Aralik, "id" | "levelMin" | "levelMax">, lev
   if (a.levelMin >= levelSiniri) return "kilitli";
   if (aralikOf(level).id === a.id) return "burada";
   return a.levelMax <= level ? "gecti" : "ileride";
-}
-
-/** Rota çizgisinde levelin yeri (0-1): duraklar eşit aralıklı, durak içinde levele göre */
-export function rotaKonumu(level: number): number {
-  const a = aralikOf(level);
-  const i = ARALIKLAR.indexOf(a);
-  const ici = Math.max(0, Math.min(1, (level - a.levelMin) / (a.levelMax - a.levelMin)));
-  return (i + ici) / ARALIKLAR.length;
 }
