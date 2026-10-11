@@ -16,6 +16,7 @@ const SEKMELER: Sekme[] = [
   { href: "/takvim", ad: "Takvim ve duyurular" },
   { href: "/karakter", ad: "Karakter tasarımı" },
   { href: "/esyalar", ad: "Eşyalar" },
+  { href: "/gorevler", ad: "Görevler" },
   { href: "/profil", ad: "Profilim" },
 ];
 

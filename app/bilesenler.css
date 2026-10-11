@@ -485,6 +485,39 @@ td.name span{font-size:12.5px;color:var(--muted)}
 .mini:disabled{color:var(--muted);cursor:not-allowed;text-decoration:none}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:9px;font:600 14px/1.3 var(--font-data);box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:calc(100% - 32px)}
 
+/* Görevler */
+.gq-sinir{margin:0 0 16px}
+.gq-ust{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center}
+.gq-tiles .tile .v{font-size:28px}
+@media (max-width:860px){.gq-ust{grid-template-columns:minmax(0,1fr)}}
+.gq-taktik{padding:12px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);font-size:14px;color:var(--fg-2)}
+.gq-taktik p{margin:0}
+.gq-taktik p+p{margin-top:6px}
+.gq-taktik b{color:var(--fg)}
+.gq-grup{margin:18px 0 4px;font:600 13px/1 var(--font-data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gq-grup:first-child{margin-top:4px}
+.gq-list{list-style:none;margin:0;padding:0}
+.gq{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-subtle)}
+.gq:last-child{border-bottom:0}
+.gq-cb{width:18px;height:18px;margin:2px 0 0;accent-color:var(--gold)}
+.gq h3{margin:0;font:600 15.5px/1.3 var(--font-body);overflow-wrap:anywhere}
+.gq.done h3{color:var(--muted);text-decoration:line-through}
+.gq .meta{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.gq-rozet{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.gq .info{margin:7px 0 0;font-size:13.5px;color:var(--fg-2)}
+.gq .info b{color:var(--fg);font-weight:600}
+.gq .neden{color:var(--fg)}
+.gq-celiski{margin:7px 0 0;padding:6px 10px;border-radius:8px;background:var(--warn-soft);font-size:13px;color:var(--fg)}
+.gq-kaynak{margin:6px 0 0;font-size:12.5px;color:var(--muted)}
+.gq .xp{text-align:right;font:600 15px/1.25 var(--font-data);white-space:nowrap}
+.gq .xp small{display:block;font-weight:500;font-size:12.5px;color:var(--muted);white-space:normal;max-width:180px;margin-left:auto}
+@media (max-width:640px){.gq{grid-template-columns:auto minmax(0,1fr)}.gq .xp{grid-column:2;text-align:left}.gq .xp small{margin-left:0}}
+.gq-adimlar{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+tr.gq-sen{background:var(--gold-soft)}
+.gq-kaynaklar{margin-top:12px}
+.gq-kaynaklar summary{cursor:pointer;font:600 14px/1.4 var(--font-data);color:var(--fg-2);padding:6px 0}
+.gq-kaynaklar summary:hover{color:var(--fg)}
+
 /* Görünüm anahtarları: yetkiye göre gizlenen öğeler sunucuda hiç çizilmez; bunlar yalnızca istemci geçişleri için */
 @media (prefers-reduced-motion: no-preference) {
   .sayfa { animation: rise 0.25s ease-out; }

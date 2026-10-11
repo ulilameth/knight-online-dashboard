@@ -1,6 +1,6 @@
 # L4BEL Klan Paneli
 
-L4BEL klanının Knight Online yeni sunucuları (12 Kasım 2026) için kullanacağı klan içi panel: açılış geri sayımı, üye listesi ve roller, etkinlik katılım takibi, takvim ve duyurular (TeamSpeak'e gönderim), karakter tasarımı ve eşya kataloğu.
+L4BEL klanının Knight Online yeni sunucuları (12 Kasım 2026) için kullanacağı klan içi panel: açılış geri sayımı, üye listesi ve roller, etkinlik katılım takibi, takvim ve duyurular (TeamSpeak'e gönderim), karakter tasarımı, eşya kataloğu ve 80 level görev rehberi.
 
 - Plan: [`docs/PLAN.md`](docs/PLAN.md)
 - Tasarım prototipi: [`design/prototype.html`](design/prototype.html) (tarayıcıda doğrudan açılır). Yayını: https://ulilameth.github.io/knight-online-dashboard/ ([`.github/workflows/pages.yml`](.github/workflows/pages.yml))
@@ -114,12 +114,13 @@ Hepsi [`.env.example`](.env.example)'da açıklamalı.
 
 | Yol | İçerik |
 |---|---|
-| `app/(panel)/` | Giriş gerektiren sayfalar: genel bakış, üyeler (+ detay), etkinlikler, takvim, karakter, eşyalar, profil, ayarlar |
+| `app/(panel)/` | Giriş gerektiren sayfalar: genel bakış, üyeler (+ detay), etkinlikler, takvim, karakter, eşyalar, görevler, profil, ayarlar |
 | `app/(hesap)/` | Giriş, davet koduyla kayıt (4 adım), şifre sıfırlama |
 | `components/` | Ekran bileşenleri (`ui/` ortak parçalar, `kabuk/` başlık ve sekmeler) |
 | `lib/actions/` | Server Action'lar (form ve düğmelerin sunucu tarafı) |
 | `lib/data/` | Veri katmanı: her alan için arayüz + demo + Supabase uygulaması; giriş noktası `veri()` |
 | `lib/oyun/` | Karakter tasarımı: eşya kataloğu, AP/HP/MP/savunma hesabı, set bonusları, planlayıcı mantığı |
+| `lib/gorevler/` | Görevler ekranı: görev, aralık, etkinlik ve bonus verisi (kaynaklı), EXP tablosu, öneri ve filtre hesapları |
 | `lib/teamspeak/` | TeamSpeak WebQuery ile duyuru gönderimi |
 | `lib/demo/` | Demo verisi ve bellekteki depo |
 | `lib/time.ts` | TSİ biçimlendirme, göreli zaman, açılış |
